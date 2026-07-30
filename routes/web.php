@@ -99,8 +99,6 @@ Route::post('/logingtk', [LoginGtkController::class, 'store'])->name('logingtk.s
 Route::resource('loginkepsek', LoginKepsekController::class);
 Route::post('/loginkepsek', [LoginKepsekController::class, 'store'])->name('loginkepsek.store');
 
-Route::resource('logingtk', LoginGtkController::class);
-Route::resource('loginkepsek', LoginKepsekController::class);
 Route::resource('loginkaprog', LoginKaprogController::class);
 Route::resource('loginkurikulum', LoginKurikulumController::class);
 // Route untuk menampilkan form login siswa
@@ -122,8 +120,8 @@ Route::get('/rombeldetail/{rombel_id}', [ShowDetailRombelController::class, 'sho
 Route::resource('walas', WaliKelasPageController::class);
 Route::get('/hapuswalas/{id}', [WaliKelasPageController::class, 'hapuswalas'])->name('hapuswalas');
 Route::get('/walas/hapuswalas/{id}', [WaliKelasPageController::class, 'hapuswalas']);
-Route::put('/walas/{id}', [WaliKelasPageController::class, 'update'])->name('walas.update');
-Route::get('/walas/{id}/edit', [WaliKelasPageController::class, 'edit'])->name('walas.edit');
+Route::put('/walas/{id}', [WaliKelasPageController::class, 'update']);
+Route::get('/walas/{id}/edit', [WaliKelasPageController::class, 'edit']);
 Route::get ('/walas_search', [WaliKelasPageController::class,'walas_search']);
 
 // CRUD KAKOM
