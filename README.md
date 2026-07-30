@@ -179,13 +179,13 @@ docker run --rm -v "%cd%:/app" composer:2 sh -c "cd /app && php artisan key:gene
 # 4. Build & jalankan
 docker compose up -d --build
 
-# 5. Buka http://localhost:8080
+# 5. Buka http://localhost
 ```
 
 ### Konfigurasi Docker
 | Variabel          | Default          | Keterangan          |
 | ----------------- | ---------------- | ------------------- |
-| `APP_PORT`        | `8080`           | Port aplikasi       |
+| `APP_PORT`        | `80`           | Port aplikasi       |
 | `DB_DATABASE`     | `ewalas`         | Nama database       |
 | `DB_USERNAME`     | `ewalas`         | User database       |
 | `DB_PASSWORD`     | `ewalas_secret`  | Password database   |
