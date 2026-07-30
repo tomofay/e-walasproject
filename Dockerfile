@@ -29,6 +29,7 @@ WORKDIR /var/www
 
 COPY composer.json composer.lock artisan ./
 COPY bootstrap/app.php bootstrap/app.php
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
