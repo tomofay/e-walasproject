@@ -30,10 +30,9 @@ WORKDIR /var/www
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-COPY package.json package-lock.json ./
-RUN npm install && npm run build
-
 COPY . .
+
+RUN npm install --no-audit --no-fund && npm run build
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
