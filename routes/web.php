@@ -128,16 +128,16 @@ Route::get ('/walas_search', [WaliKelasPageController::class,'walas_search']);
 Route::resource('kakom', KakomDataController::class);
 Route::get('/hapuskakom/{id}', [KakomDataController::class, 'hapuskakom'])->name('hapuskakom');
 Route::get('/kakom/hapuskakom/{id}', [KakomDataController::class, 'hapuskakom']);
-Route::put('/kakom/{id}', [KakomDataController::class, 'update'])->name('kakom.update');
-Route::get('/kakom/{id}/edit', [KakomDataController::class, 'edit'])->name('kakom.edit');
+Route::put('/kakom/{id}', [KakomDataController::class, 'update']);
+Route::get('/kakom/{id}/edit', [KakomDataController::class, 'edit']);
 Route::get ('/kakom_search', [KakomDataController::class,'kakom_search']);
 
 // CRUD KURIKULUM
 Route::resource('kurikulum', KurikulumPageController::class);
 Route::get('/hapuskurikulum/{id}', [KurikulumPageController::class, 'hapuskurikulum'])->name('hapuskurikulum');
 Route::get('/kurikulum/hapuskurikulum/{id}', [KurikulumPageController::class, 'hapuskurikulum']);
-Route::put('/kurikulum/{id}', [KurikulumPageController::class, 'update'])->name('kurikulum.update');
-Route::get('/kurikulum/{id}/edit', [KurikulumPageController::class, 'edit'])->name('kurikulum.edit');
+Route::put('/kurikulum/{id}', [KurikulumPageController::class, 'update']);
+Route::get('/kurikulum/{id}/edit', [KurikulumPageController::class, 'edit']);
 Route::get ('/kurikulum_search', [KurikulumPageController::class,'kurikulum_search']);
 
 // CRUD KEPSEK
@@ -153,8 +153,8 @@ Route::get ('/kepsek_search', [KepsekPageController::class,'kepsek_search']);
 Route::resource('guru', GuruPageController::class);
 Route::get('/hapusguru/{id}', [GuruPageController::class, 'hapusguru'])->name('hapusguru');
 Route::get('/guru/hapusguru/{id}', [GuruPageController::class, 'hapusguru']);
-Route::put('/guru/{id}', [GuruPageController::class, 'update'])->name('guru.update');
-Route::get('/guru/{id}/edit', [GuruPageController::class, 'edit'])->name('guru.edit');
+Route::put('/guru/{id}', [GuruPageController::class, 'update']);
+Route::get('/guru/{id}/edit', [GuruPageController::class, 'edit']);
 Route::get ('/guru_search', [GuruPageController::class,'guru_search']);
 
 
@@ -326,7 +326,7 @@ Route::put('/kelompoksiswa/update/{id}', [DenahKerjaKelompokSiswaController::cla
 
 // CRUD JADWALPIKET
 // Route::resource('jadwalpiket', JadwalPiketController::class);
-Route::get('/createpiket', [JadwalPiketController::class, 'create'])->name('jadwalpiket.create');
+Route::get('/createpiket', [JadwalPiketController::class, 'create'])->name('piket.create');
 // Route::post('/piket/{id}/add-siswa', [JadwalPiketController::class, 'addSiswa'])->name('piket.addSiswa');
 Route::post('/createpiket/store', [JadwalPiketController::class, 'store'])->name('piket.store');
 // Route::post('/piket/simpan', [JadwalPiketController::class, 'simpan'])->name('piket.simpan');
@@ -550,7 +550,6 @@ Route::post('/siswadata/simpan-keterangan/{id}', [KeluarRombelController::class,
 Route::resource('keluarrombeldata', KeluarRombelViewController::class);
 
 // Keluar Rombel View
-Route::resource('keluarrombeldata', KeluarRombelViewController::class);
 Route::get('/keluarrombeldetail/{rombels_id}', [KeluarRombelViewController::class, 'showSiswaKeluarRombel'])
     ->name('detail.keluarormbel');
 Route::resource('keluarrombeldatakepsek', KeluarRombelViewKepsek::class);
@@ -569,14 +568,6 @@ Route::get('/alumni', [AlumniDataController::class, 'pengaturanalumni'])->name('
 Route::get('/alumnidatakepsek', [AlumniDataController::class, 'pengaturanalumnikepsek'])->name('alumnikepsek.index');
 Route::get('/alumnidatakakom', [AlumniDataController::class, 'pengaturanalumnikakom'])->name('alumnikakom.index');
 Route::get('/alumnidatakurikulum', [AlumniDataController::class, 'pengaturanalumnikurikulum'])->name('alumnikurikulum.index');
-
-// Logout admin
-Route::post('/homepageadmin/logout', function () {
-    Auth::guard('admins')->logout();
-    session()->flash('status', 'Logout Berhasil');
-    return redirect('/');
-})->name('logoutadmin');
-
 
 // Logout admin
 Route::post('/homepageadmin/logout', function () {
