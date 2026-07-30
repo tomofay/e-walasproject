@@ -30,6 +30,9 @@ WORKDIR /var/www
 # 1. Salin seluruh source code terlebih dahulu
 COPY . .
 
+# 1b. Copy .env.docker as default .env (agar key:generate bisa jalan)
+COPY .env.docker .env
+
 # 2. Buat folder cache & storage jika belum ada
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
 
