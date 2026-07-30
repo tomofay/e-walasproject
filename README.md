@@ -1,66 +1,225 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📘 E-Walas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Sistem Informasi Administrasi Wali Kelas** — Aplikasi web untuk mengelola seluruh administrasi wali kelas di SMK secara digital.
 
-## About Laravel
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-11-red?logo=laravel&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?logo=tailwind-css&logoColor=white)
+![Database](https://img.shields.io/badge/DB-SQLite_|_MySQL-4479A1?logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🎯 Tentang E-Walas
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+E-Walas adalah platform digital yang membantu wali kelas SMK mengelola tugas administrasi kelas secara terpusat. Mulai dari pendataan siswa, presensi harian, catatan kasus, home visit, hingga pembuatan berita acara dan laporan PDF — semuanya tersedia dalam satu sistem.
 
-## Learning Laravel
+Selain wali kelas, sistem ini juga menyediakan dashboard untuk **Admin**, **Kepala Kompetensi (Kakom)**, **Kepala Sekolah**, **Kurikulum**, dan **Siswa** dengan hak akses yang berbeda-beda.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## ✨ Fitur Utama
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🔑 Multi-Role Authentication
+6 guard autentikasi terpisah: **Admin**, **Wali Kelas**, **Kakom**, **Kepala Sekolah**, **Kurikulum**, dan **Siswa**.
 
-## Laravel Sponsors
+### 👑 Admin
+- CRUD warga sekolah — Walas, Kakom, Kurikulum, Kepsek, Guru
+- CRUD rombel & mata pelajaran
+- Manajemen tahun ajaran
+- Import data massal via Excel (siswa, walas, guru, kakom, kurikulum, kepsek, mapel, rombel)
+- Export data ke Excel
+- Kenaikan kelas & pengelolaan alumni
+- Monitoring data administrasi seluruh walas
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 👨‍🏫 Wali Kelas (Walas)
+- **Manajemen Siswa** — CRUD data siswa + biodata lengkap (validasi NIS & NISN)
+- **Administrasi Kelas:**
+  - Identitas Kelas
+  - Struktur Organisasi Kelas
+  - Jadwal KBM
+  - Jadwal Piket Kelas
+  - Denah Tempat Kerja Kelompok
+- **Presensi** — Rekap presensi harian dengan detail per siswa, export PDF
+- **Catatan Kasus Siswa** — Pencatatan dan monitoring kasus, export PDF
+- **Home Visit** — Data kunjungan rumah, export PDF
+- **Buku Tamu Orangtua** — Rekam kunjungan orangtua, export PDF
+- **Berita Acara** — Kenaikan Kelas, Kelulusan, Serah Terima Rapor
+- **Rencana Kegiatan Walas** — Perencanaan semester ganjil & genap
+- **Daftar Peserta Didik** & **Rekapitulasi Jumlah Siswa**
+- **Daftar Serah Terima Rapor** — Import via Excel
+- **Prestasi Siswa** — Input dan rekap, export PDF
+- **Laporan Statistik:**
+  - Pendapatan Orangtua (export PDF)
+  - Persentase Pekerjaan Orangtua
+  - Grafik Jarak Tempuh Siswa (export PDF)
 
-### Premium Partners
+### 🔍 Kakom / Kepala Sekolah / Kurikulum
+- View-only seluruh data administrasi wali kelas per rombel
+- Cetak laporan PDF dari seluruh modul
+- Monitoring data wali kelas, rombel, dan tahun ajaran
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 🎒 Siswa
+- Login mandiri
+- Input & edit biodata diri
+- Input prestasi pribadi
+- Melihat catatan kasus
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🛠 Tech Stack
 
-## Code of Conduct
+| Layer      | Teknologi                                           |
+| ---------- | --------------------------------------------------- |
+| Framework  | Laravel 11                                          |
+| Bahasa     | PHP 8.2+                                            |
+| Frontend   | Tailwind CSS 3, Vite 6                              |
+| Database   | SQLite (dev) / MySQL (production)                   |
+| PDF        | [barryvdh/laravel-dompdf](https://github.com/barryvdh/laravel-dompdf) |
+| Excel      | [maatwebsite/excel](https://laravel-excel.com)      |
+| Auth       | Multi-guard session-based (6 guard)                 |
+| Templating | Blade                                               |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📋 Prasyarat
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **PHP** ≥ 8.2
+- **Composer**
+- **Node.js** & **npm**
+- **SQLite** (default) atau **MySQL**
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🚀 Instalasi
+
+```bash
+# 1. Clone repository
+git clone https://github.com/cessaaisya/e-walasproject.git
+cd e-walasproject
+
+# 2. Install dependencies
+composer install
+npm install
+
+# 3. Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
+
+# 4. Setup database (SQLite default)
+#   Edit .env jika ingin menggunakan MySQL
+php artisan migrate
+php artisan db:seed
+
+# 5. Build frontend & jalankan server
+npm run dev
+php artisan serve
+```
+
+Akses aplikasi di **http://localhost:8000**
+
+---
+
+## 🏗 Struktur Proyek
+
+```
+e-walasproject/
+├── app/
+│   ├── Models/                  # 37 model (Admin, Walas, Siswa, Rombel, dll.)
+│   └── Http/
+│       ├── Controllers/         # 87 controller
+│       └── Middleware/          # Admin, Walas, Kakom, Siswa middleware
+├── config/
+│   └── auth.php                 # 6 guard authentication
+├── database/
+│   └── migrations/              # 39 tabel migrasi
+├── routes/
+│   └── web.php                  # Seluruh route aplikasi
+├── resources/
+│   └── views/                   # 24 modul Blade (per role + template PDF)
+├── composer.json                # Dependensi PHP
+└── package.json                 # Dependensi frontend
+```
+
+---
+
+## 🔐 Kredensial Default
+
+Semua user menggunakan password: **`12345678`**
+
+| Role       | Nama Login                    | Halaman Login     |
+| ---------- | ----------------------------- | ----------------- |
+| Admin      | `Admin E-Walas`              | `/loginadmin`     |
+| Walas      | `Budi Santoso, S.Pd.`        | `/logingtk`       |
+| Kakom      | `Drs. Rahmat Hidayat`        | `/loginkaprog`    |
+| Kepsek     | `Drs. H. Ahmad Fauzi, M.Pd.` | `/loginkepsek`    |
+| Kurikulum  | `Sri Wahyuni, M.Pd.`         | `/loginkurikulum` |
+| Siswa      | `Andi Pratama`               | `/loginsiswa`     |
+
+> ⚠️ **Penting:** Ganti password default setelah instalasi. Sistem menggunakan perbandingan password plaintext — disarankan mengimplementasikan `Hash::bcrypt()` pada production.
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+# 1. Clone & masuk direktori
+git clone https://github.com/cessaaisya/e-walasproject.git
+cd e-walasproject
+
+# 2. Generate APP_KEY (jalankan sekali)
+cp .env.docker .env
+docker run --rm -v "%cd%:/app" composer:2 sh -c "cd /app && php artisan key:generate"
+
+# Atau di Linux/Mac:
+# docker run --rm -v "$(pwd):/app" composer:2 sh -c "cd /app && php artisan key:generate"
+
+# 3. Salin APP_KEY dari .env ke .env.docker (atau tetap di .env)
+
+# 4. Build & jalankan
+docker compose up -d --build
+
+# 5. Buka http://localhost:8080
+```
+
+### Konfigurasi Docker
+| Variabel          | Default          | Keterangan          |
+| ----------------- | ---------------- | ------------------- |
+| `APP_PORT`        | `8080`           | Port aplikasi       |
+| `DB_DATABASE`     | `ewalas`         | Nama database       |
+| `DB_USERNAME`     | `ewalas`         | User database       |
+| `DB_PASSWORD`     | `ewalas_secret`  | Password database   |
+| `DB_ROOT_PASSWORD`| `root_secret`    | Root password MySQL |
+
+Override variabel di `.env` sebelum `docker compose up`.
+
+### Perintah Berguna
+```bash
+docker compose up -d --build   # Build ulang & jalankan
+docker compose down            # Hentikan container
+docker compose down -v         # Hentikan + hapus volume DB
+docker compose logs -f app     # Pantau log aplikasi
+docker compose exec app php artisan migrate:fresh --seed  # Reset DB
+```
+
+---
+
+## 📦 Deployment Manual (non-Docker)
+
+```bash
+cp .env.example .env
+# Edit .env: APP_ENV=production, APP_DEBUG=false, DB koneksi production
+
+composer install --optimize-autoloader --no-dev
+npm install && npm run build
+php artisan optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+---
+
+## 📄 Lisensi
+
+Proyek ini bersifat open-source di bawah lisensi [MIT](https://opensource.org/licenses/MIT).
