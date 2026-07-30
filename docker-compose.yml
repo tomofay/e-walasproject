@@ -12,7 +12,7 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY}
-      DB_CONNECTION: mysql
+      DB_CONNECTION: mariadb
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE:-ewalas}
@@ -22,20 +22,20 @@ services:
       - app_storage:/var/www/storage
 
   db:
-    image: mysql:8.0
+    image: mariadb:11.4
     container_name: ewalas-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
-      MYSQL_DATABASE: ${DB_DATABASE:-ewalas}
-      MYSQL_USER: ${DB_USERNAME:-ewalas}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-ewalas_secret}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+      MARIADB_DATABASE: ${DB_DATABASE:-ewalas}
+      MARIADB_USER: ${DB_USERNAME:-ewalas}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-ewalas_secret}
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
       interval: 10s
       timeout: 5s
       retries: 10
