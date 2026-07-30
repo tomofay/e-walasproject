@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
 
         // ── Admin ──
         $admin = Admin::create([
-            'nama'      => 'Admin E-Walas',
+            'nama'      => 'admin',
             'no_wa'     => '081234567890',
             'password'  => $password,
         ]);
