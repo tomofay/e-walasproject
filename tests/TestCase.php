@@ -3,8 +3,26 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 
 abstract class TestCase extends BaseTestCase
 {
-    //
+    use RefreshDatabase;
+
+    protected string $baseUrl = 'http://localhost';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seed database
+        $this->seed();
+    }
+
+    /** Get password hash as stored in DB */
+    protected function password(): string
+    {
+        return '12345678';
+    }
 }
