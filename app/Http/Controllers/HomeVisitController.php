@@ -3,163 +3,76 @@
 namespace App\Http\Controllers;
 
 use App\Models\Walas;
-use Illuminate\Http\Request;
 use App\Models\HomeVisit;
 use App\Models\Rombel;
 use App\Models\Siswa;
+use App\Http\Concerns\HasWalasAuth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class HomeVisitController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use HasWalasAuth;
+
     public function index()
-{
-     // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-     $walas = Auth::guard('walas')->user();
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-     // Periksa apakah session 'walas_id' ada
-     if (!session()->has('walas_id')) {
-         return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-     }
- 
-     // Ambil data walas berdasarkan 'walas_id' yang ada di session
-     $walas = Walas::find(session('walas_id'));
- 
-     // Periksa apakah data walas ditemukan
-     if (!$walas) {
-         return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-     }
- 
-     // Ambil data kelompok berdasarkan 'walas_id'
-     $homevisit = HomeVisit::where('walas_id', $walas->id)->get();
+        $homevisit = HomeVisit::where('walas_id', $walas->id)->get();
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-     // Ambil data rombel berdasarkan 'walas_id'
-    $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-    // Periksa apakah rombel ditemukan
-    if (!$rombel) {
-        return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
+        return view("admwalas.homevisit.index", compact('homevisit', 'walas', 'siswas', 'rombel'));
     }
 
-       // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
-     $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+    public function generatePDF(Request $request)
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
+        $homevisit = HomeVisit::where('walas_id', $walas->id)->get();
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-    // Return view dengan data yang difilter
-    return view("admwalas.homevisit.index", compact('homevisit', 'walas', 'siswas', 'rombel'));
-}
+        foreach ($homevisit as $item) {
+            $item->bukti_base64 = $this->toBase64($item->bukti_url);
+            $item->dokumentasi_base64 = $this->toBase64($item->dokumentasi_url);
+        }
 
-public function generatePDF(Request $request)
-{
-    $walas = Walas::find(session('walas_id'));
+        $pdf = Pdf::loadView('pdf.homevisit', [
+            'walas' => $walas,
+            'homevisit' => $homevisit,
+            'siswas' => $siswas,
+            'rombel' => $rombel,
+            'suratImage' => $request->input('suratImage'),
+            'dokumImage' => $request->input('dokumImage'),
+        ]);
 
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
+        return $pdf->stream('Home_Visit.pdf');
     }
 
-    $homevisit = HomeVisit::where('walas_id', $walas->id)->get();
-    $rombel = Rombel::where('walas_id', $walas->id)->first();
-    if (!$rombel) {
-        return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
+    private function toBase64($path)
+    {
+        $fullPath = storage_path("app/public/" . $path);
+        if (file_exists($fullPath)) {
+            return 'data:' . mime_content_type($fullPath) . ';base64,' . base64_encode(file_get_contents($fullPath));
+        }
+        return null;
     }
 
-    $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-
-    // Ambil base64 dari request (grafik chart)
-    $suratImage = $request->input('suratImage');
-    $dokumImage = $request->input('dokumImage');
-
-    // Konversi gambar bukti_url dan dokumentasi_url ke base64
-    foreach ($homevisit as $item) {
-        $item->bukti_base64 = $this->convertToBase64($item->bukti_url);
-        $item->dokumentasi_base64 = $this->convertToBase64($item->dokumentasi_url);
-    }
-
-    // Load view PDF
-    $pdf = Pdf::loadView('pdf.homevisit', compact('walas', 'homevisit', 'siswas', 'rombel', 'suratImage', 'dokumImage'));
-
-    return $pdf->stream('Home_Visit.pdf');
-}
-
-// Fungsi untuk mengubah gambar ke base64
-private function convertToBase64($path)
-{
-    $fullPath = storage_path("app/public/" . $path);
-    
-    if (file_exists($fullPath)) {
-        $imageData = file_get_contents($fullPath);
-        $mimeType = mime_content_type($fullPath);
-        return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-    }
-
-    return null;
-}
-
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
-{
-    // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-    $walaslogin = Auth::guard('walas')->user();
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-    // Periksa apakah session 'walas_id' ada
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
+        return view('admwalas.homevisit.create', compact('walas', 'siswas'));
     }
-
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walaslogin = Walas::find(session('walas_id'));
-
-    // Periksa apakah data walas ditemukan
-    if (!$walaslogin) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-
-    // Ambil data rombel berdasarkan 'walas_id'
-    $rombel = Rombel::where('walas_id', $walaslogin->id)->first();
-        
-    // Periksa apakah rombel ditemukan
-    if (!$rombel) {
-        return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-    }
-
-    // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
-    $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas_id = session('walas_id');
-    $walas = Walas::where('id', $walas_id)->get(); // Ambil hanya data sesuai walas_id
-
-    $homevisit = HomeVisit::all();
-    return view('admwalas.homevisit.create', compact('homevisit', 'walas', 'walaslogin', 'siswas'));
-}
-
-    /**
-     * Store a newly created resource in storage.
-     */
 
     public function store(Request $request)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
+        $walas = $this->getAuthenticatedWalas();
 
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-    
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // validasi input
         $request->validate([
             'walas_id' => 'required|exists:walas,id',
             'nama_peserta_didik' => 'required',
@@ -167,21 +80,12 @@ private function convertToBase64($path)
             'kasus' => 'required',
             'solusi' => 'required',
             'tindak_lanjut' => 'required',
-            'bukti_url' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // validasi file gambar
-            'dokumentasi_url' => 'required|image|mimes:jpeg,png,jpg,gif|max:1024', // validasi file gambar
+            'bukti_url' => 'required|image|max:2048',
+            'dokumentasi_url' => 'required|image|max:1024',
         ]);
 
-        // simpan file ke storage
-        if ($request->hasFile('bukti_url')) {
-            $buktiPath = $request->file('bukti_url')->store('homevisit/Photos', 'public'); // simpan di storage/app/public/images
-            
-        }
-        
-        // simpan file ke storage
-        if ($request->hasFile('dokumentasi_url')) {
-            $dokumentasiPath = $request->file('dokumentasi_url')->store('homevisit/Photos', 'public'); // simpan di storage/app/public/images
-            
-        }
+        $buktiPath = $request->file('bukti_url')->store('homevisit/Photos', 'public');
+        $dokumentasiPath = $request->file('dokumentasi_url')->store('homevisit/Photos', 'public');
 
         HomeVisit::create([
             'walas_id' => $request->walas_id,
@@ -193,150 +97,80 @@ private function convertToBase64($path)
             'bukti_url' => $buktiPath,
             'dokumentasi_url' => $dokumentasiPath,
         ]);
-        
 
-        // redirect dengan pesan sukses
         return redirect('/homevisit')->with('success', 'Data berhasil disimpan!');
     }
 
+    public function show(string $id) {}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
-{
-    // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-    $walaslogin = Auth::guard('walas')->user();
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-    // Periksa apakah session 'walas_id' ada
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
+        $homevisit = HomeVisit::findOrFail($id);
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+
+        return view('admwalas.homevisit.edit', compact('homevisit', 'walas', 'siswas'));
     }
 
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walaslogin = Walas::find(session('walas_id'));
+    public function update(Request $request, $id)
+    {
+        $walas = $this->getAuthenticatedWalas();
 
-    // Periksa apakah data walas ditemukan
-    if (!$walaslogin) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
+        $request->validate([
+            'walas_id' => 'required|exists:walas,id',
+            'nama_peserta_didik' => 'required',
+            'tanggal' => 'required',
+            'kasus' => 'required',
+            'solusi' => 'required',
+            'tindak_lanjut' => 'required',
+            'bukti_url' => 'nullable|image|max:2048',
+            'dokumentasi_url' => 'nullable|image|max:2048',
+        ]);
 
-    // Ambil data rombel berdasarkan 'walas_id'
-    $rombel = Rombel::where('walas_id', $walaslogin->id)->first();
+        $homevisit = HomeVisit::findOrFail($id);
 
-    // Periksa apakah rombel ditemukan
-    if (!$rombel) {
-        return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-    }
-
-    // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
-    $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-
-    // Ambil data home visit yang akan diedit
-    $homevisit = HomeVisit::findOrFail($id);
-
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas_id = session('walas_id');
-    $walas = Walas::where('id', $walas_id)->get(); // Ambil hanya data sesuai walas_id
-
-    return view('admwalas.homevisit.edit', compact('homevisit', 'walas', 'walaslogin', 'siswas'));
-}
-
-    
-public function update(Request $request, $id)
-{
-    // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-    $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
-
-    // Periksa apakah session 'walas_id' ada
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-    }
-
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas = Walas::find(session('walas_id'));
-
-    // Validasi input
-    $request->validate([
-        'walas_id' => 'required|exists:walas,id',
-        'nama_peserta_didik' => 'required',
-        'tanggal' => 'required',
-        'kasus' => 'required',
-        'solusi' => 'required',
-        'tindak_lanjut' => 'required',
-        'bukti_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // validasi file gambar, nullable agar tidak harus upload ulang jika tidak ada perubahan
-        'dokumentasi_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // validasi file gambar, nullable agar tidak harus upload ulang jika tidak ada perubahan
-    ]);
-
-    // Ambil data HomeVisit berdasarkan ID
-    $homevisit = HomeVisit::findOrFail($id);
-
-    // Simpan file ke storage jika ada perubahan file
-    if ($request->hasFile('bukti_url')) {
-        // Hapus file yang lama jika ada
-        if ($homevisit->bukti_url && Storage::exists('public/' . $homevisit->bukti_url)) {
-            Storage::delete('public/' . $homevisit->bukti_url);
+        if ($request->hasFile('bukti_url')) {
+            if ($homevisit->bukti_url && Storage::exists('public/' . $homevisit->bukti_url)) {
+                Storage::delete('public/' . $homevisit->bukti_url);
+            }
+            $buktiPath = $request->file('bukti_url')->store('homevisit/Photos', 'public');
+        } else {
+            $buktiPath = $homevisit->bukti_url;
         }
-        $buktiPath = $request->file('bukti_url')->store('homevisit/Photos', 'public');  // simpan di storage/app/public/images
-    } else {
-        $buktiPath = $homevisit->bukti_url;  // Jika tidak ada perubahan, gunakan file lama
-    }
 
-    if ($request->hasFile('dokumentasi_url')) {
-        // Hapus file yang lama jika ada
-        if ($homevisit->dokumentasi_url && Storage::exists('public/' . $homevisit->dokumentasi_url)) {
-            Storage::delete('public/' . $homevisit->dokumentasi_url);
+        if ($request->hasFile('dokumentasi_url')) {
+            if ($homevisit->dokumentasi_url && Storage::exists('public/' . $homevisit->dokumentasi_url)) {
+                Storage::delete('public/' . $homevisit->dokumentasi_url);
+            }
+            $dokumentasiPath = $request->file('dokumentasi_url')->store('homevisit/Photos', 'public');
+        } else {
+            $dokumentasiPath = $homevisit->dokumentasi_url;
         }
-        $dokumentasiPath = $request->file('dokumentasi_url')->store('homevisit/Photos', 'public');  // simpan di storage/app/public/images
-    } else {
-        $dokumentasiPath = $homevisit->dokumentasi_url;  // Jika tidak ada perubahan, gunakan file lama
+
+        $homevisit->update([
+            'walas_id' => $request->walas_id,
+            'nama_peserta_didik' => $request->nama_peserta_didik,
+            'tanggal' => $request->tanggal,
+            'kasus' => $request->kasus,
+            'solusi' => $request->solusi,
+            'tindak_lanjut' => $request->tindak_lanjut,
+            'bukti_url' => $buktiPath,
+            'dokumentasi_url' => $dokumentasiPath,
+        ]);
+
+        return redirect('/homevisit')->with('success', 'Data berhasil diperbarui!');
     }
 
-    // Update data HomeVisit
-    $homevisit->update([
-        'walas_id' => $request->walas_id,
-        'nama_peserta_didik' => $request->nama_peserta_didik,
-        'tanggal' => $request->tanggal,
-        'kasus' => $request->kasus,
-        'solusi' => $request->solusi,
-        'tindak_lanjut' => $request->tindak_lanjut,
-        'bukti_url' => $buktiPath,
-        'dokumentasi_url' => $dokumentasiPath,
-    ]);
-
-    // Redirect dengan pesan sukses
-    return redirect('/homevisit')->with('success', 'Data berhasil diperbarui!');
-}
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function hapushomevisit(string $id)
     {
-         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-     $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
-
-     // Periksa apakah session 'walas_id' ada
-     if (!session()->has('walas_id')) {
-         return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-     }
-
-     // Ambil data walas berdasarkan 'walas_id' yang ada di session
-     $walas = Walas::find(session('walas_id'));
+        $this->getAuthenticatedWalas();
 
         $homevisit = HomeVisit::find($id);
         if ($homevisit) {
             $homevisit->delete();
-            return redirect('/homevisit')->with('success', 'Data Berhasil Dihapus ');
+            return redirect('/homevisit')->with('success', 'Data Berhasil Dihapus');
         }
         return redirect('/homevisit')->with('error', 'Data not found!');
     }
