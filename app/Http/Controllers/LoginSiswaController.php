@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Siswa;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 
 class LoginSiswaController extends Controller
@@ -39,9 +41,9 @@ class LoginSiswaController extends Controller
         $siswa = Siswa::where('nama', $request->nama)->first();
 
         // Periksa apakah siswa ditemukan dan password cocok
-        if ($siswa && $request->password === $siswa->password) {
-            // Simpan informasi login ke session
+        if ($siswa && Hash::check($request->password, $siswa->password)) {
             $request->session()->put('siswa_id', $siswa->id);
+            Auth::guard('siswas')->login($siswa);
 
             // Redirect ke halaman siswa dengan pesan sukses
             return redirect()->route('homepagesiswa.index')->with('success', 'Login berhasil! Selamat datang di halaman Siswa.');

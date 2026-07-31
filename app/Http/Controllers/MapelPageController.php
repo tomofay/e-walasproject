@@ -29,6 +29,9 @@ class MapelPageController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_mapel.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Kurikulum;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class ProfilePageKurikulumController extends Controller
@@ -122,7 +123,7 @@ class ProfilePageKurikulumController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $kurikulum->password = ($request->password);
+            $kurikulum->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

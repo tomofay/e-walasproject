@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Walas;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginGtkController extends Controller
 {
@@ -29,9 +31,9 @@ class LoginGtkController extends Controller
         $walas = Walas::where('nama', $request->nama)->first();
 
         // Periksa apakah walas ditemukan dan password cocok
-        if ($walas && $request->password === $walas->password) {
-            // Simpan informasi login ke session
+        if ($walas && Hash::check($request->password, $walas->password)) {
             $request->session()->put('walas_id', $walas->id);
+            Auth::guard('walas')->login($walas);
 
             // Redirect ke halaman walas dengan pesan sukses
             return redirect()->route('homepagegtk.index')->with('success', 'Login berhasil! Selamat datang di halaman Walas.');

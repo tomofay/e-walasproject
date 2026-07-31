@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class DataSiswaWalasController extends Controller
 {
@@ -65,6 +66,9 @@ class DataSiswaWalasController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_siswa.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
 
@@ -368,7 +372,7 @@ class DataSiswaWalasController extends Controller
             'rombels_id' => $request->rombels_id,
             'jenis_kelamin' => $request->jenis_kelamin,
             'no_wa' => $request->no_wa,
-            'password' => ($request->password),
+            'password' => Hash::make($request->password),
             'status' => $request->status,
             'image_url' => $imagePath, // Simpan path gambar di database
         ]);
@@ -439,7 +443,7 @@ class DataSiswaWalasController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $siswa->password = ($request->password);
+            $siswa->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database
@@ -551,7 +555,7 @@ class DataSiswaWalasController extends Controller
 
         // Buat data baru untuk KeluarRombel
         $keluarRombel = KeluarRombel::create([
-            'nama_siswa' => $siswa->nama, // Nama siswa diambil dari database
+            'nama_siswa' => $siswa->id,
             'keterangan' => $request->keterangan,
             'rombels_id' => $rombel->id, // Rombel diambil dari data rombel yang sesuai
         ]);

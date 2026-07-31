@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Kakom extends Model
+class Kakom extends Authenticatable
 {
     use HasFactory;
     protected $fillable = [
@@ -15,5 +15,5 @@ class Kakom extends Model
         'kompetensi',
         'image_url'
     ];
-    public $timestamps = false;
+    protected $hidden = ['password'];
 }

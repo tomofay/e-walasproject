@@ -8,6 +8,7 @@ use App\Models\Rombel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class ProfileKakomController extends Controller
@@ -121,7 +122,7 @@ class ProfileKakomController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $kakom->password = ($request->password);
+            $kakom->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

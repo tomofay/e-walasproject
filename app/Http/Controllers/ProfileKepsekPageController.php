@@ -9,6 +9,7 @@ use App\Models\Kepsek;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class ProfileKepsekPageController extends Controller
@@ -122,7 +123,7 @@ class ProfileKepsekPageController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $kepsek->password = ($request->password);
+            $kepsek->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

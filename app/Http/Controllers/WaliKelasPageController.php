@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class WaliKelasPageController extends Controller
 {
@@ -48,6 +49,9 @@ class WaliKelasPageController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_walas.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
     /**
@@ -81,7 +85,7 @@ class WaliKelasPageController extends Controller
             'nama' => $request->nama,
             'no_wa' => $request->no_wa,
             'jenis_kelamin' => $request->jenis_kelamin,
-            'password' => ($request->password),
+            'password' => Hash::make($request->password),
             'nip' => $request->nip,
             'image_url' => $imagePath, // Simpan path gambar di database
         ]);
@@ -151,7 +155,7 @@ class WaliKelasPageController extends Controller
 
     // Update password jika diisi (jika tidak, biarkan yang lama)
     if ($request->filled('password')) {
-        $walas->password = ($request->password);
+        $walas->password = Hash::make($request->password);
     }
 
     // Simpan perubahan ke database

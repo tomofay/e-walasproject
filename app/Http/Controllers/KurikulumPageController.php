@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class KurikulumPageController extends Controller
 {
@@ -46,11 +47,10 @@ class KurikulumPageController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_kurikulum.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
-        // Mengirim data ke view
-    return view('homepageadmin.kurikulumdata.index', [
-        'kurikulumdata' =>  Kurikulum::all(),
-    ]);
     }
     /**
      * Show the form for creating a new resource.
@@ -81,7 +81,7 @@ class KurikulumPageController extends Controller
         Kurikulum::create([
             'nama' => $request->nama,
             'no_wa' => $request->no_wa,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'nip' => $request->nip,
             'image_url' => $imagePath, // Simpan path gambar di database
         ]);
@@ -147,7 +147,7 @@ class KurikulumPageController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $kurikulum->password = ($request->password);
+            $kurikulum->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

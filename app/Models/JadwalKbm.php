@@ -71,16 +71,4 @@ class JadwalKbm extends Model
     {
         return $this->belongsTo(Kurikulum::class);
     }
-
-    public function mapels()
-    {
-        return $this->belongsTo(Mapel::class, 'mapel_id');
-    }
-
-    public function gurus()
-    {
-        return $this->belongsTo(Guru::class, 'guru_id');
-    }
-
-
 }

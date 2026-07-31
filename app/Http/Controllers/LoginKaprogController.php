@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kakom;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginKaprogController extends Controller
 {
@@ -38,9 +40,9 @@ class LoginKaprogController extends Controller
         $kaprog = Kakom::where('nama', $request->nama)->first();
 
         // Periksa apakah kaprog ditemukan dan password cocok
-        if ($kaprog && $request->password === $kaprog->password) {
-            // Simpan informasi login ke session
+        if ($kaprog && Hash::check($request->password, $kaprog->password)) {
             $request->session()->put('kakom_id', $kaprog->id);
+            Auth::guard('kakoms')->login($kaprog);
 
             // Redirect ke halaman kaprog dengan pesan sukses
             return redirect()->route('homepagekaprog.index')->with('success', 'Login berhasil! Selamat datang di halaman kepala program.');

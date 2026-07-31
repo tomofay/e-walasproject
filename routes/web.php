@@ -91,13 +91,13 @@ Route::get('/', function () {
 });
 
 Route::resource('loginadmin', LoginController::class);
-Route::post('/loginadmin', [LoginController::class, 'store'])->name('login.store');
+Route::post('/loginadmin', [LoginController::class, 'store']);
 
 Route::get('/logingtk', [LoginGtkController::class, 'index'])->name('logingtk.index');
 Route::post('/logingtk', [LoginGtkController::class, 'store'])->name('logingtk.store');
 
 Route::resource('loginkepsek', LoginKepsekController::class);
-Route::post('/loginkepsek', [LoginKepsekController::class, 'store'])->name('loginkepsek.store');
+Route::post('/loginkepsek', [LoginKepsekController::class, 'store']);
 
 Route::resource('loginkaprog', LoginKaprogController::class);
 Route::resource('loginkurikulum', LoginKurikulumController::class);

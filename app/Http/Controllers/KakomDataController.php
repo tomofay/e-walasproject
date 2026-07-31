@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Imports\KakomImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class KakomDataController extends Controller
@@ -46,6 +47,9 @@ class KakomDataController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_kakom.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
     /**
@@ -77,7 +81,7 @@ class KakomDataController extends Controller
         Kakom::create([
             'nama' => $request->nama,
             'no_wa' => $request->no_wa,
-            'password' => ($request->password),
+            'password' => Hash::make($request->password),
             'kompetensi' => $request->kompetensi,
             'image_url' => $imagePath, // Simpan path gambar di database
         ]);
@@ -146,7 +150,7 @@ class KakomDataController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $kakom->password = ($request->password);
+            $kakom->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

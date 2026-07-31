@@ -51,6 +51,9 @@ class BeritaAcaraSerahTerimaController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/Berita_Acara_Serah_Terima.pdf');
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
 

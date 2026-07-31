@@ -9,6 +9,7 @@ use App\Models\Admin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileAdminController extends Controller
 {
@@ -121,7 +122,7 @@ class ProfileAdminController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $admin->password = ($request->password);
+            $admin->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

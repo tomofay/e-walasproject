@@ -8,6 +8,7 @@ use App\Models\Rombel;
 use App\Models\Siswa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ProfilePageController extends Controller
 {
@@ -120,7 +121,7 @@ class ProfilePageController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $siswa->password = ($request->password);
+            $siswa->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

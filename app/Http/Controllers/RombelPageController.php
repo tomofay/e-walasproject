@@ -114,7 +114,10 @@ return redirect('/rombel');
 public function downloadTemplate()
 {
     $pathToFile = storage_path('app/public/template_rombel.xlsx'); // Sesuaikan dengan lokasi file template Excel
-    return response()->download($pathToFile);
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
+        return response()->download($pathToFile);
 }
 
     /**

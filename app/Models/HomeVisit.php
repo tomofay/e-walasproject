@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
 class HomeVisit extends Model
 {
     use HasFactory;
@@ -18,18 +17,10 @@ class HomeVisit extends Model
         'solusi',
         'bukti_url',
         'dokumentasi_url'
-
     ];
 
-    public function siswa()
-{
-    return $this->belongsTo(Siswa::class, 'nama_peserta_didik', 'id');
-}
-
-public function siswaedit()
-{
-    return $this->belongsTo(Siswa::class, 'siswa_id');
-}
-
-
+    public function walas()
+    {
+        return $this->belongsTo(Walas::class, 'walas_id');
+    }
 }

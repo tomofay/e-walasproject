@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Rombel;
 use App\Models\Walas;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class SiswaDataPageAdminController extends Controller
 {
@@ -51,7 +52,10 @@ class SiswaDataPageAdminController extends Controller
         public function downloadTemplate()
         {
             $pathToFile = storage_path('app/public/template_siswa.xlsx'); // Sesuaikan dengan lokasi file template Excel
-            return response()->download($pathToFile);
+            if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
+        return response()->download($pathToFile);
         }
     
         /**
@@ -87,7 +91,7 @@ class SiswaDataPageAdminController extends Controller
                 'rombels_id' => $request->rombels_id,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'no_wa' => $request->no_wa,
-                'password' => ($request->password),
+                'password' => Hash::make($request->password),
                 'status' => $request->status,
                 'image_url' => $imagePath, // Simpan path gambar di database
             ]);
@@ -158,7 +162,7 @@ class SiswaDataPageAdminController extends Controller
         
             // Update password jika diisi (jika tidak, biarkan yang lama)
             if ($request->filled('password')) {
-                $siswa->password = ($request->password);
+                $siswa->password = Hash::make($request->password);
             }
         
             // Simpan perubahan ke database

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kurikulum;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginKurikulumController extends Controller
 {
@@ -38,9 +40,9 @@ class LoginKurikulumController extends Controller
         $kurikulum = Kurikulum::where('nama', $request->nama)->first();
 
         // Periksa apakah kurikulum ditemukan dan password cocok
-        if ($kurikulum && $request->password === $kurikulum->password) {
-            // Simpan informasi login ke session
+        if ($kurikulum && Hash::check($request->password, $kurikulum->password)) {
             $request->session()->put('kurikulum_id', $kurikulum->id);
+            Auth::guard('kurikulums')->login($kurikulum);
 
             // Redirect ke halaman kurikulum dengan pesan sukses
             return redirect()->route('homepagekurikulum.index')->with('success', 'Login berhasil! Selamat datang di halaman kurikulum.');

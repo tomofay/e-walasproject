@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Kepsek extends Model
+class Kepsek extends Authenticatable
 {
     use HasFactory;
     protected $fillable = [
@@ -14,5 +14,5 @@ class Kepsek extends Model
         'password',
         'image_url'
     ];
-    public $timestamps = false;
+    protected $hidden = ['password'];
 }

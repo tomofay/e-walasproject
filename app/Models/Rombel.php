@@ -14,9 +14,6 @@ class Rombel extends Model
         'nama_kelas',
         'walas_id'
     ];
-    public $timestamps = false;
-
-    // app/Models/Rombel.php
 
     public function siswas()
     {

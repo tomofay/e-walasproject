@@ -13,5 +13,4 @@ class DetailJadwalPiket extends Model
         'jadwalpikets_id',
         'siswas_id'
     ];
-    public $timestamps = false;
 }

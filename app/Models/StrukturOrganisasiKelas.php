@@ -25,4 +25,44 @@ class StrukturOrganisasiKelas extends Model
         'ttdkurikulum_url',
         'ttdwalas_url',
     ];
+
+    public function ketuaKelas()
+    {
+        return $this->belongsTo(Siswa::class, 'ketuakelas');
+    }
+
+    public function wakilKetuaKelas()
+    {
+        return $this->belongsTo(Siswa::class, 'waketuakelas');
+    }
+
+    public function bendaharaSiswa()
+    {
+        return $this->belongsTo(Siswa::class, 'bendahara');
+    }
+
+    public function sekretarisSiswa()
+    {
+        return $this->belongsTo(Siswa::class, 'sekretaris');
+    }
+
+    public function seksiKebersihan()
+    {
+        return $this->belongsTo(Siswa::class, 'seksi_kebersihan');
+    }
+
+    public function seksiPerlengkapan()
+    {
+        return $this->belongsTo(Siswa::class, 'seksi_perlengkapan');
+    }
+
+    public function seksiKeamanan()
+    {
+        return $this->belongsTo(Siswa::class, 'seksi_keamanan');
+    }
+
+    public function seksiKerohanian()
+    {
+        return $this->belongsTo(Siswa::class, 'seksi_kerohanian');
+    }
 }

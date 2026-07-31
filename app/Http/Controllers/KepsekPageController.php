@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 
 class KepsekPageController extends Controller
@@ -47,6 +48,9 @@ class KepsekPageController extends Controller
     public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/template_kepsek.xlsx'); // Sesuaikan dengan lokasi file template Excel
+        if (!file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
         return response()->download($pathToFile);
     }
 
@@ -78,7 +82,7 @@ class KepsekPageController extends Controller
         Kepsek::create([
             'nama' => $request->nama,
             'no_wa' => $request->no_wa,
-            'password' => ($request->password),
+            'password' => Hash::make($request->password),
             'image_url' => $imagePath, // Simpan path gambar di database
         ]);
     
@@ -142,7 +146,7 @@ class KepsekPageController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-           $kepsek->password = ($request->password);
+           $kepsek->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database

@@ -11,5 +11,4 @@ class Mapel extends Model
     protected $fillable = [
         'nama_mapel'
     ];
-    public $timestamps = false;
 }

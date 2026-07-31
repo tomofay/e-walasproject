@@ -8,14 +8,15 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement("
-            CREATE VIEW vwsiswas AS
+            CREATE OR REPLACE VIEW vwsiswas AS
             SELECT
                 r.id,
                 s.id AS siswa_id,
                 r.nama_kelas,
                 s.nama AS siswa_nama,
-                s.jenis_kelamin AS siswa_jenis_kelamin,
-                s.no_wa AS siswa_no_wa,
+                s.jenis_kelamin,
+                s.no_wa,
+                s.image_url,
                 s.status,
                 s.keterangan,
                 s.rombels_id,

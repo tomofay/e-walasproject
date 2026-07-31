@@ -12,12 +12,13 @@ use App\Models\Rombel;
 use App\Models\Siswa;
 use App\Models\Walas;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = '12345678';
+        $password = Hash::make('12345678');
 
         // ── Admin ──
         $admin = Admin::create([

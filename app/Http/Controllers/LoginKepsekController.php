@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kepsek;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginKepsekController extends Controller
 {
@@ -38,9 +40,9 @@ class LoginKepsekController extends Controller
     $kepsek = Kepsek::where('nama', $request->nama)->first();
 
     // Periksa apakah kepsek ditemukan dan password cocok
-    if ($kepsek && $request->password === $kepsek->password) {
-        // Simpan informasi login ke session
-        $request->session()->put('kepsek_id', $kepsek->id);
+        if ($kepsek && Hash::check($request->password, $kepsek->password)) {
+            $request->session()->put('kepsek_id', $kepsek->id);
+            Auth::guard('kepseks')->login($kepsek);
 
         // Redirect ke halaman kepsek dengan pesan sukses
         return redirect()->route('homepagekepsek.index')->with('success', 'Login berhasil! Selamat datang di halaman kepala sekolah.');

@@ -19,14 +19,8 @@ class BukuTamuOrangtua extends Model
         'dokumentasi_url'
     ];
 
-    public function siswa()
+    public function walas()
     {
-        return $this->belongsTo(Siswa::class, 'nama_peserta_didik', 'id');
+        return $this->belongsTo(Walas::class, 'walas_id');
     }
-    
-    public function siswaedit()
-    {
-        return $this->belongsTo(Siswa::class, 'siswa_id');
-    }
-    
 }

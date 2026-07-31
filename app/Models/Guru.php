@@ -11,5 +11,4 @@ class Guru extends Model
     protected $fillable = [
         'nama'
     ];
-    public $timestamps = false;
 }

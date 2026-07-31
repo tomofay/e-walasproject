@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -31,9 +32,9 @@ class LoginController extends Controller
     $admin = Admin::where('nama', $request->nama)->first();
 
     // Periksa apakah admin ditemukan dan password cocok
-    if ($admin && $request->password === $admin->password) {
-        // Simpan informasi login ke session
+        if ($admin && Hash::check($request->password, $admin->password)) {
         $request->session()->put('admin_id', $admin->id);
+        Auth::guard('admins')->login($admin);
 
         // Redirect ke halaman admin dengan pesan sukses
         return redirect()->route('homepageadmin.index')->with('success', 'Login berhasil! Selamat datang di halaman admin.');

@@ -4,23 +4,17 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class KakomMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        {
-            if (!session('kakoms_id')) {
-                return redirect('/loginkaprog')->with('error', 'Silakan login terlebih dahulu.');
-            }
-    
-            return $next($request);
+        if (!Auth::guard('kakoms')->check() && !session('kakom_id')) {
+            return redirect('/loginkaprog')->with('error', 'Silakan login terlebih dahulu.');
         }
+
+        return $next($request);
     }
 }

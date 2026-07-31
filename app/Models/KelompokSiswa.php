@@ -14,5 +14,4 @@ class KelompokSiswa extends Model
         'kelompok_id',
         'siswa_id'
     ];
-    public $timestamps = false;
 }

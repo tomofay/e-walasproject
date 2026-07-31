@@ -12,8 +12,9 @@ if [ ! -f /var/www/.docker_initialized ]; then
     php artisan migrate --force
     php artisan db:seed --force
 
-    echo "==> Caching config & views..."
+    echo "==> Caching config, routes & views..."
     php artisan config:cache
+    php artisan route:cache
     php artisan view:cache
 
     touch /var/www/.docker_initialized

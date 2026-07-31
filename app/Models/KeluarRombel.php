@@ -20,8 +20,6 @@ class KeluarRombel extends Model
         'tidak_naik_kelas' => 'Tidak Naik Kelas',
         'pindah_sekolah' => 'Pindah Sekolah'
     ];
-    
-    public $timestamps = false;
 
     public function rombel()
     {

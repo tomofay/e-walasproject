@@ -9,6 +9,7 @@ use App\Models\Siswa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class ProfilePageWalasController extends Controller
@@ -140,7 +141,7 @@ class ProfilePageWalasController extends Controller
     
         // Update password jika diisi (jika tidak, biarkan yang lama)
         if ($request->filled('password')) {
-            $walas->password = ($request->password);
+            $walas->password = Hash::make($request->password);
         }
     
         // Simpan perubahan ke database
