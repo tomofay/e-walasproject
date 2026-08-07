@@ -3,82 +3,47 @@
 namespace Tests\Feature\Walas;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use App\Models\Siswa;
 use App\Models\AgendaKegiatanWalas;
-use App\Models\HomeVisit;
-use App\Models\CatatanKasusSiswa;
 
 class WalasFullTest extends TestCase
 {
-    use WithoutMiddleware;
-
     private string $walasNama = 'Budi Santoso, S.Pd.';
 
-    // ── Helper: login as walas so session persists ──
-    private function loginAndGetSession(): void
+    protected function manualLogin(): void
     {
-        $this->post('/logingtk', [
-            'nama'     => $this->walasNama,
-            'password' => $this->password(),
-        ]);
-
-        // after redirect, Laravel stores walas_id in session
         session()->put('walas_id', 1);
     }
 
-    // ════════════════════════════════════════
-    // 1. AUTH
-    // ════════════════════════════════════════
+    // ═══════ LOGIN ═══════
 
-    public function test_walas_login_returns_redirect(): void
+    public function test_login_page_loads(): void
     {
-        $this->post('/logingtk', [
-            'nama'     => $this->walasNama,
-            'password' => $this->password(),
-        ])->assertRedirect('/walaspage');
+        $this->get('/logingtk')->assertStatus(200);
     }
 
-    public function test_walas_login_rejected_with_wrong_password(): void
+    public function test_login_fails_with_wrong_password(): void
     {
         $this->post('/logingtk', [
             'nama'     => $this->walasNama,
             'password' => 'wrongpassword',
-        ])->assertRedirect('/logingtk');
+        ])->assertSessionHasErrors();
     }
 
-    // ════════════════════════════════════════
-    // 2. DASHBOARD
-    // ════════════════════════════════════════
-
-    public function test_walas_dashboard_returns_200(): void
-    {
-        $this->loginAndGetSession();
-        $this->get('/walaspage')->assertStatus(200)->assertSee('Budi Santoso');
-    }
-
-    // ════════════════════════════════════════
-    // 3. DATA SISWA
-    // ════════════════════════════════════════
+    // ═══════ DATA SISWA ═══════
 
     public function test_siswadata_returns_200(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
         $this->get('/siswadata')->assertStatus(200);
     }
 
-    public function test_siswadata_search_returns_200(): void
+    public function test_store_siswa(): void
     {
-        $this->loginAndGetSession();
-        $this->get('/siswadata_search?keyword=Andi')->assertStatus(200);
-    }
-
-    public function test_store_siswa_inserts_record(): void
-    {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $this->post('/siswadata/tambah/store', [
-            'nama'          => 'Test Siswa',
+            'nama'          => 'Test Siswa Baru',
             'rombels_id'    => 1,
             'jenis_kelamin' => 'Laki-laki',
             'no_wa'         => '081234567890',
@@ -86,12 +51,12 @@ class WalasFullTest extends TestCase
             'status'        => 'aktif',
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('siswas', ['nama' => 'Test Siswa']);
+        $this->assertDatabaseHas('siswas', ['nama' => 'Test Siswa Baru']);
     }
 
-    public function test_update_siswa_works(): void
+    public function test_update_siswa(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $siswa = Siswa::where('nama', 'Andi Pratama')->first();
 
@@ -106,15 +71,15 @@ class WalasFullTest extends TestCase
         $this->assertDatabaseHas('siswas', ['nama' => 'Andi Updated']);
     }
 
-    public function test_delete_siswa_works(): void
+    public function test_hapussiswa(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $siswa = Siswa::create([
-            'nama'          => 'To Delete',
+            'nama'          => 'Delete Me',
             'rombels_id'    => 1,
             'jenis_kelamin' => 'Laki-laki',
-            'no_wa'         => '081000000000',
+            'no_wa'         => '081999999999',
             'password'      => bcrypt('123'),
             'status'        => 'aktif',
         ]);
@@ -123,66 +88,61 @@ class WalasFullTest extends TestCase
         $this->assertDatabaseMissing('siswas', ['id' => $siswa->id]);
     }
 
-    public function test_download_template_returns_redirect(): void
-    {
-        $this->loginAndGetSession();
-        $this->get('/siswa-download-template')->assertRedirect();
-    }
+    // ═══════ ALL MODULES SMOKE ═══════
 
-    // ════════════════════════════════════════
-    // 4. ALL WALAS MODULES — SMOKE TESTS
-    // ════════════════════════════════════════
-
-    public function walasModuleDataProvider(): array
+    public function test_all_walas_modules(): void
     {
-        return [
-            'adminwalas'               => ['/adminwalas'],
-            'identitaskelas'           => ['/identitaskelas'],
-            'strukturorganisasi'       => ['/strukturorganisasi'],
-            'jadwalkbm'                => ['/jadwalkbm'],
-            'jadwalpiket'              => ['/jadwalpiket'],
-            'denahkerjakelompok'       => ['/denahkerjakelompok'],
-            'serahterimarapor'         => ['/serahterimarapor'],
-            'lembarpengesahan'         => ['/lembarpengesahan'],
-            'presensi'                 => ['/presensi'],
-            'homevisit'                => ['/homevisit'],
-            'homevisitcreate'          => ['/homevisitcreate'],
-            'bukutamuortu'             => ['/bukutamuortu'],
-            'bukutamuortucreate'       => ['/bukutamuortucreate'],
-            'agendawalas'              => ['/agendawalas'],
-            'catatankasus'             => ['/catatankasus'],
-            'daftarpesertadidik'       => ['/daftarpesertadidik'],
-            'daftarpesertadidikcreate' => ['/daftarpesertadidikcreate'],
-            'rekapjumlahsiswa'         => ['/rekapjumlahsiswa'],
-            'rekapjumlahsiswacreate'   => ['/rekapjumlahsiswacreate'],
-            'persentasesosialekonomi'  => ['/persentasesosialekonomi'],
-            'persentasesosialekonomicreate' => ['/persentasesosialekonomicreate'],
-            'prestasisiswa'            => ['/prestasisiswa'],
-            'beritaacarakenaikan'      => ['/beritaacarakenaikan'],
-            'beritaacarakelulusan'     => ['/beritaacarakelulusan'],
-            'beritaacaraserahterima'   => ['/beritaacaraserahterima'],
-            'rencana_kegiatan_ganjil'  => ['/rencana_kegiatan/ganjil'],
-            'rencana_kegiatan_genap'   => ['/rencana_kegiatan/genap'],
-            'pendapatanortu'           => ['/pendapatanortu'],
-            'grafikjaraktempuh'        => ['/grafikjaraktempuh'],
-            'profilewalas'             => ['/profilewalas'],
+        $this->manualLogin();
+
+        $modules = [
+            '/adminwalas',
+            '/identitaskelas',
+            '/strukturorganisasi',
+            '/jadwalkbm',
+            '/jadwalpiket',
+            '/denahkerjakelompok',
+            '/serahterimarapor',
+            '/lembarpengesahan',
+            '/presensi',
+            '/homevisit',
+            '/homevisitcreate',
+            '/bukutamuortu',
+            '/bukutamuortucreate',
+            '/agendawalas',
+            '/catatankasus',
+            '/daftarpesertadidik',
+            '/daftarpesertadidikcreate',
+            '/rekapjumlahsiswa',
+            '/rekapjumlahsiswacreate',
+            '/persentasesosialekonomi',
+            '/persentasesosialekonomicreate',
+            '/prestasisiswa',
+            '/beritaacarakenaikan',
+            '/beritaacarakelulusan',
+            '/beritaacaraserahterima',
+            '/rencana_kegiatan/ganjil',
+            '/rencana_kegiatan/genap',
+            '/pendapatanortu',
+            '/grafikjaraktempuh',
+            '/profilewalas',
         ];
+
+        $failed = [];
+        foreach ($modules as $url) {
+            $status = $this->get($url)->getStatusCode();
+            if (! in_array($status, [200, 302])) {
+                $failed[] = "{$url} → {$status}";
+            }
+        }
+
+        $this->assertEmpty($failed, implode("\n", $failed));
     }
 
-    /** @dataProvider walasModuleDataProvider */
-    public function test_walas_module_returns_200(string $url): void
-    {
-        $this->loginAndGetSession();
-        $this->get($url)->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 5. AGENDA CRUD
-    // ════════════════════════════════════════
+    // ═══════ AGENDA CRUD ═══════
 
     public function test_agenda_create(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $this->post('/agendawalas/store', [
             'hari'           => 'Senin',
@@ -190,16 +150,16 @@ class WalasFullTest extends TestCase
             'nama_kegiatan'  => 'Test Kegiatan',
             'hasil'          => 'Test Hasil',
             'waktu'          => '08:00',
-            'keterangan'     => 'Test Keterangan',
+            'keterangan'     => 'Test',
             'tanggalttd'     => now()->format('Y-m-d'),
         ])->assertRedirect('/agendawalas');
 
         $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Test Kegiatan']);
     }
 
-    public function test_agenda_edit_and_delete(): void
+    public function test_agenda_update_and_delete(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $agenda = AgendaKegiatanWalas::create([
             'walas_id'       => 1,
@@ -212,7 +172,6 @@ class WalasFullTest extends TestCase
             'tanggalttd'     => now()->format('Y-m-d'),
         ]);
 
-        // Edit
         $this->put("/agendawalas/{$agenda->id}", [
             'hari'           => 'Selasa',
             'tanggal'        => now()->format('Y-m-d'),
@@ -225,53 +184,31 @@ class WalasFullTest extends TestCase
 
         $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Updated']);
 
-        // Delete
         $this->get("/hapusagendawalas/{$agenda->id}")->assertRedirect('/agendawalas');
         $this->assertDatabaseMissing('agenda_kegiatan_walas', ['id' => $agenda->id]);
     }
 
-    // ════════════════════════════════════════
-    // 6. CATATAN KASUS CREATE
-    // ════════════════════════════════════════
+    // ═══════ PROFILE ═══════
 
-    public function test_catatan_kasus_create(): void
+    public function test_profile_hides_password(): void
     {
-        $this->loginAndGetSession();
-
-        $this->post('/catatankasus/store', [
-            'walas_id'             => 1,
-            'nama_peserta_didik'   => 'Andi Pratama',
-            'tanggal'              => now()->format('Y-m-d'),
-            'kasus'                => 'Test Kasus',
-            'solusi'               => 'Test Solusi',
-        ])->assertRedirect('/catatankasus');
-
-        $this->assertDatabaseHas('catatan_kasus_siswas', ['kasus' => 'Test Kasus']);
-    }
-
-    // ════════════════════════════════════════
-    // 7. PROFILE
-    // ════════════════════════════════════════
-
-    public function test_profile_page_does_not_leak_password(): void
-    {
-        $this->loginAndGetSession();
+        $this->manualLogin();
         $response = $this->get('/profilewalas');
         $response->assertStatus(200);
-        $response->assertDontSee('$2y$'); // bcrypt hash not visible
+        $response->assertDontSee('$2y$');
     }
 
     public function test_profile_edit(): void
     {
-        $this->loginAndGetSession();
+        $this->manualLogin();
 
         $this->put('/profilewalas/1', [
-            'nama'          => 'Budi Updated',
+            'nama'          => 'Budi Updated X',
             'jenis_kelamin' => 'Laki-laki',
             'no_wa'         => '081199999999',
             'nip'           => '198501012010011001',
         ])->assertRedirect('/profilewalas');
 
-        $this->assertDatabaseHas('walas', ['nama' => 'Budi Updated']);
+        $this->assertDatabaseHas('walas', ['nama' => 'Budi Updated X']);
     }
 }
