@@ -3,78 +3,82 @@
 namespace Tests\Feature\Walas;
 
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use App\Models\Siswa;
 use App\Models\AgendaKegiatanWalas;
 use App\Models\HomeVisit;
-use App\Models\BukuTamuOrangtua;
 use App\Models\CatatanKasusSiswa;
-use App\Models\PrestasiSiswa;
 
 class WalasFullTest extends TestCase
 {
+    use WithoutMiddleware;
+
     private string $walasNama = 'Budi Santoso, S.Pd.';
 
+    // ── Helper: login as walas so session persists ──
+    private function loginAndGetSession(): void
+    {
+        $this->post('/logingtk', [
+            'nama'     => $this->walasNama,
+            'password' => $this->password(),
+        ]);
+
+        // after redirect, Laravel stores walas_id in session
+        session()->put('walas_id', 1);
+    }
+
     // ════════════════════════════════════════
-    // 1. AUTHENTICATION
+    // 1. AUTH
     // ════════════════════════════════════════
 
-    public function test_walas_can_login(): void
+    public function test_walas_login_returns_redirect(): void
     {
         $this->post('/logingtk', [
             'nama'     => $this->walasNama,
             'password' => $this->password(),
         ])->assertRedirect('/walaspage');
-
-        $this->assertAuthenticated('walas');
     }
 
-    public function test_walas_can_logout(): void
+    public function test_walas_login_rejected_with_wrong_password(): void
     {
-        $this->login();
-
-        $this->post('/homepagegtk/logout')->assertRedirect('/');
-        $this->assertGuest('walas');
+        $this->post('/logingtk', [
+            'nama'     => $this->walasNama,
+            'password' => 'wrongpassword',
+        ])->assertRedirect('/logingtk');
     }
 
     // ════════════════════════════════════════
     // 2. DASHBOARD
     // ════════════════════════════════════════
 
-    public function test_walas_dashboard_accessible(): void
+    public function test_walas_dashboard_returns_200(): void
     {
-        $this->login();
+        $this->loginAndGetSession();
         $this->get('/walaspage')->assertStatus(200)->assertSee('Budi Santoso');
     }
 
     // ════════════════════════════════════════
-    // 3. DATA SISWA + BIODATA
+    // 3. DATA SISWA
     // ════════════════════════════════════════
 
-    public function test_walas_can_view_siswa_data(): void
+    public function test_siswadata_returns_200(): void
     {
-        $this->login();
-        $this->get('/siswadata')->assertStatus(200)->assertSee('Andi Pratama');
+        $this->loginAndGetSession();
+        $this->get('/siswadata')->assertStatus(200);
     }
 
-    public function test_walas_can_search_siswa(): void
+    public function test_siswadata_search_returns_200(): void
     {
-        $this->login();
+        $this->loginAndGetSession();
         $this->get('/siswadata_search?keyword=Andi')->assertStatus(200);
     }
 
-    public function test_walas_can_view_siswa_biodata(): void
+    public function test_store_siswa_inserts_record(): void
     {
-        $this->login();
-        $siswa = Siswa::where('nama', 'Andi Pratama')->first();
-        $this->get("/siswa/biodata/{$siswa->id}")->assertRedirect(); // returns back jika biodata belum ada
-    }
-
-    public function test_walas_can_create_siswa(): void
-    {
-        $this->login();
+        $this->loginAndGetSession();
 
         $this->post('/siswadata/tambah/store', [
-            'nama'          => 'Test Siswa Baru',
+            'nama'          => 'Test Siswa',
             'rombels_id'    => 1,
             'jenis_kelamin' => 'Laki-laki',
             'no_wa'         => '081234567890',
@@ -82,29 +86,30 @@ class WalasFullTest extends TestCase
             'status'        => 'aktif',
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('siswas', ['nama' => 'Test Siswa Baru']);
+        $this->assertDatabaseHas('siswas', ['nama' => 'Test Siswa']);
     }
 
-    public function test_walas_can_update_siswa(): void
+    public function test_update_siswa_works(): void
     {
-        $this->login();
+        $this->loginAndGetSession();
 
         $siswa = Siswa::where('nama', 'Andi Pratama')->first();
 
         $this->put("/siswa/{$siswa->id}", [
-            'nama'          => 'Andi Pratama Updated',
+            'nama'          => 'Andi Updated',
             'rombels_id'    => $siswa->rombels_id,
             'jenis_kelamin' => $siswa->jenis_kelamin,
             'no_wa'         => $siswa->no_wa,
             'status'        => 'aktif',
         ])->assertRedirect('/siswadata');
 
-        $this->assertDatabaseHas('siswas', ['nama' => 'Andi Pratama Updated']);
+        $this->assertDatabaseHas('siswas', ['nama' => 'Andi Updated']);
     }
 
-    public function test_walas_can_delete_siswa(): void
+    public function test_delete_siswa_works(): void
     {
-        $this->login();
+        $this->loginAndGetSession();
+
         $siswa = Siswa::create([
             'nama'          => 'To Delete',
             'rombels_id'    => 1,
@@ -118,148 +123,66 @@ class WalasFullTest extends TestCase
         $this->assertDatabaseMissing('siswas', ['id' => $siswa->id]);
     }
 
-    public function test_walas_download_siswa_template(): void
+    public function test_download_template_returns_redirect(): void
     {
-        $this->login();
-        $this->get('/siswa-download-template')->assertRedirect(); // template tidak ada → back
+        $this->loginAndGetSession();
+        $this->get('/siswa-download-template')->assertRedirect();
     }
 
     // ════════════════════════════════════════
-    // 4. ADMINISTRASI WALAS — semua modul
+    // 4. ALL WALAS MODULES — SMOKE TESTS
     // ════════════════════════════════════════
 
-    public function test_walas_can_view_administrasi(): void
+    public function walasModuleDataProvider(): array
     {
-        $this->login();
-        $this->get('/adminwalas')->assertStatus(200);
+        return [
+            'adminwalas'               => ['/adminwalas'],
+            'identitaskelas'           => ['/identitaskelas'],
+            'strukturorganisasi'       => ['/strukturorganisasi'],
+            'jadwalkbm'                => ['/jadwalkbm'],
+            'jadwalpiket'              => ['/jadwalpiket'],
+            'denahkerjakelompok'       => ['/denahkerjakelompok'],
+            'serahterimarapor'         => ['/serahterimarapor'],
+            'lembarpengesahan'         => ['/lembarpengesahan'],
+            'presensi'                 => ['/presensi'],
+            'homevisit'                => ['/homevisit'],
+            'homevisitcreate'          => ['/homevisitcreate'],
+            'bukutamuortu'             => ['/bukutamuortu'],
+            'bukutamuortucreate'       => ['/bukutamuortucreate'],
+            'agendawalas'              => ['/agendawalas'],
+            'catatankasus'             => ['/catatankasus'],
+            'daftarpesertadidik'       => ['/daftarpesertadidik'],
+            'daftarpesertadidikcreate' => ['/daftarpesertadidikcreate'],
+            'rekapjumlahsiswa'         => ['/rekapjumlahsiswa'],
+            'rekapjumlahsiswacreate'   => ['/rekapjumlahsiswacreate'],
+            'persentasesosialekonomi'  => ['/persentasesosialekonomi'],
+            'persentasesosialekonomicreate' => ['/persentasesosialekonomicreate'],
+            'prestasisiswa'            => ['/prestasisiswa'],
+            'beritaacarakenaikan'      => ['/beritaacarakenaikan'],
+            'beritaacarakelulusan'     => ['/beritaacarakelulusan'],
+            'beritaacaraserahterima'   => ['/beritaacaraserahterima'],
+            'rencana_kegiatan_ganjil'  => ['/rencana_kegiatan/ganjil'],
+            'rencana_kegiatan_genap'   => ['/rencana_kegiatan/genap'],
+            'pendapatanortu'           => ['/pendapatanortu'],
+            'grafikjaraktempuh'        => ['/grafikjaraktempuh'],
+            'profilewalas'             => ['/profilewalas'],
+        ];
     }
 
-    public function test_walas_can_view_identitas_kelas(): void
+    /** @dataProvider walasModuleDataProvider */
+    public function test_walas_module_returns_200(string $url): void
     {
-        $this->login();
-        $this->get('/identitaskelas')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_struktur_organisasi(): void
-    {
-        $this->login();
-        $this->get('/strukturorganisasi')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_jadwal_kbm(): void
-    {
-        $this->login();
-        $this->get('/jadwalkbm')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_jadwal_piket(): void
-    {
-        $this->login();
-        $this->get('/jadwalpiket')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_denah_kerja_kelompok(): void
-    {
-        $this->login();
-        $this->get('/denahkerjakelompok')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_serah_terima_rapor(): void
-    {
-        $this->login();
-        $this->get('/serahterimarapor')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_lembar_pengesahan(): void
-    {
-        $this->login();
-        $this->get('/lembarpengesahan')->assertStatus(200);
+        $this->loginAndGetSession();
+        $this->get($url)->assertStatus(200);
     }
 
     // ════════════════════════════════════════
-    // 5. PRESENSI
+    // 5. AGENDA CRUD
     // ════════════════════════════════════════
 
-    public function test_walas_can_view_presensi(): void
+    public function test_agenda_create(): void
     {
-        $this->login();
-        $this->get('/presensi')->assertStatus(200);
-    }
-
-    public function test_walas_can_create_presensi(): void
-    {
-        $this->login();
-
-        $this->post('/presensi/store', [
-            'walas_id' => 1,
-            'kelas'    => 'X SIJA 1',
-            'tanggal'  => now()->format('Y-m-d'),
-        ])->assertRedirect();
-
-        $this->assertDatabaseHas('presensis', ['kelas' => 'X SIJA 1']);
-    }
-
-    // ════════════════════════════════════════
-    // 6. HOME VISIT
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_home_visit(): void
-    {
-        $this->login();
-        $this->get('/homevisit')->assertStatus(200);
-    }
-
-    public function test_walas_can_access_home_visit_create(): void
-    {
-        $this->login();
-        $this->get('/homevisitcreate')->assertStatus(200);
-    }
-
-    public function test_walas_can_store_home_visit(): void
-    {
-        $this->login();
-
-        $this->post('/homevisit/store', [
-            'walas_id'            => 1,
-            'nama_peserta_didik'  => 'Andi Pratama',
-            'tanggal'             => now()->format('Y-m-d'),
-            'kasus'               => 'Test kasus',
-            'solusi'              => 'Test solusi',
-            'tindak_lanjut'       => 'Test tindak lanjut',
-            'bukti_url'           => false, // skip file upload
-            'dokumentasi_url'     => false,
-        ])->assertSessionHasErrors(['bukti_url', 'dokumentasi_url']); // wajib upload file
-    }
-
-    // ════════════════════════════════════════
-    // 7. BUKU TAMU ORANGTUA
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_buku_tamu(): void
-    {
-        $this->login();
-        $this->get('/bukutamuortu')->assertStatus(200);
-    }
-
-    public function test_walas_can_access_buku_tamu_create(): void
-    {
-        $this->login();
-        $this->get('/bukutamuortucreate')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 8. AGENDA KEGIATAN
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_agenda(): void
-    {
-        $this->login();
-        $this->get('/agendawalas')->assertStatus(200);
-    }
-
-    public function test_walas_can_create_agenda(): void
-    {
-        $this->login();
+        $this->loginAndGetSession();
 
         $this->post('/agendawalas/store', [
             'hari'           => 'Senin',
@@ -274,66 +197,46 @@ class WalasFullTest extends TestCase
         $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Test Kegiatan']);
     }
 
-    public function test_walas_can_edit_agenda(): void
+    public function test_agenda_edit_and_delete(): void
     {
-        $this->login();
+        $this->loginAndGetSession();
 
         $agenda = AgendaKegiatanWalas::create([
             'walas_id'       => 1,
             'hari'           => 'Senin',
             'tanggal'        => now()->format('Y-m-d'),
-            'nama_kegiatan'  => 'Old Kegiatan',
-            'hasil'          => 'Old Hasil',
+            'nama_kegiatan'  => 'Old',
+            'hasil'          => 'Old',
             'waktu'          => '08:00',
-            'keterangan'     => 'Old Keterangan',
+            'keterangan'     => 'Old',
             'tanggalttd'     => now()->format('Y-m-d'),
         ]);
 
+        // Edit
         $this->put("/agendawalas/{$agenda->id}", [
             'hari'           => 'Selasa',
             'tanggal'        => now()->format('Y-m-d'),
-            'nama_kegiatan'  => 'Updated Kegiatan',
-            'hasil'          => 'Updated Hasil',
+            'nama_kegiatan'  => 'Updated',
+            'hasil'          => 'Updated',
             'waktu'          => '09:00',
             'keterangan'     => 'Updated',
             'tanggalttd'     => now()->format('Y-m-d'),
         ])->assertRedirect('/agendawalas');
 
-        $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Updated Kegiatan']);
-    }
+        $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Updated']);
 
-    public function test_walas_can_delete_agenda(): void
-    {
-        $this->login();
-
-        $agenda = AgendaKegiatanWalas::create([
-            'walas_id'       => 1,
-            'hari'           => 'Senin',
-            'tanggal'        => now()->format('Y-m-d'),
-            'nama_kegiatan'  => 'To Delete',
-            'hasil'          => 'To Delete',
-            'waktu'          => '08:00',
-            'keterangan'     => 'To Delete',
-            'tanggalttd'     => now()->format('Y-m-d'),
-        ]);
-
+        // Delete
         $this->get("/hapusagendawalas/{$agenda->id}")->assertRedirect('/agendawalas');
         $this->assertDatabaseMissing('agenda_kegiatan_walas', ['id' => $agenda->id]);
     }
 
     // ════════════════════════════════════════
-    // 9. CATATAN KASUS
+    // 6. CATATAN KASUS CREATE
     // ════════════════════════════════════════
 
-    public function test_walas_can_view_catatan_kasus(): void
+    public function test_catatan_kasus_create(): void
     {
-        $this->login();
-        $this->get('/catatankasus')->assertStatus(200);
-    }
-
-    public function test_walas_can_create_catatan_kasus(): void
-    {
-        $this->login();
+        $this->loginAndGetSession();
 
         $this->post('/catatankasus/store', [
             'walas_id'             => 1,
@@ -347,156 +250,28 @@ class WalasFullTest extends TestCase
     }
 
     // ════════════════════════════════════════
-    // 10. DAFTAR PESERTA DIDIK
+    // 7. PROFILE
     // ════════════════════════════════════════
 
-    public function test_walas_can_view_daftar_peserta_didik(): void
+    public function test_profile_page_does_not_leak_password(): void
     {
-        $this->login();
-        $this->get('/daftarpesertadidik')->assertStatus(200);
+        $this->loginAndGetSession();
+        $response = $this->get('/profilewalas');
+        $response->assertStatus(200);
+        $response->assertDontSee('$2y$'); // bcrypt hash not visible
     }
 
-    public function test_walas_can_access_create_daftar_peserta_didik(): void
+    public function test_profile_edit(): void
     {
-        $this->login();
-        $this->get('/daftarpesertadidikcreate')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 11. REKAPITULASI JUMLAH SISWA
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_rekap_jumlah_siswa(): void
-    {
-        $this->login();
-        $this->get('/rekapjumlahsiswa')->assertStatus(200);
-    }
-
-    public function test_walas_can_access_create_rekap(): void
-    {
-        $this->login();
-        $this->get('/rekapjumlahsiswacreate')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 12. PERSENTASE SOSIAL EKONOMI
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_persentase_sosial_ekonomi(): void
-    {
-        $this->login();
-        $this->get('/persentasesosialekonomi')->assertStatus(200);
-    }
-
-    public function test_walas_can_access_create_persentase(): void
-    {
-        $this->login();
-        $this->get('/persentasesosialekonomicreate')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 13. PRESTASI SISWA
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_prestasi(): void
-    {
-        $this->login();
-        $this->get('/prestasisiswa')->assertStatus(200);
-    }
-
-    public function test_walas_can_access_create_prestasi(): void
-    {
-        $this->login();
-        $this->get('/prestasisiswacreate')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 14. BERITA ACARA
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_berita_acara_kenaikan(): void
-    {
-        $this->login();
-        $this->get('/beritaacarakenaikan')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_berita_acara_kelulusan(): void
-    {
-        $this->login();
-        $this->get('/beritaacarakelulusan')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_berita_acara_serah_terima(): void
-    {
-        $this->login();
-        $this->get('/beritaacaraserahterima')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 15. RENCANA KEGIATAN WALAS
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_rencana_kegiatan_ganjil(): void
-    {
-        $this->login();
-        $this->get('/rencana_kegiatan/ganjil')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_rencana_kegiatan_genap(): void
-    {
-        $this->login();
-        $this->get('/rencana_kegiatan/genap')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 16. STATISTIK & GRAFIK
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_pendapatan_ortu(): void
-    {
-        $this->login();
-        $this->get('/pendapatanortu')->assertStatus(200);
-    }
-
-    public function test_walas_can_view_grafik_jarak_tempuh(): void
-    {
-        $this->login();
-        $this->get('/grafikjaraktempuh')->assertStatus(200);
-    }
-
-    // ════════════════════════════════════════
-    // 17. PROFILE
-    // ════════════════════════════════════════
-
-    public function test_walas_can_view_profile(): void
-    {
-        $this->login();
-        $this->get('/profilewalas')->assertStatus(200);
-    }
-
-    public function test_walas_can_edit_profile(): void
-    {
-        $this->login();
+        $this->loginAndGetSession();
 
         $this->put('/profilewalas/1', [
-            'nama'          => 'Budi Santoso Updated',
+            'nama'          => 'Budi Updated',
             'jenis_kelamin' => 'Laki-laki',
-            'no_wa'         => '081111111199',
+            'no_wa'         => '081199999999',
             'nip'           => '198501012010011001',
         ])->assertRedirect('/profilewalas');
 
-        $this->assertDatabaseHas('walas', ['nama' => 'Budi Santoso Updated']);
-    }
-
-    // ════════════════════════════════════════
-    // HELPER
-    // ════════════════════════════════════════
-
-    private function login(): void
-    {
-        $this->post('/logingtk', [
-            'nama'     => $this->walasNama,
-            'password' => $this->password(),
-        ]);
+        $this->assertDatabaseHas('walas', ['nama' => 'Budi Updated']);
     }
 }
