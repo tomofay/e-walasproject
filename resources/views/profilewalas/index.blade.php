@@ -346,7 +346,7 @@ h1 .accent-text {
         <p><strong>Jenis Kelamin:</strong> {{ $walas->jenis_kelamin }}</p>
         <p><strong>Phone:</strong> {{ $walas->no_wa }}</p>
         <p><strong>NIP </strong> {{ $walas->nip }}</p>
-        <p><strong>Password:</strong> {{ $walas->password }}</p>
+        <p><strong>Password:</strong> ••••••••</p>
         <br>
         <!-- Tombol Edit -->
         <a href="{{ route('profilewalas.edit', $walas->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>

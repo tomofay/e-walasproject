@@ -53,7 +53,7 @@ class JadwalKbmController extends Controller
         // Ambil semua data rombel
         $rombels = Rombel::all();
     
-        $jadwalKbms = JadwalKBM::with(['rombel', 'walas', 'mapels', 'gurus'])
+        $jadwalKbms = JadwalKBM::with(['rombel', 'walas'])
             ->where('walas_id', $walas->id)
             ->get();
     

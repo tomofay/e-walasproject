@@ -277,6 +277,7 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <div class="mb-4">
             <h2 class="font-weight-bold">Jadwal Piket Siswa</h2>
+            <a href="/createpiket" class="btn btn-primary btn-sm mt-2">+ Buat Piket Baru</a>
             <hr class="my-3">
         </div>
         <br>
