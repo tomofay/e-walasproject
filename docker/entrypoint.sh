@@ -9,7 +9,12 @@ if [ ! -f /var/www/.docker_initialized ]; then
         echo "APP_KEY already set from environment."
     fi
 
-    php artisan migrate --force
+    echo "==> Waiting for database to be ready..."
+    until php artisan migrate --force 2>/dev/null; do
+        echo "  DB not ready — retrying in 2s..."
+        sleep 2
+    done
+
     php artisan db:seed --force
 
     echo "==> Caching config, routes & views..."
