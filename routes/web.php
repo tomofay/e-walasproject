@@ -96,7 +96,7 @@ Route::post('/loginadmin', [LoginController::class, 'store']);
 Route::get('/logingtk', [LoginGtkController::class, 'index'])->name('logingtk.index');
 Route::post('/logingtk', [LoginGtkController::class, 'store'])->name('logingtk.store');
 
-Route::resource('loginkepsek', LoginKepsekController::class);
+Route::resource('loginkepsek', LoginKepsekController::class)->except(['store']);
 Route::post('/loginkepsek', [LoginKepsekController::class, 'store']);
 
 Route::resource('loginkaprog', LoginKaprogController::class);
@@ -306,8 +306,8 @@ Route::resource('kurikulumwalas', KurikulumWalasController::class);
 
 // Route Siswa Halaman
     Route::get('/siswapage', [SiswaPageController::class, 'index'])->name('homepagesiswa.index');
-    Route::resource('datadiri', DataDiriPageController::class);
-    Route::resource('inputdatadiri', InputDataDiriSiswaController::class);
+    Route::resource('datadiri', DataDiriPageController::class)->except(['edit']);
+    Route::resource('inputdatadiri', InputDataDiriSiswaController::class)->except(['edit', 'update']);
     Route::post('/biodatasiswa/store', [InputDataDiriSiswaController::class, 'store'])->name('biodatasiswa.store');
     Route::resource('datadiripage', DataDiriDataController::class);
     Route::get('/biodatasiswa/{id}/edit', [InputDataDiriSiswaController::class, 'edit'])->name('datadiri.edit');
