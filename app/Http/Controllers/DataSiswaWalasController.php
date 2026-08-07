@@ -210,7 +210,9 @@ class DataSiswaWalasController extends Controller
             'status' => 'required',
         ]);
 
-        $imagePath = $request->file('image_url')->store('siswafoto/Photos', 'public');
+        $imagePath = $request->hasFile('image_url')
+            ? $request->file('image_url')->store('siswafoto/Photos', 'public')
+            : null;
 
         Siswa::create([
             'nama' => $request->nama,
