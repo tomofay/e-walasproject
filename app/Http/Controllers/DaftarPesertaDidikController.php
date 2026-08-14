@@ -8,50 +8,24 @@ use App\Models\Walas;
 use App\Models\Rombel;
 use App\Models\Kurikulum;
 use App\Models\DaftarPesertaDidik;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Concerns\HasWalasAuth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class DaftarPesertaDidikController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use HasWalasAuth;
+
     public function index()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-        
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-        
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-        
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-        
-        // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-        
-        // Ambil data catatan kasus berdasarkan walas_id dengan relasi siswa
         $daftarpdidik = DaftarPesertaDidik::where('walas_id', $walas->id)
             ->with('siswa')
             ->get();
 
-        // Hitung jumlah jenis kelamin berdasarkan walas_id
         $jenisKelaminCount = $daftarpdidik->groupBy('jenis_kelamin')->map(function ($items) {
             return $items->count();
         });
@@ -71,36 +45,13 @@ class DaftarPesertaDidikController extends Controller
      */
     public function create()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-
-        // Ambil data siswa dengan relasi biodata siswa
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodata') // relasi biodata (bukan biodataSiswa)
+            ->with('biodata')
             ->get();
 
-        // Ambil ID pertama dari tabel kurikulums
         $kurikulumIdPertama = optional(Kurikulum::first())->id;
 
         // Kirim data ke view
@@ -111,21 +62,11 @@ class DaftarPesertaDidikController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $walas = Auth::guard('walas')->user();
-    
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-    }
+    {
+        $walas = $this->getAuthenticatedWalas();
 
-    $walas = Walas::find(session('walas_id'));
-
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-
-    $kurikulum = Kurikulum::first();
-    $kurikulum_id = $kurikulum ? $kurikulum->id : null;
+        $kurikulum = Kurikulum::first();
+        $kurikulum_id = $kurikulum ? $kurikulum->id : null;
 
     // Validasi input
     $validatedData = $request->validate([
@@ -164,36 +105,13 @@ class DaftarPesertaDidikController extends Controller
      */
     public function edit($id)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-
-        // Ambil data siswa dengan relasi biodata siswa
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodata') // relasi biodata (bukan biodataSiswa)
+            ->with('biodata')
             ->get();
 
-        // Ambil ID pertama dari tabel kurikulums
         $kurikulumIdPertama = optional(Kurikulum::first())->id;
 
         $daftarPesertaDidik = DaftarPesertaDidik::findOrFail($id);
@@ -207,23 +125,13 @@ class DaftarPesertaDidikController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    $walas = Auth::guard('walas')->user();
-    
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-    }
+    {
+        $walas = $this->getAuthenticatedWalas();
 
-    $walas = Walas::find(session('walas_id'));
+        $daftarPesertaDidik = DaftarPesertaDidik::findOrFail($id);
 
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-
-    $daftarPesertaDidik = DaftarPesertaDidik::findOrFail($id);
-
-    $kurikulum = Kurikulum::first();
-    $kurikulum_id = $kurikulum ? $kurikulum->id : null;
+        $kurikulum = Kurikulum::first();
+        $kurikulum_id = $kurikulum ? $kurikulum->id : null;
 
     // Validasi input
     $validatedData = $request->validate([

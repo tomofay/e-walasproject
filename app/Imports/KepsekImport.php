@@ -19,7 +19,7 @@ class KepsekImport implements ToModel, WithHeadingRow
         return new Kepsek([
         'nama' => $row['nama'],
         'no_wa' => $row['no_wa'],
-        'password' => $row['password'],
+        'password' => Hash::make($row['password']),
         ]);
     }
 }

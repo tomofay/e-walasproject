@@ -25,7 +25,7 @@ class WalasImport implements ToModel, WithHeadingRow
         'nama' => $row['nama'],
         'jenis_kelamin' => $row['jenis_kelamin'],
         'no_wa' => $row['no_wa'],
-        'password' => $row['password'],
+        'password' => Hash::make($row['password']),
         'nip' => $row['nip'],
         ]);
     }

@@ -163,5 +163,8 @@ class DatabaseSeeder extends Seeder
                 'status'        => 'aktif',
             ]);
         }
+
+        // ── Generate template Excel ──
+        $this->call(TemplateSeeder::class);
     }
 }

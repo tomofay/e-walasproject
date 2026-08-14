@@ -62,11 +62,11 @@ class HomeVisitController extends Controller
 
     public function create()
     {
-        $walas = $this->getAuthenticatedWalas();
+        $walaslogin = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-        return view('admwalas.homevisit.create', compact('walas', 'siswas'));
+        return view('admwalas.homevisit.create', compact('walaslogin', 'siswas'));
     }
 
     public function store(Request $request)
@@ -105,13 +105,13 @@ class HomeVisitController extends Controller
 
     public function edit($id)
     {
-        $walas = $this->getAuthenticatedWalas();
+        $walaslogin = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
 
         $homevisit = HomeVisit::findOrFail($id);
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-        return view('admwalas.homevisit.edit', compact('homevisit', 'walas', 'siswas'));
+        return view('admwalas.homevisit.edit', compact('homevisit', 'walaslogin', 'siswas'));
     }
 
     public function update(Request $request, $id)

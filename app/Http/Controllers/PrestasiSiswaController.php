@@ -3,172 +3,66 @@
 namespace App\Http\Controllers;
 
 use App\Models\Siswa;
-use App\Models\Walas;
 use App\Models\Rombel;
-use App\Models\Kurikulum;
+use App\Http\Concerns\HasWalasAuth;
+use App\Http\Concerns\ConvertsImagesToBase64;
 use Illuminate\Http\Request;
 use App\Models\PrestasiSiswa;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
-use App\Models\RekapitulasiJumlahSiswa;
 use Illuminate\Support\Facades\Storage;
 
 class PrestasiSiswaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use HasWalasAuth;
+    use ConvertsImagesToBase64;
+
     public function index()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-        
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-        
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-        
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-        
-        // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-        
-        // Ambil data rekapitulasi jumlah siswa berdasarkan walas_id tanpa relasi siswa
         $prestasisiswa = PrestasiSiswa::where('walas_id', $walas->id)->get();
 
-        // Kirim data walas, siswa, dan rekapitulasi jumlah siswa ke view
         return view('admwalas.prestasisiswa.index', compact('walas', 'prestasisiswa', 'siswas'));
     }
 
     public function generatePDF(Request $request)
-{
-    $walas = Walas::find(session('walas_id'));
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-    // Ambil data rombel berdasarkan 'walas_id'
-    $rombel = Rombel::where('walas_id', $walas->id)->first();
-            
-    // Periksa apakah rombel ditemukan
-    if (!$rombel) {
-        return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-    }
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+        $prestasisiswa = PrestasiSiswa::where('walas_id', $walas->id)->get();
 
-    // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
-    $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+        $sertifImage = $request->input('sertifImage');
+        $dokumImage = $request->input('dokumImage');
 
-    // Ambil data rekapitulasi jumlah siswa berdasarkan walas_id tanpa relasi siswa
-    $prestasisiswa = PrestasiSiswa::where('walas_id', $walas->id)->get();
+        foreach ($prestasisiswa as $item) {
+            $item->sertifikat_base64 = $this->convertToBase64($item->sertifikat_url);
+            $item->dokumentasi_base64 = $this->convertToBase64($item->dokumentasi_url);
+        }
 
-    // Ambil base64 dari request (grafik chart)
-    $sertifImage = $request->input('sertifImage');
-    $dokumImage = $request->input('dokumImage');
+        $pdf = Pdf::loadView('pdf.prestasisiswa', compact('walas', 'prestasisiswa', 'siswas', 'rombel', 'sertifImage', 'dokumImage'));
 
-    // Konversi gambar bukti_url dan dokumentasi_url ke base64
-    foreach ($prestasisiswa as $item) {
-        $item->sertifikat_base64 = $this->convertToBase64($item->sertifikat_url);
-        $item->dokumentasi_base64 = $this->convertToBase64($item->dokumentasi_url);
+        return $pdf->stream('Prestasi_Siswa.pdf');
     }
 
-    // Load view PDF
-    $pdf = Pdf::loadView('pdf.prestasisiswa', compact('walas', 'prestasisiswa', 'siswas', 'rombel', 'sertifImage', 'dokumImage'));
-
-    return $pdf->stream('Prestasi_Siswa.pdf');
-}
-
-// Fungsi untuk mengubah gambar ke base64
-private function convertToBase64($path)
-{
-    $fullPath = storage_path("app/public/" . $path);
-    
-    if (file_exists($fullPath)) {
-        $imageData = file_get_contents($fullPath);
-        $mimeType = mime_content_type($fullPath);
-        return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-    }
-
-    return null;
-}
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-        
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-        
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-        
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-        
-        // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
 
-
-        // Kirim data ke view
         return view('admwalas.prestasisiswa.create', compact('walas', 'siswas', 'rombel'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-
-        // Validasi input
-        $validatedData = $request->validate([
+        $request->validate([
             'walas_id' => 'required|exists:walas,id',
-            'siswas_id' => 'required|exists:siswas,id', // Pastikan siswa valid
+            'siswas_id' => 'required|exists:siswas,id',
             'rombels_id' => 'required',
             'jenis_prestasi' => 'required',
             'nama_prestasi' => 'required|string|max:255',
@@ -177,17 +71,14 @@ private function convertToBase64($path)
             'dokumentasi_url' => 'nullable',
         ]);
 
-        // Simpan file ke storage
-        if ($request->hasFile('sertifikat_url')) {
-            $sertifikatPath = $request->file('sertifikat_url')->store('prestasisiswa/Photos', 'public'); // Simpan di storage/app/public/images
-        }
+        $sertifikatPath = $request->hasFile('sertifikat_url')
+            ? $request->file('sertifikat_url')->store('prestasisiswa/Photos', 'public')
+            : null;
 
-         // Simpan file ke storage
-         if ($request->hasFile('dokumentasi_url')) {
-            $dokumentasiPath = $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public'); // Simpan di storage/app/public/images
-        }
+        $dokumentasiPath = $request->hasFile('dokumentasi_url')
+            ? $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public')
+            : null;
 
-        // Simpan data ke database
         PrestasiSiswa::create([
             'walas_id' => $request->walas_id,
             'siswas_id' => $request->siswas_id,
@@ -196,143 +87,82 @@ private function convertToBase64($path)
             'nama_prestasi' => $request->nama_prestasi,
             'tanggal' => $request->tanggal,
             'sertifikat_url' => $sertifikatPath,
-            'dokumentasi_url' => $dokumentasiPath, // Simpan path file di database
+            'dokumentasi_url' => $dokumentasiPath,
         ]);
 
         return redirect('/prestasisiswa')->with('success', 'Data berhasil disimpan.');
     }
 
+    public function show(string $id) {}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-        
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-        
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-        
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-        
-        // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
-        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
+        $siswas = Siswa::where('rombels_id', $rombel->id)->get();
         $prestasisiswa = PrestasiSiswa::findOrFail($id);
 
-        // Kirim data ke view
         return view('admwalas.prestasisiswa.edit', compact('walas', 'rombel', 'prestasisiswa', 'siswas'));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
-{
-    // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-    $walas = Auth::guard('walas')->user();
-    
-    // Periksa apakah session 'walas_id' ada
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-    }
+    {
+        $prestasisiswa = PrestasiSiswa::findOrFail($id);
 
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas = Walas::find(session('walas_id'));
+        $request->validate([
+            'walas_id' => 'required|exists:walas,id',
+            'siswas_id' => 'required|exists:siswas,id',
+            'rombels_id' => 'required',
+            'jenis_prestasi' => 'required',
+            'nama_prestasi' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'sertifikat_url' => 'nullable',
+            'dokumentasi_url' => 'nullable',
+        ]);
 
-    // Periksa apakah data walas ditemukan
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-
-    // Ambil data DaftarPesertaDidik yang akan diedit
-    $prestasisiswa = PrestasiSiswa::findOrFail($id);
-
-    // Validasi input
-    $validatedData = $request->validate([
-        'walas_id' => 'required|exists:walas,id',
-        'siswas_id' => 'required|exists:siswas,id', // Pastikan siswa valid
-        'rombels_id' => 'required',
-        'jenis_prestasi' => 'required',
-        'nama_prestasi' => 'required|string|max:255',
-        'tanggal' => 'required|date',
-        'sertifikat_url' => 'nullable',
-        'dokumentasi_url' => 'nullable',
-    ]);
-
-    if ($request->hasFile('sertifikat_url')) {
-        // Hapus file yang lama jika ada
-        if ($prestasisiswa->sertifikat_url && Storage::exists('public/' . $prestasisiswa->sertifikat_url)) {
-            Storage::delete('public/' . $prestasisiswa->sertifikat_url);
+        if ($request->hasFile('sertifikat_url')) {
+            if ($prestasisiswa->sertifikat_url && Storage::exists('public/' . $prestasisiswa->sertifikat_url)) {
+                Storage::delete('public/' . $prestasisiswa->sertifikat_url);
+            }
+            $sertifikatPath = $request->file('sertifikat_url')->store('prestasisiswa/Photos', 'public');
+        } else {
+            $sertifikatPath = $prestasisiswa->sertifikat_url;
         }
-        $sertifikatPath = $request->file('sertifikat_url')->store('prestasisiswa/Photos', 'public');  // simpan di storage/app/public/images
-    } else {
-        $sertifikatPath = $prestasisiswa->sertifikat_url;  // Jika tidak ada perubahan, gunakan file lama
-    }
 
-    if ($request->hasFile('dokumentasi_url')) {
-        // Hapus file yang lama jika ada
-        if ($prestasisiswa->dokumentasi_url && Storage::exists('public/' . $prestasisiswa->dokumentasi_url)) {
-            Storage::delete('public/' . $prestasisiswa->dokumentasi_url);
+        if ($request->hasFile('dokumentasi_url')) {
+            if ($prestasisiswa->dokumentasi_url && Storage::exists('public/' . $prestasisiswa->dokumentasi_url)) {
+                Storage::delete('public/' . $prestasisiswa->dokumentasi_url);
+            }
+            $dokumentasiPath = $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public');
+        } else {
+            $dokumentasiPath = $prestasisiswa->dokumentasi_url;
         }
-        $dokumentasiPath = $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public');  // simpan di storage/app/public/images
-    } else {
-        $dokumentasiPath = $prestasisiswa->dokumentasi_url;  // Jika tidak ada perubahan, gunakan file lama
-    }
 
-    // Update data HomeVisit
-    $prestasisiswa->update([
-        '   walas_id' => $request->walas_id,
+        $prestasisiswa->update([
+            'walas_id' => $request->walas_id,
             'siswas_id' => $request->siswas_id,
             'rombels_id' => $request->rombels_id,
             'jenis_prestasi' => $request->jenis_prestasi,
             'nama_prestasi' => $request->nama_prestasi,
             'tanggal' => $request->tanggal,
             'sertifikat_url' => $sertifikatPath,
-            'dokumentasi_url' => $dokumentasiPath, // 
-    ]);
+            'dokumentasi_url' => $dokumentasiPath,
+        ]);
 
+        return redirect('/prestasisiswa')->with('success', 'Data berhasil diperbarui.');
+    }
 
-    return redirect('/prestasisiswa')->with('success', 'Data berhasil diperbarui.');
-}
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function hapusprestasisiswa(string $id)
     {
         $prestasisiswa = PrestasiSiswa::find($id);
+
         if ($prestasisiswa) {
             $prestasisiswa->delete();
+
             return redirect('/prestasisiswa')->with('success', 'Data Prestasi Siswa Berhasil Dihapus ');
         }
+
         return redirect('/prestasisiswa')->with('error', 'Data Prestasi Siswa not found!');
     }
 }

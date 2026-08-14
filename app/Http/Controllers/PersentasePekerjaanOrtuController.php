@@ -8,46 +8,21 @@ use App\Models\Walas;
 use App\Models\Rombel;
 use App\Models\Kurikulum;
 use App\Models\PersentaseSosialEkonomi;
+use App\Http\Concerns\HasWalasAuth;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
 class PersentasePekerjaanOrtuController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use HasWalasAuth;
+
     public function index()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-        
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-        
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-        
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-        
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-        
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-        
-        // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
-        
-        // Ambil data rekapitulasi jumlah siswa berdasarkan walas_id tanpa relasi siswa
         $persentasesosialekonomi = PersentaseSosialEkonomi::where('walas_id', $walas->id)->get();
 
         if (request()->has('export') && request()->get('export') === 'pdf') {
@@ -66,32 +41,11 @@ class PersentasePekerjaanOrtuController extends Controller
 
      public function create()
      {
-         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-         $walas = Auth::guard('walas')->user();
-     
-         // Periksa apakah session 'walas_id' ada
-         if (!session()->has('walas_id')) {
-             return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-         }
-     
-         // Ambil data walas berdasarkan 'walas_id' yang ada di session
-         $walas = Walas::find(session('walas_id'));
-     
-         // Periksa apakah data walas ditemukan
-         if (!$walas) {
-             return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-         }
-     
-         // Ambil data rombel berdasarkan 'walas_id'
-         $rombel = Rombel::where('walas_id', $walas->id)->first();
-     
-         // Periksa apakah rombel ditemukan
-         if (!$rombel) {
-             return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-         }
-     
+         $walas = $this->getAuthenticatedWalas();
+         $rombel = $this->getWalasRombel();
+
          $siswas = Siswa::where('rombels_id', $rombel->id)
-             ->with('biodata') // relasi biodata (bukan biodataSiswa)
+             ->with('biodata')
              ->get();
              $jumlahPekerjaanAyah = $siswas->groupBy(fn($s) => $s->biodata?->pekerjaan_ayah ?? 'Tidak Diketahui')
              ->map(function ($items) {
@@ -127,23 +81,8 @@ class PersentasePekerjaanOrtuController extends Controller
      */
     public function store(Request $request)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
+        $walas = $this->getAuthenticatedWalas();
 
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-
-        // Validasi input
         $validatedData = $request->validate([
             'jenis_sosial_ekonomi' => 'required',
             'jumlah' => 'required',
@@ -178,32 +117,11 @@ class PersentasePekerjaanOrtuController extends Controller
      */
     public function edit($id)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
-    
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-    
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-    
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-    
-        // Ambil data rombel berdasarkan 'walas_id'
-        $rombel = Rombel::where('walas_id', $walas->id)->first();
-    
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/rombels')->with('error', 'Rombel tidak ditemukan.');
-        }
-    
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
+
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodata') // relasi biodata (bukan biodataSiswa)
+            ->with('biodata')
             ->get();
             $jumlahPekerjaanAyah = $siswas->groupBy(fn($s) => $s->biodata?->pekerjaan_ayah ?? 'Tidak Diketahui')
             ->map(function ($items) {
@@ -240,23 +158,8 @@ class PersentasePekerjaanOrtuController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $walas = Auth::guard('walas')->user();
+        $walas = $this->getAuthenticatedWalas();
 
-        // Periksa apakah session 'walas_id' ada
-        if (!session()->has('walas_id')) {
-            return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas = Walas::find(session('walas_id'));
-
-        // Periksa apakah data walas ditemukan
-        if (!$walas) {
-            return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-        }
-
-        // Validasi input
         $validatedData = $request->validate([
             'jenis_sosial_ekonomi' => 'required',
             'jumlah' => 'required',

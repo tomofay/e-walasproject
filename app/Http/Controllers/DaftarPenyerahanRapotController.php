@@ -3,188 +3,105 @@
 namespace App\Http\Controllers;
 
 use App\Models\Walas;
+use App\Http\Concerns\HasWalasAuth;
 use Illuminate\Http\Request;
 use App\Models\DaftarSerahTerimaRapor;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 
 class DaftarPenyerahanRapotController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use HasWalasAuth;
+
     public function index()
-{
-     // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-     $walas = Auth::guard('walas')->user();
+    {
+        $walas = $this->getAuthenticatedWalas();
 
-     // Periksa apakah session 'walas_id' ada
-     if (!session()->has('walas_id')) {
-         return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-     }
- 
-     // Ambil data walas berdasarkan 'walas_id' yang ada di session
-     $walas = Walas::find(session('walas_id'));
- 
-     // Periksa apakah data walas ditemukan
-     if (!$walas) {
-         return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-     }
- 
-     // Ambil data kelompok berdasarkan 'walas_id'
-     $penyerahanrapot = DaftarSerahTerimaRapor::where('walas_id', $walas->id)->get();
+        $penyerahanrapot = DaftarSerahTerimaRapor::where('walas_id', $walas->id)->get();
 
-    // Return view dengan data yang difilter
-    return view("admwalas.daftarpenyerahanrapot.index", compact('penyerahanrapot', 'walas'));
-}
+        return view("admwalas.daftarpenyerahanrapot.index", compact('penyerahanrapot', 'walas'));
+    }
 
-public function downloadTemplate()
+    public function downloadTemplate()
     {
         $pathToFile = storage_path('app/public/Penyerahan Pengembalian Rapor.pdf');
+
+        if (! file_exists($pathToFile)) {
+            return back()->with('error', 'Template belum tersedia.');
+        }
+
         return response()->download($pathToFile);
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
-{
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas_id = session('walas_id');
-    $walas = Walas::where('id', $walas_id)->get(); // Ambil hanya data sesuai walas_id
-
-    $penyerahanrapot = DaftarSerahTerimaRapor::all();
-    return view('admwalas.daftarpenyerahanrapot.create', compact('penyerahanrapot', 'walas'));
-}
-
-    /**
-     * Store a newly created resource in storage.
-     */
-
-public function store(Request $request)
-{
-      // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-      $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
-
-      // Periksa apakah session 'walas_id' ada
-      if (!session()->has('walas_id')) {
-          return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-      }
- 
-      // Ambil data walas berdasarkan 'walas_id' yang ada di session
-      $walas = Walas::find(session('walas_id'));
-
-    // validasi input
-    $request->validate([
-        'walas_id' => 'required|exists:walas,id',
-        'image_url' => 'required|mimes:jpeg,png,jpg,gif,pdf|max:2048', // validasi file gambar
-    ]);
-
-    // simpan file ke storage
-    if ($request->hasFile('image_url')) {
-        $filePath = $request->file('image_url')->store('penyerahanrapot/Photos', 'public'); // simpan di storage/app/public/images
-        
-    }
-
-    // simpan data ke database
-    DaftarSerahTerimaRapor::create([
-        'walas_id' => $request->walas_id,
-        'image_url' => $filePath, // simpan path file di database
-    ]);
-
-    // redirect dengan pesan sukses
-    return redirect('/serahterimarapor')->with('success', 'Data berhasil disimpan!');
-}
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
     {
-        //
+        $walas = $this->getAuthenticatedWalas();
+        $penyerahanrapot = DaftarSerahTerimaRapor::all();
+
+        return view('admwalas.daftarpenyerahanrapot.create', compact('penyerahanrapot', 'walas'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'walas_id' => 'required|exists:walas,id',
+            'image_url' => 'required|mimes:jpeg,png,jpg,gif,pdf|max:2048',
+        ]);
+
+        $filePath = $request->hasFile('image_url')
+            ? $request->file('image_url')->store('penyerahanrapot/Photos', 'public')
+            : null;
+
+        DaftarSerahTerimaRapor::create([
+            'walas_id' => $request->walas_id,
+            'image_url' => $filePath,
+        ]);
+
+        return redirect('/serahterimarapor')->with('success', 'Data berhasil disimpan!');
+    }
+
+    public function show(string $id) {}
+
     public function edit($id)
     {
-        // Ambil data walas berdasarkan 'walas_id' yang ada di session
-        $walas_id = session('walas_id');
-        $walas = Walas::where('id', $walas_id)->get(); // Ambil hanya data sesuai walas_id
-    
-        // Ambil data berdasarkan id
+        $walas = $this->getAuthenticatedWalas();
         $penyerahanrapot = DaftarSerahTerimaRapor::findOrFail($id);
-    
+
         return view('admwalas.daftarpenyerahanrapot.edit', compact('penyerahanrapot', 'walas'));
     }
-    
-public function update(Request $request, $id)
-{
-      // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-      $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
 
-      // Periksa apakah session 'walas_id' ada
-      if (!session()->has('walas_id')) {
-          return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-      }
- 
-      // Ambil data walas berdasarkan 'walas_id' yang ada di session
-      $walas = Walas::find(session('walas_id'));
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'walas_id' => 'required|exists:walas,id',
+            'image_url' => 'nullable|mimes:jpeg,png,jpg,gif,pdf,docx|max:2048',
+        ]);
 
-    // validasi input
-    $request->validate([
-        'walas_id' => 'required|exists:walas,id',
-        'image_url' => 'nullable|mimes:jpeg,png,jpg,gif,pdf,docx|max:2048', // validasi file gambar
-    ]);
+        $penyerahanrapot = DaftarSerahTerimaRapor::findOrFail($id);
 
-    // ambil data lama
-    $penyerahanrapot = DaftarSerahTerimaRapor::findOrFail($id);
+        if ($request->hasFile('image_url')) {
+            if ($penyerahanrapot->image_url && Storage::disk('public')->exists($penyerahanrapot->image_url)) {
+                Storage::disk('public')->delete($penyerahanrapot->image_url);
+            }
 
-    // simpan file baru jika ada
-    if ($request->hasFile('image_url')) {
-        // hapus file lama
-        if ($penyerahanrapot->image_url && Storage::disk('public')->exists($penyerahanrapot->image_url)) {
-            Storage::disk('public')->delete($penyerahanrapot->image_url);
+            $penyerahanrapot->image_url = $request->file('image_url')->store('penyerahanrapot/photos', 'public');
         }
 
-        // simpan file baru
-        $filePath = $request->file('image_url')->store('penyerahanrapot/photos', 'public');
-        $penyerahanrapot->image_url = $filePath;
+        $penyerahanrapot->walas_id = $request->walas_id;
+        $penyerahanrapot->save();
+
+        return redirect('/serahterimarapor')->with('success', 'Data berhasil diperbarui!');
     }
 
-    // update data lainnya
-    $penyerahanrapot->walas_id = $request->walas_id;
-    $penyerahanrapot->save();
-
-    // redirect dengan pesan sukses
-    return redirect('/serahterimarapor')->with('success', 'Data berhasil diperbarui!');
-}
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function hapuspenyerahanrapot(string $id)
     {
-         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-     $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
-
-     // Periksa apakah session 'walas_id' ada
-     if (!session()->has('walas_id')) {
-         return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-     }
-
-     // Ambil data walas berdasarkan 'walas_id' yang ada di session
-     $walas = Walas::find(session('walas_id'));
-
         $penyerahanrapot = DaftarSerahTerimaRapor::find($id);
+
         if ($penyerahanrapot) {
             $penyerahanrapot->delete();
+
             return redirect('/serahterimarapor')->with('success', 'Data Berhasil Dihapus ');
         }
+
         return redirect('/serahterimarapor')->with('error', 'Data not found!');
     }
 }
