@@ -91,9 +91,9 @@ class PersentasePekerjaanOrtuController extends Controller
          }
      
          $siswas = Siswa::where('rombels_id', $rombel->id)
-             ->with('biodataSiswa') // Ambil semua data relasi
+             ->with('biodata') // relasi biodata (bukan biodataSiswa)
              ->get();
-             $jumlahPekerjaanAyah = $siswas->groupBy('biodataSiswa.pekerjaan_ayah')
+             $jumlahPekerjaanAyah = $siswas->groupBy(fn($s) => $s->biodata?->pekerjaan_ayah ?? 'Tidak Diketahui')
              ->map(function ($items) {
                  return $items->count(); // Menghitung jumlah siswa dengan pekerjaan ayah yang sama
              });
@@ -203,9 +203,9 @@ class PersentasePekerjaanOrtuController extends Controller
         }
     
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodataSiswa') // Ambil semua data relasi
+            ->with('biodata') // relasi biodata (bukan biodataSiswa)
             ->get();
-            $jumlahPekerjaanAyah = $siswas->groupBy('biodataSiswa.pekerjaan_ayah')
+            $jumlahPekerjaanAyah = $siswas->groupBy(fn($s) => $s->biodata?->pekerjaan_ayah ?? 'Tidak Diketahui')
             ->map(function ($items) {
                 return $items->count(); // Menghitung jumlah siswa dengan pekerjaan ayah yang sama
             });

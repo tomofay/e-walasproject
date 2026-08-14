@@ -97,11 +97,11 @@ class DaftarPesertaDidikController extends Controller
 
         // Ambil data siswa dengan relasi biodata siswa
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodataSiswa') // Asumsi ada relasi 'biodataSiswa' di model Siswa
+            ->with('biodata') // relasi biodata (bukan biodataSiswa)
             ->get();
 
         // Ambil ID pertama dari tabel kurikulums
-        $kurikulumIdPertama = Kurikulum::first()->id ?? null;
+        $kurikulumIdPertama = optional(Kurikulum::first())->id;
 
         // Kirim data ke view
         return view('admwalas.daftarpesertadidik.create', compact('walas', 'siswas', 'rombel', 'kurikulumIdPertama'));
@@ -190,11 +190,11 @@ class DaftarPesertaDidikController extends Controller
 
         // Ambil data siswa dengan relasi biodata siswa
         $siswas = Siswa::where('rombels_id', $rombel->id)
-            ->with('biodataSiswa') // Asumsi ada relasi 'biodataSiswa' di model Siswa
+            ->with('biodata') // relasi biodata (bukan biodataSiswa)
             ->get();
 
         // Ambil ID pertama dari tabel kurikulums
-        $kurikulumIdPertama = Kurikulum::first()->id ?? null;
+        $kurikulumIdPertama = optional(Kurikulum::first())->id;
 
         $daftarPesertaDidik = DaftarPesertaDidik::findOrFail($id);
 

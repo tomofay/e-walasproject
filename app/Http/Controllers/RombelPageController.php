@@ -107,6 +107,9 @@ class RombelPageController extends Controller
     }
 
 public function import(Request $request){
+    if (! $request->hasFile('file')) {
+        return back()->with('error', 'File tidak ditemukan.');
+    }
     Excel::import(new RombelImport, $request->file('file'));
 return redirect('/rombel');
 }

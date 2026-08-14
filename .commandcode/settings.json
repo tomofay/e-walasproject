@@ -1,3 +1,10 @@
 {
-  "tasteLearning": false
+  "tasteLearning": false,
+  "permissions": {
+    "allow": [
+      "Shell(docker:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
 }

@@ -41,7 +41,9 @@ class WaliKelasPageController extends Controller
     }
 
     public function import(Request $request){
-        //dd ($request->file('file'));
+        if (! $request->hasFile('file')) {
+            return back()->with('error', 'File tidak ditemukan.');
+        }
         Excel::import(new WalasImport, $request->file('file'));
     return redirect('/walas');
     }

@@ -51,6 +51,9 @@ class ShowDetailRombelController extends Controller
     
 
     public function importsiswaadmin(Request $request){
+        if (! $request->hasFile('file')) {
+            return back()->with('error', 'File tidak ditemukan.');
+        }
         Excel::import(new SiswaImport, $request->file('file'));
         return back();
     }

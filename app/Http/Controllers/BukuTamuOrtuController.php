@@ -155,6 +155,7 @@ private function convertToBase64($path)
          ]);
      
          // Simpan file ke storage
+         $filePath = null;
          if ($request->hasFile('dokumentasi_url')) {
              $filePath = $request->file('dokumentasi_url')->store('homevisit/Photos', 'public'); // Simpan di storage/app/public/images
          }
