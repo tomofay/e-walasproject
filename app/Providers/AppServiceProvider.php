@@ -2,30 +2,22 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\SiswaMiddleware;
-use App\Http\Middleware\WalasMiddleware;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Middleware untuk siswa
-        Route::aliasMiddleware('siswa', SiswaMiddleware::class);
-    
-        // Middleware untuk walas
-        Route::aliasMiddleware('walas', WalasMiddleware::class);
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(5)->by($request->input('nama') ?: $request->ip());
+        });
     }
 }
