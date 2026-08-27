@@ -2,7 +2,30 @@
   "tasteLearning": false,
   "permissions": {
     "allow": [
-      "Shell(docker:*)"
+      "Shell(docker:*)",
+      "Shell(APP_ENV=testing php -r  var_dump($_SERVER[\"APP_ENV\"] ?? \"NO SERVER\", $_ENV[\"APP_ENV\"] ?? \"NO ENV\", getenv(\"APP_ENV\") ?: \"NO GETENV\");  2 >& 1)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test 2 >& 1)",
+      "Shell(grep:*)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --filter=admin_can_view_login_page 2 >& 1)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --filter=admin_can_view_login_page --without-tty 2 >& 1)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: APP_DEBUG=true php artisan test --filter=admin_can_view_login_page 2 >& 1)",
+      "Shell(rm:*)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan route:list --json 2 > /dev/null)",
+      "Shell(php -r $r=json_decode(stream_get_contents(STDIN), true); echo \"route count: \".count($r).\"\\n\"; 2 > /dev/null)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan route:list 2 >& 1)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan route:list -v 2 >& 1)",
+      "Shell(php -r $r=json_decode(stream_get_contents(STDIN),true); $m=[]; foreach($r as $x){ foreach(($x[\"middleware\"]??[]) as $mw){ $m[$mw]=($m[$mw]??0)+1; } } ksort($m); foreach($m as $k=>$v){ echo \"$k: $v\\n\"; } echo \"TOTAL: \".count($r).\"\\n\";)",
+      "Shell(DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan migrate:fresh --force 2 >& 1)",
+      "Shell(for:*)",
+      "Shell(do:*)",
+      "Shell(done:*)",
+      "Shell(cd /home/ubuntu/e-walasproject && cat > /tmp/check_login.php <<'PHP' <?php require \"vendor/autoload.php\"; $app = require \"bootstrap/app.php\"; $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); try { $resp = $app->handle(Illuminate\\Http\\Request::create('/loginadmin', 'GET')); echo \"STATUS: \".$resp->getStatusCode().\"\\n\"; echo $resp->getContent(); } catch (\\Throwable $e) { echo \"EXCEPTION: \".get_class($e).\"\\n\"; echo $e->getMessage().\"\\n\"; echo $e->getTraceAsString().\"\\n\"; } PHP DB_CONNECTION=sqlite DB_DATABASE=:memory: php /tmp/check_login.php 2>&1 | head -40)",
+      "Shell(cd /home/ubuntu/e-walasproject && cat > /tmp/check_login2.php <<'PHP' <?php require \"vendor/autoload.php\"; $app = require \"bootstrap/app.php\"; $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); config(['app.debug' => true]); $app->instance('config', app('config')); try { $kernel = $app->make(Illuminate\\Contracts\\Http\\Kernel::class); $resp = $kernel->handle(Illuminate\\Http\\Request::create('/loginadmin', 'GET')); echo \"STATUS: \".$resp->getStatusCode().\"\\n\"; } catch (\\Throwable $e) { echo \"EXCEPTION: \".get_class($e).\"\\n\"; echo \"MSG: \".$e->getMessage().\"\\n\"; echo \"FILE: \".$e->getFile().\":\".$e->getLine().\"\\n\"; echo substr($e->getTraceAsString(), 0, 3000).\"\\n\"; } PHP DB_CONNECTION=sqlite DB_DATABASE=:memory: php /tmp/check_login2.php 2>&1 | head -50)",
+      "Shell(cd /home/ubuntu/e-walasproject && cat > /tmp/check_login3.php <<'PHP' <?php require \"vendor/autoload.php\"; $app = require \"bootstrap/app.php\"; $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); config(['app.debug' => true]); error_reporting(E_ALL); ini_set('display_errors', '1'); $kernel = $app->make(Illuminate\\Contracts\\Http\\Kernel::class); $resp = $kernel->handle(Illuminate\\Http\\Request::create('/loginadmin', 'GET')); echo \"STATUS: \".$resp->getStatusCode().\"\\n\"; $exc = $resp->exception ?? null; if ($exc) { echo \"EXCEPTION: \".get_class($exc).\"\\n\"; echo \"MSG: \".$exc->getMessage().\"\\n\"; echo \"FILE: \".$exc->getFile().\":\".$exc->getLine().\"\\n\"; echo substr($exc->getTraceAsString(), 0, 3000).\"\\n\"; } else { echo \"No exception in response\\n\"; } PHP DB_CONNECTION=sqlite DB_DATABASE=:memory: php /tmp/check_login3.php 2>&1 | head -60)",
+      "Shell(php artisan test 2 >& 1)",
+      "Shell(php artisan test --filter=kakom_can_view_all_walas_administration 2 >& 1)",
+      "Shell(cd /home/ubuntu/e-walasproject && cat > /tmp/check_routes.php <<'PHP' <?php require \"vendor/autoload.php\"; putenv(\"APP_ENV=testing\"); putenv(\"DB_CONNECTION=sqlite\"); putenv(\"DB_DATABASE=:memory:\"); putenv(\"SESSION_DRIVER=array\"); $_ENV[\"APP_ENV\"]=\"testing\"; $_ENV[\"DB_CONNECTION\"]=\"sqlite\"; $_ENV[\"DB_DATABASE\"]=\":memory:\"; $_ENV[\"SESSION_DRIVER\"]=\"array\"; $_SERVER[\"APP_ENV\"]=\"testing\"; $_SERVER[\"DB_CONNECTION\"]=\"sqlite\"; $_SERVER[\"DB_DATABASE\"]=\":memory:\"; $_SERVER[\"SESSION_DRIVER\"]=\"array\"; $app = require \"bootstrap/app.php\"; $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); $kakom = App\\Models\\Kakom::first(); Auth::guard('kakoms')->login($kakom); session()->put('kakom_id', $kakom->id); $routes = ['agendawalasview','identiaskelasview','lembarpengesahanview','jadwalkbmview','presensisview','piketkelasview','serahterimaraporview','catatankasusview','daftarpesertadidikview','homevisitview','bukutamuview']; $kernel = $app->make(Illuminate\\Contracts\\Http\\Kernel::class); foreach ($routes as $r) { $req = Illuminate\\Http\\Request::create('/'.$r, 'GET'); $resp = $kernel->handle($req); echo $r . \" => \" . $resp->getStatusCode(); if ($resp->getStatusCode() == 302) { echo \" -> \" . $resp->headers->get('Location'); } echo \"\\n\"; } PHP DB_CONNECTION=sqlite DB_DATABASE=:memory: SESSION_DRIVER=array php artisan migrate:fresh --seed --force >/dev/null 2>&1 DB_CONNECTION=sqlite DB_DATABASE=:memory: SESSION_DRIVER=array php /tmp/check_routes.php 2>&1 | head -30)",
+      "Shell(cd /home/ubuntu/e-walasproject && php artisan config:clear >/dev/null 2>&1; touch database/database.sqlite && php artisan migrate:fresh --seed --force 2>&1 | tail -15)"
     ],
     "deny": [],
     "defaultMode": "default"
