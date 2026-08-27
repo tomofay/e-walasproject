@@ -72,7 +72,7 @@
 
     <div class="screen">
         <div class="screen__content">
-            <form class="login" action="{{ route('login.store') }}" method="POST">
+            <form class="login" action="{{ route('loginadmin.store') }}" method="POST">
                 @csrf
                 <img src="{{ asset('images/logologin.png') }}" alt="Logo" class="login__logo">
                 <h2>Login Form Admin</h2>

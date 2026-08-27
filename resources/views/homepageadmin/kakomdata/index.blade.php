@@ -408,7 +408,11 @@
                         Edit
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapuskakom/{{$data->id}}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus data kakom">Hapus</a> 
+                    <form action="{{ route('kakom.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus data kakom">Hapus</button>
+                    </form>
                 </td>
                 </div>
             </tr>

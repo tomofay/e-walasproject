@@ -405,9 +405,11 @@
                         Edit
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapusguru/{{$data->id}}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Guru">
-                           Hapus
-                    </a>
+                    <form action="{{ route('guru.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Guru">Hapus</button>
+                    </form>
                 </div>
                 </td>
             </tr>

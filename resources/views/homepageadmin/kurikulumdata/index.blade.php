@@ -460,9 +460,11 @@
                         Edit
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapuskurikulum/{{$data->id}}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus data Kurikulum">
-                            Hapus
-                    </a>
+                    <form action="{{ route('kurikulum.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus data Kurikulum">Hapus</button>
+                    </form>
                 </div>
                 </td>
             </tr>

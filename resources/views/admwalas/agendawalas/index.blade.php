@@ -228,7 +228,11 @@
                             <!-- Tombol Edit -->
                             <a href="{{ route('agendawalas.edit', $data->id) }}" class="btn btn-primary btn-sm me-2">Edit</a>
                             <!-- Tombol Delete -->
-                            <a href="/hapusagendawalas/{{$data->id}}" class="btn btn-danger btn-sm">Hapus</a>
+                            <form action="{{ route('agendawalas.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

@@ -49,7 +49,7 @@ class LoginKaprogController extends Controller
         }
 
         // Jika gagal, kembali ke halaman login dengan pesan error
-        return redirect()->back()->with('error', 'Login gagal! Nama atau password salah.');
+        return redirect()->route('loginkaprog.index')->with('error', 'Login gagal! Nama atau password salah.');
     }
 
     /**

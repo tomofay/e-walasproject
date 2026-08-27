@@ -222,9 +222,11 @@
                 </td>
                 <td class="text-center text-md-start">
                     <div class="d-flex flex-column flex-md-row gap-2">
-                        <a href="/hapuspenyerahanrapot/{{ $penyerahan->id }}" class="btn btn-danger btn-sm">
-                            Hapus
-                        </a>
+                        <form action="{{ route('penyerahanrapot.destroy', $penyerahan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                        </form>
                         <a href="{{ route('penyerahanrapot.edit', $penyerahan->id) }}" class="btn btn-warning btn-sm">
                             Edit
                         </a>

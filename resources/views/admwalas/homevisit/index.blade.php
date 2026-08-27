@@ -230,9 +230,11 @@
                     <a href="{{ route('homevisit.edit', $homevisit->id) }}" class="btn btn-primary btn-sm">
                             Edit
                         </a>
-                        <a href="/hapushomevisit/{{ $homevisit->id }}" class="btn btn-danger btn-sm me-2">
-                            Hapus
-                        </a>
+                        <form action="{{ route('homevisit.destroy', $homevisit->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm me-2">Hapus</button>
+                        </form>
                     </div>
                 </td>
             </tr>

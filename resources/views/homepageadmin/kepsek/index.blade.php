@@ -401,9 +401,11 @@
                        Edit
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapuskepsek/{{$data->id}}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kepala Sekolah">
-                           Hapus
-                </a>
+                    <form action="{{ route('kepsek.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kepala Sekolah">Hapus</button>
+                    </form>
                 </div>
                 </td>
             </tr>

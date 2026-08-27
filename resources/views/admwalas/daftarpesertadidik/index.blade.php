@@ -231,7 +231,11 @@
                             <!-- Tombol Edit -->
                             <a href="{{ route('daftarpesertadidik.edit', $data->id) }}" class="btn btn-primary btn-sm me-2">Edit</a>
                             <!-- Tombol Delete -->
-                            <a href="/hapusdaftarpesertadidik/{{$data->id}}" class="btn btn-danger btn-sm">Hapus</a>
+                            <form action="{{ route('daftarpesertadidik.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

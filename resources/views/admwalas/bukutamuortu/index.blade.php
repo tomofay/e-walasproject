@@ -225,9 +225,11 @@
                         <a href="{{ route('bukutamuortu.edit', $bukutamuortu->id) }}" class="btn btn-primary btn-sm">
                                 Edit
                             </a>
-                            <a href="/hapusbukutamuortu/{{ $bukutamuortu->id }}" class="btn btn-danger btn-sm me-2">
-                                Hapus
-                            </a>
+                            <form action="{{ route('bukutamuortu.destroy', $bukutamuortu->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm me-2">Hapus</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

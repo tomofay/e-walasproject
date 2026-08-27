@@ -381,10 +381,13 @@
                         <i class="bi bi-pencil" style="font-size: 20px; color: #6c757d;"></i>
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapusmapel/{{$data->id}}" class="btn rounded-circle shadow-sm" 
-                            style="background-color: #f8fbff; border: none; width: 50px; height: 50px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Mata Pelajaran">
-                        <i class="bi bi-trash" style="font-size: 20px; color: #6c757d;"></i>
-                    </a>
+                    <form action="{{ route('mapel.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn rounded-circle shadow-sm" style="background-color: #f8fbff; border: none; width: 50px; height: 50px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Mata Pelajaran">
+                            <i class="bi bi-trash" style="font-size: 20px; color: #6c757d;"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
         @endforeach

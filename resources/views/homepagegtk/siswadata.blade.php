@@ -528,9 +528,11 @@
                             <a href="{{ route('siswa.edit', $data->siswa_id) }}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Data Siswa">
                                 Edit
                             </a>
-                            <a href="/hapussiswa/{{$data->siswa_id}}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Siswa">
-                                Hapus
-                            </a>
+                            <form action="{{ route('siswa.destroy', $data->siswa_id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Siswa">Hapus</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

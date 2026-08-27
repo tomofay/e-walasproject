@@ -394,10 +394,13 @@
                         <i class="bi bi-pencil" style="font-size: 20px; color: #6c757d;"></i>
                     </a>
                     <!-- Tombol Delete -->
-                    <a href="/hapusrombel/{{$data->rombel_id}}" class="btn rounded-circle shadow-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Rombel" 
-                            style="background-color: #f8fbff; border: none; width: 50px; height: 50px;">
-                        <i class="bi bi-trash" style="font-size: 20px; color: #6c757d;"></i>
-                    </a>
+                    <form action="{{ route('rombel.destroy', $data->rombel_id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn rounded-circle shadow-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Rombel" style="background-color: #f8fbff; border: none; width: 50px; height: 50px;">
+                            <i class="bi bi-trash" style="font-size: 20px; color: #6c757d;"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
         @endforeach
