@@ -60,6 +60,8 @@ class DataSiswaWalasController extends Controller
         $walas = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
 
+        $this->siswaDiRombel($id);
+
         $siswa = Siswa::find($id);
         if (! $siswa) {
             return back()->with('error', 'Siswa tidak ditemukan');
@@ -121,6 +123,8 @@ class DataSiswaWalasController extends Controller
     {
         $walas = $this->getAuthenticatedWalas();
         $biodata = BiodataSiswa::findOrFail($id);
+
+        $this->siswaDiRombel($biodata->siswas_id);
 
         $request->validate([
             'walas_id' => 'nullable|integer',
@@ -234,6 +238,8 @@ class DataSiswaWalasController extends Controller
 
     public function edit($id)
     {
+        $this->siswaDiRombel($id);
+
         $siswa = DB::table('vwsiswas')->where('siswa_id', $id)->first();
         $rombels = Rombel::with('walas')->get();
         return view('homepagegtk.editsiswa', compact('siswa', 'rombels'));
@@ -241,6 +247,8 @@ class DataSiswaWalasController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->siswaDiRombel($id);
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'rombels_id' => 'required',
@@ -271,6 +279,8 @@ class DataSiswaWalasController extends Controller
 
     public function hapussiswa(string $id)
     {
+        $this->siswaDiRombel($id);
+
         $siswa = Siswa::find($id);
         if ($siswa) {
             $siswa->delete();
@@ -287,7 +297,7 @@ class DataSiswaWalasController extends Controller
         $keywords = explode(' ', $request->keyword);
 
         $siswa = DB::table('vwsiswas')
-            ->where('id', $rombel->id)
+            ->where('nama_kelas', $rombel->nama_kelas)
             ->where(function ($query) use ($keywords) {
                 foreach ($keywords as $keyword) {
                     $query->where('siswa_nama', 'LIKE', '%' . $keyword . '%');
@@ -311,6 +321,8 @@ class DataSiswaWalasController extends Controller
         ]);
 
         $siswa = Siswa::find($request->siswa_id);
+
+        $this->siswaDiRombel($siswa->id);
 
         $keluarRombel = KeluarRombel::create([
             'siswa_id' => $siswa->id,

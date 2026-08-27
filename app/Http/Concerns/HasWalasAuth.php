@@ -4,6 +4,7 @@ namespace App\Http\Concerns;
 
 use App\Models\Walas;
 use App\Models\Rombel;
+use App\Models\Siswa;
 use Illuminate\Support\Facades\Auth;
 
 trait HasWalasAuth
@@ -37,5 +38,24 @@ trait HasWalasAuth
         }
 
         return $rombel;
+    }
+
+    /**
+     * Resolve a Siswa that belongs to the authenticated Walas' rombel.
+     * Prevents IDOR: a Walas may only manage students in their own class.
+     */
+    protected function siswaDiRombel(string $id): Siswa
+    {
+        $rombel = $this->getWalasRombel();
+
+        $siswa = Siswa::find($id);
+
+        abort_if(
+            ! $siswa || $siswa->rombels_id != $rombel->id,
+            403,
+            'Siswa tidak berada di rombel Anda.'
+        );
+
+        return $siswa;
     }
 }
