@@ -96,7 +96,7 @@ class WalasFullTest extends TestCase
             'status'        => 'aktif',
         ]);
 
-        $this->get("/hapussiswa/{$siswa->id}")->assertRedirect('/siswadata');
+        $this->delete("/hapussiswa/{$siswa->id}")->assertRedirect('/siswadata');
         $this->assertDatabaseMissing('siswas', ['id' => $siswa->id]);
     }
 
@@ -278,7 +278,7 @@ class WalasFullTest extends TestCase
 
         $this->assertDatabaseHas('agenda_kegiatan_walas', ['nama_kegiatan' => 'Updated']);
 
-        $this->get("/hapusagendawalas/{$agenda->id}")->assertRedirect('/agendawalas');
+        $this->delete("/hapusagendawalas/{$agenda->id}")->assertRedirect('/agendawalas');
         $this->assertDatabaseMissing('agenda_kegiatan_walas', ['id' => $agenda->id]);
     }
 

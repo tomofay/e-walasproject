@@ -8,12 +8,12 @@ class KurikulumAuthTest extends TestCase
 {
     public function test_kurikulum_can_login(): void
     {
-        $response = $this->post('/loginkurikulum/store', [
+        $response = $this->post('/loginkurikulum', [
             'nama'     => 'Sri Wahyuni, M.Pd.',
             'password' => $this->password(),
         ]);
 
-        $response->assertRedirect('/homepagekurikulum');
+        $response->assertRedirect('/kurikulumpage');
         $this->assertAuthenticated('kurikulums');
     }
 
@@ -52,7 +52,7 @@ class KurikulumAuthTest extends TestCase
 
     private function loginKurikulum(): void
     {
-        $this->post('/loginkurikulum/store', [
+        $this->post('/loginkurikulum', [
             'nama'     => 'Sri Wahyuni, M.Pd.',
             'password' => $this->password(),
         ]);

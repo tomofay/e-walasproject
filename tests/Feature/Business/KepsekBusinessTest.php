@@ -40,7 +40,7 @@ class KepsekBusinessTest extends TestCase
 
     private function loginKepsek(): void
     {
-        $this->post('/loginkepsek/store', [
+        $this->post('/loginkepsek', [
             'nama'     => 'Drs. H. Ahmad Fauzi, M.Pd.',
             'password' => $this->password(),
         ]);

@@ -40,7 +40,7 @@ class KurikulumBusinessTest extends TestCase
 
     private function loginKurikulum(): void
     {
-        $this->post('/loginkurikulum/store', [
+        $this->post('/loginkurikulum', [
             'nama'     => 'Sri Wahyuni, M.Pd.',
             'password' => $this->password(),
         ]);

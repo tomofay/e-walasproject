@@ -41,7 +41,7 @@ class KakomBusinessTest extends TestCase
 
     private function loginKakom(): void
     {
-        $this->post('/loginkaprog/store', [
+        $this->post('/loginkaprog', [
             'nama'     => 'Drs. Rahmat Hidayat',
             'password' => $this->password(),
         ]);

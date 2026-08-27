@@ -20,8 +20,8 @@ class WalasBusinessTest extends TestCase
         // Search siswa
         $this->get('/siswadata_search?keyword=Andi')->assertStatus(200);
 
-        // Download template siswa
-        $this->get('/siswa-download-template')->assertRedirect();
+        // Download template siswa (template dibuat oleh seeder, return 200)
+        $this->get('/siswa-download-template')->assertStatus(200);
     }
 
     /** Walas login → administrasi walas */

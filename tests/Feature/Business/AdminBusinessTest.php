@@ -15,7 +15,7 @@ class AdminBusinessTest extends TestCase
         $this->get('/walas')->assertStatus(200)->assertSee('Budi Santoso');
 
         // Create
-        $this->post('/walas/store', [
+        $this->post('/walas', [
             'nama'          => 'Test Walas',
             'jenis_kelamin' => 'Laki-laki',
             'no_wa'         => '081000000000',
@@ -52,13 +52,13 @@ class AdminBusinessTest extends TestCase
     public function test_admin_download_template(): void
     {
         $this->loginAdmin();
-        // Semua download template seharusnya return 302 (back) jika file tidak ada
-        $this->get('/guru-download-template')->assertRedirect();
+        // Template dibuat oleh seeder, sehingga endpoint return 200 (file terunduh)
+        $this->get('/guru-download-template')->assertStatus(200);
     }
 
     private function loginAdmin(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);

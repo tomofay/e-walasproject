@@ -8,12 +8,12 @@ class KepsekAuthTest extends TestCase
 {
     public function test_kepsek_can_login(): void
     {
-        $response = $this->post('/loginkepsek/store', [
+        $response = $this->post('/loginkepsek', [
             'nama'     => 'Drs. H. Ahmad Fauzi, M.Pd.',
             'password' => $this->password(),
         ]);
 
-        $response->assertRedirect('/homepagekepsek');
+        $response->assertRedirect('/kepsekpage');
         $this->assertAuthenticated('kepseks');
     }
 
@@ -52,7 +52,7 @@ class KepsekAuthTest extends TestCase
 
     private function loginKepsek(): void
     {
-        $this->post('/loginkepsek/store', [
+        $this->post('/loginkepsek', [
             'nama'     => 'Drs. H. Ahmad Fauzi, M.Pd.',
             'password' => $this->password(),
         ]);

@@ -13,7 +13,7 @@ class SiswaAuthTest extends TestCase
 
     public function test_siswa_can_login(): void
     {
-        $response = $this->post('/loginsiswa/store', [
+        $response = $this->post('/loginsiswa', [
             'nama'     => 'Andi Pratama',
             'password' => $this->password(),
         ]);
@@ -57,7 +57,7 @@ class SiswaAuthTest extends TestCase
 
     private function loginSiswa(): void
     {
-        $this->post('/loginsiswa/store', [
+        $this->post('/loginsiswa', [
             'nama'     => 'Andi Pratama',
             'password' => $this->password(),
         ]);

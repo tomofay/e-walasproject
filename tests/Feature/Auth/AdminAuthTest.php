@@ -15,7 +15,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_login(): void
     {
-        $response = $this->post('/loginadmin/store', [
+        $response = $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);
@@ -26,7 +26,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_cannot_login_with_wrong_password(): void
     {
-        $response = $this->post('/loginadmin/store', [
+        $response = $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => 'wrongpassword',
         ]);
@@ -42,7 +42,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_dashboard_accessible_when_logged_in(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);
@@ -52,7 +52,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_view_warga_sekolah(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);
@@ -67,7 +67,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_view_rombel_and_mapel(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);
@@ -78,7 +78,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_view_detail_kelas(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);
@@ -88,7 +88,7 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_logout(): void
     {
-        $this->post('/loginadmin/store', [
+        $this->post('/loginadmin', [
             'nama'     => 'admin',
             'password' => $this->password(),
         ]);

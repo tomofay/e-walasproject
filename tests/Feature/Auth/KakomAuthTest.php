@@ -8,7 +8,7 @@ class KakomAuthTest extends TestCase
 {
     public function test_kakom_can_login(): void
     {
-        $response = $this->post('/loginkaprog/store', [
+        $response = $this->post('/loginkaprog', [
             'nama'     => 'Drs. Rahmat Hidayat',
             'password' => $this->password(),
         ]);
@@ -52,7 +52,7 @@ class KakomAuthTest extends TestCase
 
     private function loginKakom(): void
     {
-        $this->post('/loginkaprog/store', [
+        $this->post('/loginkaprog', [
             'nama'     => 'Drs. Rahmat Hidayat',
             'password' => $this->password(),
         ]);
