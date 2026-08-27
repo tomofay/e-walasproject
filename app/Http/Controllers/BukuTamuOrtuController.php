@@ -46,13 +46,14 @@ class BukuTamuOrtuController extends Controller
 
     public function create()
     {
-        $walas = $this->getAuthenticatedWalas();
+        $walaslogin = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
 
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
         $bukutamuortu = BukuTamuOrangtua::all();
+        $walas = Walas::all();
 
-        return view('admwalas.bukutamuortu.create', compact('bukutamuortu', 'rombel', 'siswas', 'walas'));
+        return view('admwalas.bukutamuortu.create', compact('bukutamuortu', 'rombel', 'siswas', 'walas', 'walaslogin'));
     }
 
     public function store(Request $request)
