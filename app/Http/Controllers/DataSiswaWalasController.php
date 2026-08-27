@@ -206,7 +206,7 @@ class DataSiswaWalasController extends Controller
             'jenis_kelamin' => 'required',
             'no_wa' => 'required|numeric',
             'image_url' => 'nullable|image|max:5000',
-            'password' => 'required|string|min:2',
+            'password' => 'required|string|min:8',
             'status' => 'required',
         ]);
 
@@ -247,7 +247,7 @@ class DataSiswaWalasController extends Controller
             'jenis_kelamin' => 'required',
             'no_wa' => 'required|numeric',
             'image_url' => 'nullable|image|max:5000',
-            'password' => 'nullable|string|min:2',
+            'password' => 'nullable|string|min:8',
             'status' => 'required',
         ]);
 

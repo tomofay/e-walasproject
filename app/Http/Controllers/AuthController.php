@@ -19,7 +19,7 @@ class AuthController extends Controller
         // Validasi input email dan password
         $validated = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:1',
+            'password' => 'required|min:8',
         ]);
 
         // Cek kredensial untuk guard 'walas'

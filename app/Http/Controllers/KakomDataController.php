@@ -72,7 +72,7 @@ class KakomDataController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'no_wa' => 'required|numeric',
-            'password' => 'required|string|min:2',
+            'password' => 'required|string|min:8',
             'kompetensi' => 'required|string|max:255',
             'image_url' => 'nullable|image|max:5000',
         ]);
@@ -126,7 +126,7 @@ class KakomDataController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'no_wa' => 'required|numeric',
-            'password' => 'nullable|string|min:2',
+            'password' => 'nullable|string|min:8',
             'kompetensi' => 'required',
             'image_url' => 'nullable|image|max:5000', 
         ]);

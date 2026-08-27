@@ -75,7 +75,7 @@ class KepsekPageController extends Controller
             'nama' => 'required|string|max:255',
             'image_url' => 'nullable|image|max:5000',
             'no_wa' => 'required|numeric',
-            'password' => 'required|string|min:2',
+            'password' => 'required|string|min:8',
         ]);
     
         // Proses penyimpanan file gambar di folder kepsekfoto/Photos
@@ -127,7 +127,7 @@ class KepsekPageController extends Controller
             'nama' => 'required|string|max:255',
             'image_url' => 'nullable|image|max:5000', // Foto bersifat opsional
             'no_wa' => 'required|numeric',
-            'password' => 'nullable|string|min:1', // Password opsional
+            'password' => 'nullable|string|min:8', // Password opsional
         ]);
     
         // Cari Wali Kelas berdasarkan ID
