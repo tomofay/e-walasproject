@@ -83,8 +83,9 @@ class ProfileKepsekPageController extends Controller
              return redirect('/loginkepsek')->with('error', 'Data Kepala Sekolah tidak ditemukan.');
          }
 
-        // Ambil data produk berdasarkan ID
-        $kepsek = Kepsek::findOrFail($id);
+        abort_if($id != session('kepsek_id'), 403, 'Unauthorized: not your profile.');
+
+        $kepsek = Kepsek::findOrFail(session('kepsek_id'));
 
         // Kirim data ke view edit
         return view('profilekepsek.edit', compact('kepsek'));
@@ -102,8 +103,9 @@ class ProfileKepsekPageController extends Controller
             'password' => 'nullable|string|min:8', // Password opsional
         ]);
     
-        // Cari Wali Kelas berdasarkan ID
-        $kepsek = Kepsek::findOrFail($id); // Jika tidak ditemukan, akan mengembalikan error 404
+        abort_if($id != session('kepsek_id'), 403, 'Unauthorized: not your profile.');
+
+        $kepsek = Kepsek::findOrFail(session('kepsek_id'));
     
         // Simpan foto jika ada file baru yang diunggah
         if ($request->hasFile('image_url')) {

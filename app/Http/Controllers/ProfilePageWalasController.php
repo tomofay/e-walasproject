@@ -34,7 +34,7 @@ class ProfilePageWalasController extends Controller
 
     public function edit(string $id)
     {
-        $this->getAuthenticatedWalas();
+        abort_if($id != session('walas_id'), 403, 'Unauthorized: not your profile.');
 
         $walas = Walas::findOrFail($id);
 
@@ -51,7 +51,9 @@ class ProfilePageWalasController extends Controller
             'nip' => 'required|numeric',
         ]);
 
-        $walas = Walas::findOrFail($id);
+        abort_if($id != session('walas_id'), 403, 'Unauthorized: not your profile.');
+
+        $walas = Walas::findOrFail(session('walas_id'));
 
         if ($request->hasFile('image_url')) {
             if ($walas->image_url) {

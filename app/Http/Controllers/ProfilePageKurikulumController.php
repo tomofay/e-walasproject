@@ -81,8 +81,9 @@ class ProfilePageKurikulumController extends Controller
              return redirect('/loginkurikulum')->with('error', 'Data Kurikulum tidak ditemukan.');
          }
 
-        // Ambil data produk berdasarkan ID
-        $kurikulum = Kurikulum::findOrFail($id);
+        abort_if($id != session('kurikulum_id'), 403, 'Unauthorized: not your profile.');
+
+        $kurikulum = Kurikulum::findOrFail(session('kurikulum_id'));
 
         // Kirim data ke view edit
         return view('profilekurikulum.edit', compact('kurikulum'));
@@ -101,8 +102,9 @@ class ProfilePageKurikulumController extends Controller
             'nip' => 'required|numeric',
         ]);
     
-        // Cari Wali Kelas berdasarkan ID
-        $kurikulum = Kurikulum::findOrFail($id); // Jika tidak ditemukan, akan mengembalikan error 404
+        abort_if($id != session('kurikulum_id'), 403, 'Unauthorized: not your profile.');
+
+        $kurikulum = Kurikulum::findOrFail(session('kurikulum_id'));
     
         // Simpan foto jika ada file baru yang diunggah
         if ($request->hasFile('image_url')) {

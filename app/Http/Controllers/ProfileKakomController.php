@@ -82,8 +82,9 @@ class ProfileKakomController extends Controller
              return redirect('/loginkakom')->with('error', 'Data Kepala Program tidak ditemukan.');
          }
 
-        // Ambil data produk berdasarkan ID
-        $kakom = Kakom::findOrFail($id);
+        abort_if($id != session('kakom_id'), 403, 'Unauthorized: not your profile.');
+
+        $kakom = Kakom::findOrFail(session('kakom_id'));
 
         // Kirim data ke view edit
         return view('profilekaprog.edit', compact('kakom'));
@@ -101,8 +102,9 @@ class ProfileKakomController extends Controller
             'password' => 'nullable|string|min:8', // Password opsional
         ]);
     
-        // Cari Wali Kelas berdasarkan ID
-        $kakom = Kakom::findOrFail($id); // Jika tidak ditemukan, akan mengembalikan error 404
+        abort_if($id != session('kakom_id'), 403, 'Unauthorized: not your profile.');
+
+        $kakom = Kakom::findOrFail(session('kakom_id'));
     
         // Simpan foto jika ada file baru yang diunggah
         if ($request->hasFile('image_url')) {

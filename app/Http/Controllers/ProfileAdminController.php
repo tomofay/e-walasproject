@@ -82,8 +82,9 @@ class ProfileAdminController extends Controller
              return redirect('/loginadmin')->with('error', 'Data Admin tidak ditemukan.');
          }
 
-        // Ambil data produk berdasarkan ID
-        $admin = Admin::findOrFail($id);
+        abort_if($id != session('admin_id'), 403, 'Unauthorized: not your profile.');
+
+        $admin = Admin::findOrFail(session('admin_id'));
 
         // Kirim data ke view edit
         return view('profileadmin.edit', compact('admin'));
@@ -101,8 +102,9 @@ class ProfileAdminController extends Controller
             'password' => 'nullable|string|min:8', // Password opsional
         ]);
     
-        // Cari Wali Kelas berdasarkan ID
-        $admin = Admin::findOrFail($id); // Jika tidak ditemukan, akan mengembalikan error 404
+        abort_if($id != session('admin_id'), 403, 'Unauthorized: not your profile.');
+
+        $admin = Admin::findOrFail(session('admin_id'));
     
         // Simpan foto jika ada file baru yang diunggah
         if ($request->hasFile('image_url')) {

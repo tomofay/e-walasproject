@@ -81,8 +81,10 @@ class ProfilePageController extends Controller
              return redirect('/loginsiswa')->with('error', 'Data Siswa tidak ditemukan.');
          }
 
-        // Ambil data produk berdasarkan ID
-        $siswa = Siswa::findOrFail($id);
+        // Ambil data siswa berdasarkan 'siswa_id' yang ada di session (bukan dari URL)
+        abort_if($id != session('siswa_id'), 403, 'Unauthorized: not your profile.');
+
+        $siswa = Siswa::findOrFail(session('siswa_id'));
 
         // Kirim data ke view edit
         return view('profilesiswa.edit', compact('siswa'));
@@ -100,8 +102,9 @@ class ProfilePageController extends Controller
             'password' => 'nullable|string|min:8', // Password opsional
         ]);
     
-        // Cari Wali Kelas berdasarkan ID
-        $siswa = Siswa::findOrFail($id); // Jika tidak ditemukan, akan mengembalikan error 404
+        abort_if($id != session('siswa_id'), 403, 'Unauthorized: not your profile.');
+
+        $siswa = Siswa::findOrFail(session('siswa_id'));
     
         // Simpan foto jika ada file baru yang diunggah
         if ($request->hasFile('image_url')) {
