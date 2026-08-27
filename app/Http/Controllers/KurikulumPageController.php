@@ -77,8 +77,10 @@ class KurikulumPageController extends Controller
             'nip' => 'required|numeric',
         ]);
     
-        // Proses penyimpanan file gambar di folder walasfoto/Photos
-        $imagePath = $request->file('image_url')->store('kurikulum/Photos', 'public'); // Simpan gambar di folder yang diinginkan
+        // Proses penyimpanan file gambar di folder kurikulum/Photos
+        $imagePath = $request->hasFile('image_url')
+            ? $request->file('image_url')->store('kurikulum/Photos', 'public')
+            : null;
     
         // Simpan data ke database, termasuk path gambar
         Kurikulum::create([

@@ -41,7 +41,7 @@ class ShowDetailRombelController extends Controller
     
         $siswa_tidak_naik_ids = KeluarRombel::whereHas('rombel', function($query) use ($kompetensi) {
             $query->where('kompetensi', $kompetensi);
-        })->pluck('nama_siswa');
+        })->pluck('siswa_id');
     
         // Mengambil objek Siswa lengkap, bukan hanya nama
         $siswa_tidak_naik = Siswa::whereIn('id', $siswa_tidak_naik_ids)->get();

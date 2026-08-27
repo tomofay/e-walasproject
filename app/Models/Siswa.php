@@ -59,15 +59,15 @@ class Siswa extends Authenticatable
         parent::boot();
 
         static::updated(function ($siswa) {
-            if ($siswa->status == 'nonaktif') {
-                Alumni::create([
-                    'siswa_id' => $siswa->id,
-                    'nama' => $siswa->nama,
-                    'no_wa' => $siswa->no_wa,
-                    'rombels_id' => $siswa->rombels_id,
-                ]);
-
-                $siswa->delete();
+            if ($siswa->status === 'nonaktif' && $siswa->wasChanged('status')) {
+                Alumni::firstOrCreate(
+                    ['siswa_id' => $siswa->id],
+                    [
+                        'nama' => $siswa->nama,
+                        'no_wa' => $siswa->no_wa,
+                        'rombels_id' => $siswa->rombels_id,
+                    ]
+                );
             }
         });
     }

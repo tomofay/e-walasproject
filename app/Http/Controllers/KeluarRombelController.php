@@ -35,7 +35,7 @@ class KeluarRombelController extends Controller
         }
 
         KeluarRombel::create([
-            'nama_siswa' => $siswa->id,
+            'siswa_id' => $siswa->id,
             'keterangan' => $validated['keterangan'],
             'rombels_id' => $rombels->id,
         ]);
@@ -61,7 +61,7 @@ class KeluarRombelController extends Controller
         $siswa = Siswa::find($request->siswa_id);
 
         $keluarRombel = KeluarRombel::create([
-            'nama_siswa' => $siswa->id,
+            'siswa_id' => $siswa->id,
             'keterangan' => $request->keterangan,
             'rombels_id' => $rombel->id,
         ]);

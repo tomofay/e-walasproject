@@ -27,7 +27,7 @@ class DataSiswaWalasController extends Controller
         $rombel = $this->getWalasRombel();
 
         $siswa = DB::table('vwsiswas')
-            ->leftJoin('keluar_rombels', 'vwsiswas.siswa_id', '=', 'keluar_rombels.nama_siswa')
+            ->leftJoin('keluar_rombels', 'vwsiswas.siswa_id', '=', 'keluar_rombels.siswa_id')
             ->where('vwsiswas.nama_kelas', $rombel->nama_kelas)
             ->select('vwsiswas.*', 'keluar_rombels.keterangan')
             ->get();
@@ -313,7 +313,7 @@ class DataSiswaWalasController extends Controller
         $siswa = Siswa::find($request->siswa_id);
 
         $keluarRombel = KeluarRombel::create([
-            'nama_siswa' => $siswa->id,
+            'siswa_id' => $siswa->id,
             'keterangan' => $request->keterangan,
             'rombels_id' => $rombel->id,
         ]);

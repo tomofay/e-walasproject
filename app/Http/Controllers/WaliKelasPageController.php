@@ -80,7 +80,9 @@ class WaliKelasPageController extends Controller
         ]);
     
         // Proses penyimpanan file gambar di folder walasfoto/Photos
-        $imagePath = $request->file('image_url')->store('walasfoto/Photos', 'public'); // Simpan gambar di folder yang diinginkan
+        $imagePath = $request->hasFile('image_url')
+            ? $request->file('image_url')->store('walasfoto/Photos', 'public')
+            : null;
     
         // Simpan data ke database, termasuk path gambar
         Walas::create([

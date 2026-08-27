@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Walas;
 use App\Models\Kakom;
 use App\Models\Kepsek;
+use App\Models\Rombel;
 
 class AdmWalasViewKepsekController extends Controller
 {
@@ -15,30 +16,30 @@ class AdmWalasViewKepsekController extends Controller
      */
     public function index()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $kepsek = Auth::guard('kepseks')->user();  // ini akan mendapatkan data kepsek yang sedang login
+        // Menggunakan guard 'kepseks' untuk mendapatkan data kepsek yang login
+        $kepseks = Auth::guard('kepseks')->user();  // ini akan mendapatkan data kepsek yang sedang login
     
         // Periksa apakah session 'kepsek_id' ada
         if (!session()->has('kepsek_id')) {
             return redirect('/loginkepsek')->with('error', 'Silakan login terlebih dahulu.');
         }
   
-        // Ambil data kurikulum berdasarkan 'kepsek_id' yang ada di session
-        $kepsek = Kepsek::find(session('kepsek_id'));
+        // Ambil data kepsek berdasarkan 'kepsek_id' yang ada di session
+        $kepseks = Kepsek::find(session('kepsek_id'));
         
-        // Periksa apakah data kurikulum ditemukan
-        if (!$kepsek) {
-            return redirect('/loginkepsek')->with('error', 'Data Kaprog tidak ditemukan.');
+        // Periksa apakah data kepsek ditemukan
+        if (!$kepseks) {
+            return redirect('/loginkepsek')->with('error', 'Data Kepala Sekolah tidak ditemukan.');
         }
-           // Ambil walas_id dari tabel rombel berdasarkan kakom_id yang login
-        // Ambil walas_id dari tabel rombel berdasarkan kakom_id yang login
-        $kepsekIds = Rombel::all();
+        // Ambil seluruh walas_id dari tabel rombel
+        $walasIds = Rombel::pluck('walas_id');
 
         // Ambil data walas berdasarkan walas_id yang sesuai
-        $walasList = Walas::whereIn('id', $kepsekIds)->get();
+        $walasList = Walas::whereIn('id', $walasIds)->get();
+        $rombels = Rombel::all();
     
         // Return view dengan data yang difilter
-        return view("homepagekepsek.admwalasview.index", compact('walasList', 'kepsekIds', 'kepsek'));
+        return view("homepagekepsek.datawalas", compact('walasList', 'walasIds', 'kepseks', 'rombels'));
     }       
 
     /**

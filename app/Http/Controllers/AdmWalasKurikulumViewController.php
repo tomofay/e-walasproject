@@ -17,8 +17,8 @@ class AdmWalasKurikulumViewController extends Controller
      */
     public function index()
     {
-        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-        $kurikulum = Auth::guard('kurikulums')->user();  // ini akan mendapatkan data kurikulum yang sedang login
+        // Menggunakan guard 'kurikulums' untuk mendapatkan data kurikulum yang login
+        $kurikulums = Auth::guard('kurikulums')->user();  // ini akan mendapatkan data kurikulum yang sedang login
     
         // Periksa apakah session 'kurikulum_id' ada
         if (!session()->has('kurikulum_id')) {
@@ -26,19 +26,20 @@ class AdmWalasKurikulumViewController extends Controller
         }
   
         // Ambil data kurikulum berdasarkan 'kurikulum_id' yang ada di session
-        $kurikulum = Kurikulum::find(session('kurikulum_id'));
+        $kurikulums = Kurikulum::find(session('kurikulum_id'));
         
         // Periksa apakah data kurikulum ditemukan
-        if (!$kurikulum) {
-            return redirect('/loginkurikulum')->with('error', 'Data Kaprog tidak ditemukan.');
+        if (!$kurikulums) {
+            return redirect('/loginkurikulum')->with('error', 'Data Kurikulum tidak ditemukan.');
         }
 
         $kurikulumIds = Rombel::pluck('walas_id')->toArray();
 
         $walasList = Walas::whereIn('id', $kurikulumIds)->get();
+        $rombels = Rombel::all();
 
         // Return view dengan data yang difilter
-        return view("homepagekurikulum.admwalasview.admwalas", compact('walasList', 'kurikulumIds', 'kurikulum'));
+        return view("homepagekurikulum.datawalas", compact('walasList', 'kurikulumIds', 'kurikulums', 'rombels'));
     }       
 
     /**
@@ -71,11 +72,11 @@ class AdmWalasKurikulumViewController extends Controller
         }
   
         // Ambil data kurikulum berdasarkan 'kurikulum_id' yang ada di session
-        $kurikulums = kurikulum::find(session('kurikulum_id'));
+        $kurikulum = Kurikulum::find(session('kurikulum_id'));
         
         // Periksa apakah data kurikulum ditemukan
-        if (!$kurikulums) {
-            return redirect('/loginkurikulum')->with('error', 'Data Kepala Sekolah tidak ditemukan.');
+        if (!$kurikulum) {
+            return redirect('/loginkurikulum')->with('error', 'Data Kurikulum tidak ditemukan.');
         }
 
         // Ambil data walas berdasarkan walas_id
@@ -87,7 +88,7 @@ class AdmWalasKurikulumViewController extends Controller
         }
     
         // Kirim data ke view detail
-        return view('homepagekurikulum.admwalasview.admwalas', compact('walas', 'kurikulums'));
+        return view('homepagekurikulum.admwalasview.admwalas', compact('walas', 'kurikulum'));
     }
 
     /**

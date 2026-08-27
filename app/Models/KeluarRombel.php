@@ -9,7 +9,7 @@ class KeluarRombel extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'nama_siswa',
+        'siswa_id',
         'keterangan',
         'rombels_id'
     ];
@@ -29,7 +29,7 @@ class KeluarRombel extends Model
     // Relasi ke tabel Siswa
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class, 'nama_siswa', 'id');
+        return $this->belongsTo(Siswa::class, 'siswa_id', 'id');
     }
 
 }

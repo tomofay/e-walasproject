@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Walas;
 use App\Models\Kakom;
+use App\Models\Rombel;
 
 class AdmWalasViewController extends Controller
 {
@@ -29,15 +30,15 @@ class AdmWalasViewController extends Controller
         if (!$kakom) {
             return redirect('/loginkaprog')->with('error', 'Data Kaprog tidak ditemukan.');
         }
-           // Ambil walas_id dari tabel rombel berdasarkan kakom_id yang login
-        // Ambil walas_id dari tabel rombel berdasarkan kakom_id yang login
-        $walasIds = Rombel::where('kakom_id', $kakom->id)->pluck('walas_id');
+        // Ambil walas_id dari tabel rombel berdasarkan kompetensi kakom yang login
+        $walasIds = Rombel::where('kompetensi', $kakom->kompetensi)->pluck('walas_id');
 
         // Ambil data walas berdasarkan walas_id yang sesuai
         $walasList = Walas::whereIn('id', $walasIds)->get();
+        $rombels = Rombel::where('kompetensi', $kakom->kompetensi)->get();
     
         // Return view dengan data yang difilter
-        return view("homepagekaprog.admwalasview.index", compact('walasList', 'walasIds', 'kakom'));
+        return view("homepagekaprog.datawalas", compact('walasList', 'walasIds', 'kakom', 'rombels'));
     }       
 
     /**

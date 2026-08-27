@@ -230,62 +230,31 @@ class ViewAdmWalasKaprogController extends Controller
     $walasList = Walas::whereIn('id', $walasIds)->get();
 
     $walasIdSelected = $request->query('walas_id');
-    $rombel = $walasIdSelected ? Rombel::where('walas_id', $walasIdSelected)->first() : null;
-
-    if (!$rombel) {
-        return redirect('/walaspage')->with('error', 'Rombel untuk Walas ini tidak ditemukan.');
-    }// Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-    $walas = Auth::guard('walas')->user();
-    
-    // Periksa apakah session 'walas_id' ada
-    if (!session()->has('walas_id')) {
-        return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
-    }
-
-    // Ambil data walas berdasarkan 'walas_id' yang ada di session
-    $walas = Walas::find(session('walas_id'));
-
-    // Periksa apakah data walas ditemukan
-    if (!$walas) {
-        return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
-    }
-
-    // Ambil data rombel yang dimiliki walas yang sedang login
-    $rombel = Rombel::where('walas_id', $walas->id)->first();
-
-    // Periksa apakah rombel ditemukan
-    if (!$rombel) {
-        return redirect('/walaspage')->with('error', 'Rombel tidak ditemukan untuk walas ini.');
-    }
-    // Ambil data siswa berdasarkan rombel yang terkait dengan walas
-    $siswa = DB::table('siswas')
-                ->where('rombels_id', $rombel->id)  // Sesuaikan dengan kolom yang tepat
-                ->get();
-
-    // Ambil semua data rombel
-    $rombels = Rombel::all();
 
     $jadwalKbm = JadwalKBM::with(['rombel', 'walas', 'mapels', 'gurus'])
-        ->where('walas_id', $walas->id)
+        ->whereIn('walas_id', $walasIds)
+        ->when($walasIdSelected, function ($query) use ($walasIdSelected) {
+            return $query->where('walas_id', $walasIdSelected);
+        })
         ->get();
 
     $mapels = Mapel::all()->keyBy('id');
     $gurus = Guru::all()->keyBy('id');
 
     $dataHari = [
-        'senin'  => json_decode($jadwalKbm->first()->senin, true)  ?? [],
-        'selasa' => json_decode($jadwalKbm->first()->selasa, true) ?? [],
-        'rabu'   => json_decode($jadwalKbm->first()->rabu, true)   ?? [],
-        'kamis'  => json_decode($jadwalKbm->first()->kamis, true)  ?? [],
-        'jumat'  => json_decode($jadwalKbm->first()->jumat, true)  ?? [],
+        'senin'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->senin, true)  ?? [] : [],
+        'selasa' => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->selasa, true) ?? [] : [],
+        'rabu'   => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->rabu, true)   ?? [] : [],
+        'kamis'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->kamis, true)  ?? [] : [],
+        'jumat'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->jumat, true)  ?? [] : [],
     ];
+
     return view("homepagekaprog.admwalas.jadwalkbm.index", [
         'walasList' => $walasList,
         'walasIds' => $walasIds,
         'kakom' => $kakom,
         'jadwalKbm' => $jadwalKbm->first(),
-        'rombel' => $rombel,
-        'siswa' => $siswa,
+        'walasIdSelected' => $walasIdSelected,
         'hari' => $dataHari,
         'mapels' => Mapel::pluck('nama_mapel', 'id'),
         'gurus' => Guru::pluck('nama', 'id'),
@@ -936,7 +905,6 @@ $dataPendapatan = [
         
         if (request()->has('export') && request()->get('export') === 'pdf') {
             $chartImage = request()->input('chartImage'); // Ambil data grafik dari form
-            dd($chartImage); 
             $pdf = Pdf::loadView('pdfkakom.pendapatanortu', compact('pendapatan', 'walas', 'dataPendapatan', 'chartImage'));
             return $pdf->stream('Pendapatan_Orang_Tua.pdf');
         }

@@ -3,14 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-namespace App\Http\Controllers;
-use Carbon\Carbon;
 use App\Models\Kurikulum;
 use App\Models\Walas;
-use App\Models\Rombel;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class KurikulumWalasController extends Controller

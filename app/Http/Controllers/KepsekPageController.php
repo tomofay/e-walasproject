@@ -78,8 +78,10 @@ class KepsekPageController extends Controller
             'password' => 'required|string|min:2',
         ]);
     
-        // Proses penyimpanan file gambar di folder walasfoto/Photos
-        $imagePath = $request->file('image_url')->store('kepsekfoto/Photos', 'public'); // Simpan gambar di folder yang diinginkan
+        // Proses penyimpanan file gambar di folder kepsekfoto/Photos
+        $imagePath = $request->hasFile('image_url')
+            ? $request->file('image_url')->store('kepsekfoto/Photos', 'public')
+            : null;
     
         // Simpan data ke database, termasuk path gambar
         Kepsek::create([

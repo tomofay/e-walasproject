@@ -65,8 +65,9 @@ class HomeVisitController extends Controller
         $walaslogin = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+        $walas = Walas::all();
 
-        return view('admwalas.homevisit.create', compact('walaslogin', 'siswas'));
+        return view('admwalas.homevisit.create', compact('walaslogin', 'siswas', 'walas'));
     }
 
     public function store(Request $request)

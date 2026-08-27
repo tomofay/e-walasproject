@@ -7,8 +7,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        DB::statement("DROP VIEW IF EXISTS vwsiswas");
         DB::statement("
-            CREATE OR REPLACE VIEW vwsiswas AS
+            CREATE VIEW vwsiswas AS
             SELECT
                 r.id,
                 s.id AS siswa_id,

@@ -252,25 +252,6 @@ class ViewAdmWalasKurikulumController extends Controller
         // Ambil walas_id dari URL query parameter
         $walasIdSelected = $request->query('walas_id'); 
 
-        // Ambil data rombel berdasarkan walas_id yang dipilih
-        $rombel = null;
-        if ($walasIdSelected) {
-            $rombel = Rombel::where('walas_id', $walasIdSelected)->first();
-        }
-
-        // Periksa apakah rombel ditemukan
-        if (!$rombel) {
-            return redirect('/walaspage')->with('error', 'Rombel untuk Walas ini tidak ditemukan.');
-        }
-
-        // Ambil data siswa berdasarkan rombel yang terkait dengan walas
-        $siswa = DB::table('siswas')
-            ->where('rombels_id', $rombel->id) // Sesuaikan dengan kolom yang tepat
-            ->get();
-
-        // Ambil semua data rombel
-        $rombels = Rombel::all();
-
         // **[PERBAIKAN]: Buat variabel query sebelum filter**
         $jadwalKbmsQuery = JadwalKBM::with(['rombel', 'walas', 'mapels', 'gurus']);
 
@@ -297,7 +278,7 @@ class ViewAdmWalasKurikulumController extends Controller
         }
 
         // Return view dengan data yang difilter
-        return view("homepagekurikulum.admwalas.jadwalkbm.index", compact('walasList', 'walasIds', 'kurikulum', 'jadwalKbms', 'rombel', 'siswa'));
+        return view("homepagekurikulum.admwalas.jadwalkbm.index", compact('walasList', 'walasIds', 'kurikulum', 'jadwalKbms', 'walasIdSelected'));
     }
 
 
@@ -942,7 +923,6 @@ class ViewAdmWalasKurikulumController extends Controller
         
         if (request()->has('export') && request()->get('export') === 'pdf') {
             $chartImage = request()->input('chartImage'); // Ambil data grafik dari form
-            dd($chartImage); 
             $pdf = Pdf::loadView('pdf.pendapatanortu', compact('pendapatan', 'walas', 'dataPendapatan', 'chartImage'));
             return $pdf->stream('Pendapatan_Orang_Tua.pdf');
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Siswa;
+use App\Models\Admin;
 use App\Imports\SiswaImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,20 +20,20 @@ class SiswaDataPageAdminController extends Controller
      */
     public function index()
     {
-         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-         $walas = Auth::guard('walas')->user();  // ini akan mendapatkan data walas yang sedang login
+         // Ambil admin yang sedang login
+         $admin = Auth::guard('admins')->user();
     
-         // Periksa apakah session 'walas_id' ada
-         if (!session()->has('walas_id')) {
-             return redirect('/logingtk')->with('error', 'Silakan login terlebih dahulu.');
+         // Periksa apakah session 'admin_id' ada
+         if (!session()->has('admin_id')) {
+             return redirect('/loginadmin')->with('error', 'Silakan login terlebih dahulu.');
          }
     
-         // Ambil data walas berdasarkan 'walas_id' yang ada di session
-         $walas = Walas::find(session('walas_id'));
+         // Ambil data admin berdasarkan 'admin_id' yang ada di session
+         $admin = Admin::find(session('admin_id'));
          
-         // Periksa apakah data walas ditemukan
-         if (!$walas) {
-             return redirect('/logingtk')->with('error', 'Data walas tidak ditemukan.');
+         // Periksa apakah data admin ditemukan
+         if (!$admin) {
+             return redirect('/loginadmin')->with('error', 'Data Admin tidak ditemukan.');
          }
     
         // Ambil semua data rombels
@@ -40,7 +41,7 @@ class SiswaDataPageAdminController extends Controller
         $rombel = Rombel::all();
     
         // Kirim data siswa, rombels, dan walas ke view
-        return view("homepageadmin.siswadata.index", compact('siswas', 'walas', 'rombel'));
+        return view("homepageadmin.siswadata.index", compact('siswas', 'admin', 'rombel'));
     }
     
     
@@ -265,7 +266,7 @@ class SiswaDataPageAdminController extends Controller
                 ]);
         
                 // Hapus siswa dari keluar_rombel
-                DB::table('keluar_rombels')->where('nama_siswa', $request->siswa_id)->delete();
+                DB::table('keluar_rombels')->where('siswa_id', $request->siswa_id)->delete();
         
                 return response()->json([
                     'message' => 'Siswa berhasil dipindahkan ke rombel baru dan dihapus dari keluar_rombel!'
