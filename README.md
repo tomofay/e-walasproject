@@ -21,7 +21,7 @@ Selain wali kelas, sistem ini juga menyediakan dashboard untuk **Admin**, **Kepa
 ## ✨ Fitur Utama
 
 ### 🔑 Multi-Role Authentication
-6 guard autentikasi terpisah: **Admin**, **Wali Kelas**, **Kakom**, **Kepala Sekolah**, **Kurikulum**, dan **Siswa**.
+6 guard autentikasi terpisah dengan **middleware proteksi setiap route**: **Admin**, **Wali Kelas**, **Kakom**, **Kepala Sekolah**, **Kurikulum**, dan **Siswa**. Semua password disimpan hashed (`Hash::bcrypt`) dan diverifikasi pakai `Hash::check`. Login dilindungi rate-limiting (`throttle: 10 percobaan/menit`).
 
 ### 👑 Admin
 - CRUD warga sekolah — Walas, Kakom, Kurikulum, Kepsek, Guru
@@ -125,20 +125,22 @@ Akses aplikasi di **http://localhost:8000**
 ```
 e-walasproject/
 ├── app/
-│   ├── Models/                  # 37 model (Admin, Walas, Siswa, Rombel, dll.)
+│   ├── Models/                     # 37 model (Admin, Walas, Siswa, Rombel, dll.)
 │   └── Http/
-│       ├── Controllers/         # 87 controller
-│       └── Middleware/          # Admin, Walas, Kakom, Siswa middleware
+│       ├── Controllers/            # 87 controller
+│       └── Middleware/             # Admin, Walas, Kakom, Kepsek, Kurikulum, Siswa
 ├── config/
-│   └── auth.php                 # 6 guard authentication
+│   └── auth.php                    # 6 guard authentication
 ├── database/
-│   └── migrations/              # 39 tabel migrasi
+│   ├── migrations/                 # 42 tabel migrasi + database views
+│   └── seeders/                    # DatabaseSeeder + TemplateSeeder
 ├── routes/
-│   └── web.php                  # Seluruh route aplikasi
+│   └── web.php                     # Route per-role dengan grup middleware
 ├── resources/
-│   └── views/                   # 24 modul Blade (per role + template PDF)
-├── composer.json                # Dependensi PHP
-└── package.json                 # Dependensi frontend
+│   └── views/                      # 24+ modul Blade (per role + template PDF)
+├── tests/                          # PHPUnit: 119 tests (Auth, Business, Walas)
+├── composer.json                   # Dependensi PHP
+└── package.json                    # Dependensi frontend
 ```
 
 ---
@@ -156,7 +158,7 @@ Semua user menggunakan password: **`12345678`**
 | Kurikulum  | `Sri Wahyuni, M.Pd.`         | `/loginkurikulum` |
 | Siswa      | `Andi Pratama`               | `/loginsiswa`     |
 
-> ⚠️ **Penting:** Ganti password default setelah instalasi. Sistem menggunakan perbandingan password plaintext — disarankan mengimplementasikan `Hash::bcrypt()` pada production.
+> ⚠️ **Penting:** Ganti password default setelah instalasi produksi. Semua password disimpan dengan aman menggunakan `Hash::bcrypt()`. Login memakai perbandingan yang sudah di-hash (`Hash::check`), sehingga tidak pernah menyimpan atau membandingkan password secara plaintext.
 
 ---
 
