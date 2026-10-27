@@ -8,8 +8,10 @@ use App\Models\Walas;
 use App\Models\Rombel;
 use App\Models\Kurikulum;
 use App\Models\DaftarPesertaDidik;
+use App\Models\BiodataSiswa;
 use App\Http\Concerns\HasWalasAuth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 
 class DaftarPesertaDidikController extends Controller
@@ -56,6 +58,19 @@ class DaftarPesertaDidikController extends Controller
 
         // Kirim data ke view
         return view('admwalas.daftarpesertadidik.create', compact('walas', 'siswas', 'rombel', 'kurikulumIdPertama'));
+    }
+
+    public function getSiswa(string $id)
+    {
+        $siswa = $this->siswaDiRombel($id);
+        $biodata = $siswa->biodata;
+
+        return response()->json([
+            'id' => $siswa->id,
+            'nis' => $biodata?->nis,
+            'nisn' => $biodata?->nisn,
+            'nama' => $siswa->nama,
+        ]);
     }
 
     /**
@@ -149,8 +164,15 @@ class DaftarPesertaDidikController extends Controller
     // Set 'keterangan' otomatis menjadi 'aktif'
     $validatedData['keterangan'] = 'aktif';
 
-    // Update data DaftarPesertaDidik
-    $daftarPesertaDidik->update($validatedData);
+    DB::transaction(function () use ($daftarPesertaDidik, $validatedData) {
+        $daftarPesertaDidik->update($validatedData);
+
+        BiodataSiswa::where('siswas_id', $validatedData['nama_siswa'])
+            ->update([
+                'nis' => $validatedData['nis'],
+                'nisn' => $validatedData['nisn'],
+            ]);
+    });
 
     return redirect('/daftarpesertadidik')->with('success', 'Data berhasil diperbarui.');
 }

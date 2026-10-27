@@ -156,10 +156,6 @@
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
                 
-                <a href="{{ route('serahterimarapor.download-template') }}" class="btn btn-outline-secondary" download>
-                    <i class="bi bi-cloud-download"></i> Download File
-                </a>
-                <br>
                 <!-- Tombol Tambah Data -->
                 <!-- Membungkus tombol dan search box dengan div untuk pengaturan jarak -->
                 <div class="d-flex-container">

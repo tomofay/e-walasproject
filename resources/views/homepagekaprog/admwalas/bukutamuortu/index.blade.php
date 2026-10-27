@@ -201,7 +201,7 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $bukutamuortu->tanggal }}</td>
-                    <td>{{ $bukutamuortu->siswa->nama ?? 'Siswa Tidak Ditemukan' }}</td>
+                    <td>{{ $bukutamuortu->siswa?->nama ?? $bukutamuortu->nama_peserta_didik }}</td>
                     <td>{{ $bukutamuortu->nama_orang_tua }}</td>
                     <td>{{ $bukutamuortu->kasus }}</td>
                     <td>{{ $bukutamuortu->tindak_lanjut }}</td>

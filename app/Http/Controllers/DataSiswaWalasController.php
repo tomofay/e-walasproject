@@ -6,8 +6,10 @@ use Carbon\Carbon;
 use App\Models\Siswa;
 use App\Models\Rombel;
 use App\Models\KeluarRombel;
+use App\Support\AcademicYear;
 use App\Imports\SiswaImport;
 use App\Models\BiodataSiswa;
+use App\Models\Walas;
 use App\Http\Concerns\HasWalasAuth;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class DataSiswaWalasController extends Controller
 {
@@ -39,11 +42,19 @@ class DataSiswaWalasController extends Controller
 
     public function import(Request $request)
     {
-        if (! $request->hasFile('file')) {
-            return back()->with('error', 'File tidak ditemukan.');
+        set_time_limit(300);
+
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,csv,txt|max:10240',
+            ]);
+
+            Excel::import(new SiswaImport, $request->file('file'));
+        } catch (ValidationException $exception) {
+            return back()->with('error', collect($exception->errors())->flatten()->first());
         }
-        Excel::import(new SiswaImport, $request->file('file'));
-        return redirect('/siswadata');
+
+        return redirect('/siswadata')->with('success', 'Data siswa berhasil diimpor.');
     }
 
     public function downloadTemplate()
@@ -88,13 +99,40 @@ class DataSiswaWalasController extends Controller
 
     private function convertToBase64($path)
     {
-        $fullPath = storage_path("app/public/" . $path);
-        if (file_exists($fullPath)) {
-            $imageData = file_get_contents($fullPath);
-            $mimeType = mime_content_type($fullPath);
-            return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+        if (empty($path) || is_array($path)) {
+            return null;
         }
-        return null;
+
+        if (str_starts_with($path, 'data:')) {
+            return $path;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        $cleanPath = ltrim(str_replace('\\', '/', (string) $path), '/');
+        $fullPath = storage_path('app/public/' . $cleanPath);
+
+        if (! is_file($fullPath)) {
+            $fallbackPath = storage_path('app/' . $cleanPath);
+            if (! is_file($fallbackPath)) {
+                return null;
+            }
+            $fullPath = $fallbackPath;
+        }
+
+        try {
+            $imageData = @file_get_contents($fullPath);
+            if ($imageData === false) {
+                return null;
+            }
+
+            $mimeType = mime_content_type($fullPath) ?: 'application/octet-stream';
+            return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     public function editbiodata($id)
@@ -113,8 +151,8 @@ class DataSiswaWalasController extends Controller
 
         $nowalas = $siswa->rombel ? $siswa->rombel->walas : null;
         $walasList = Walas::select('id', 'nama')->get();
-        $walasData = \App\Models\Walas::find($biodata->walas_id);
-        $no_wa_walas = $walasData->no_wa ?? 'Nomor tidak tersedia';
+        $walasData = Walas::find($biodata->walas_id);
+        $no_wa_walas = $walasData?->no_wa ?? 'Nomor tidak tersedia';
 
         return view('homepagegtk.editbiodata', compact('biodata', 'siswa', 'nowalas', 'walasList', 'no_wa_walas', 'walas'));
     }
@@ -323,11 +361,14 @@ class DataSiswaWalasController extends Controller
         $siswa = Siswa::find($request->siswa_id);
 
         $this->siswaDiRombel($siswa->id);
+        $period = AcademicYear::current();
 
         $keluarRombel = KeluarRombel::create([
             'siswa_id' => $siswa->id,
             'keterangan' => $request->keterangan,
             'rombels_id' => $rombel->id,
+            'academic_year' => $period['year'],
+            'semester' => $period['status'],
         ]);
 
         return response()->json(['success' => 'Data berhasil disimpan!', 'keluarRombel' => $keluarRombel]);

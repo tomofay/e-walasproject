@@ -208,7 +208,7 @@
           <li><a href="/datamapel">Mata Pelajaran</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2025/2026 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -255,6 +255,17 @@
         <select class="form-select" id="teacherGender" name="jenis_kelamin" required>
             <option value="Laki-laki" {{ $walas->jenis_kelamin == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
             <option value="Perempuan" {{ $walas->jenis_kelamin == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="teacherCompetency" class="form-label">Kompetensi Keahlian</label>
+        <select class="form-select" id="teacherCompetency" name="kompetensi" required>
+            @foreach($kompetensiOptions as $kompetensi)
+                <option value="{{ $kompetensi }}"
+                    {{ old('kompetensi', optional($walas->rombel)->kompetensi) === $kompetensi ? 'selected' : '' }}>
+                    {{ $kompetensi }}
+                </option>
+            @endforeach
         </select>
     </div>
     <div class="mb-3">

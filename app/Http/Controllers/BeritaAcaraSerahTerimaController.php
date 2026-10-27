@@ -8,6 +8,7 @@ use App\Http\Concerns\HasWalasAuth;
 use Illuminate\Http\Request;
 use App\Models\BeritaAcaraSerahTerima;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BeritaAcaraSerahTerimaController extends Controller
 {
@@ -25,13 +26,12 @@ class BeritaAcaraSerahTerimaController extends Controller
 
     public function downloadTemplate()
     {
-        $pathToFile = storage_path('app/public/Berita_Acara_Serah_Terima.pdf');
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-        if (! file_exists($pathToFile)) {
-            return back()->with('error', 'Template belum tersedia.');
-        }
-
-        return response()->download($pathToFile);
+        return Pdf::loadView('pdf.template-berita-acara-serah-terima', compact('walas', 'rombel'))
+            ->setPaper('a4')
+            ->download('Berita_Acara_Serah_Terima.pdf');
     }
 
     public function create()

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class InputDataDiriSiswaController extends Controller
 {
@@ -62,80 +63,155 @@ class InputDataDiriSiswaController extends Controller
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
     
-        // Validasi input
+        $ayahPekerjaanLainnya = $request->input('pekerjaan_ayah') === 'Lainnya';
+        $ibuPekerjaanLainnya = $request->input('pekerjaan_ibu') === 'Lainnya';
+        if ($ayahPekerjaanLainnya) {
+            $request->merge(['pekerjaan_ayah' => $request->input('pekerjaan_ayah_lainnya')]);
+        }
+        if ($ibuPekerjaanLainnya) {
+            $request->merge(['pekerjaan_ibu' => $request->input('pekerjaan_ibu_lainnya')]);
+        }
+
+        $ayahPekerjaanRules = ['required', 'string', 'max:80'];
+        if (! $ayahPekerjaanLainnya) {
+            $ayahPekerjaanRules[] = Rule::in(['TNI/POLRI', 'ASN/PNS', 'Karyawan', 'Wiraswasta', 'Pengemudi', 'Buruh', 'Tani', 'Pensiunan']);
+        }
+        $ibuPekerjaanRules = ['required', 'string', 'max:50'];
+        if (! $ibuPekerjaanLainnya) {
+            $ibuPekerjaanRules[] = Rule::in(['TNI/POLRI', 'ASN/PNS', 'Karyawan', 'Wiraswasta', 'Ibu Rumah Tangga', 'Buruh', 'Tani', 'Pensiunan']);
+        }
+
         $validatedData = $request->validate([
-            'walas_id' => 'nullable|integer',
-            'nama_lengkap' => 'nullable|string|max:255',
-            'jenis_kelamin' => 'nullable|string|max:10',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string|max:255',
-            'alamat_maps' => 'nullable|string|max:1000',
-            'fotorumah_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'kepemilikan_rumah' => 'nullable|string|max:50',
-            'jalur_masuk' => 'nullable|string|max:50',
-            'jarak_rumah' => 'nullable|string|max:50',
-            'transportasi_sekolah' => 'nullable|string|max:50',
-            'transportasi_rumah' => 'nullable|string|max:50',
-            'agama' => 'nullable|string|max:50',
-            'kewarganegaraan' => 'nullable|string|max:50',
-            'anak_ke' => 'nullable|integer',
-            'jumlah_saudara' => 'nullable|integer',
-            'no_wa' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'nis' => 'required|string|max:20',
-            'nisn' => 'required|string|max:20',
-            'kelas' => 'nullable|string|max:50',
-            'kompetensi' => 'nullable|string|max:100',
-            'tahun_masuk' => 'nullable|string|max:4',
-            'nama_ayah' => 'nullable|string|max:255',
-            'pekerjaan_ayah' => 'nullable|string|max:255',
-            'tempat_lahir_ayah' => 'nullable|string|max:255',
-            'tanggal_lahir_ayah' => 'nullable|date',
-            'alamat_ayah' => 'nullable|string|max:255',
-            'no_wa_ayah' => 'nullable|string|max:20',
-            'nama_ibu' => 'nullable|string|max:255',
-            'pekerjaan_ibu' => 'nullable|string|max:255',
-            'tempat_lahir_ibu' => 'nullable|string|max:255',
-            'tanggal_lahir_ibu' => 'nullable|date',
-            'alamat_ibu' => 'nullable|string|max:255',
-            'no_wa_ibu' => 'nullable|string|max:20',
-            'pendapatan_ortu' => 'string|max:255',
-            'namasekolah_asal' => 'nullable|string|max:255',
-            'alamat_sekolah' => 'nullable|string|max:255',
-            'tahun_lulus' => 'nullable|string|max:4',
-            'riwayat_penyakit' => 'nullable|string|max:255',
-            'alergi' => 'nullable|string|max:255',
-            'prestasi_akademik' => 'nullable|string|max:255',
-            'prestasi_non_akademik' => 'nullable|string|max:255',
-            'pengalaman_ekskul' => 'nullable|string|max:255',
-            'kepribadian' => 'nullable|string|max:255'
+            'walas_id' => ['required', 'integer', Rule::exists('walas', 'id')],
+            'nama_lengkap' => 'required|string|max:255',
+            'jenis_kelamin' => ['required', Rule::in(['Perempuan', 'Laki-laki'])],
+            'tempat_lahir' => 'required|string|max:255',
+            'tanggal_lahir' => 'required|date|before_or_equal:today',
+            'alamat' => 'required|string',
+            'alamat_maps' => 'required|string',
+            'fotorumah_url' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'kepemilikan_rumah' => ['required', Rule::in(['Lunas', 'Sewa', 'KPR/Kredit', 'Kontrak', 'Inden'])],
+            'jalur_masuk' => ['required', Rule::in(['Afirmasi', 'Zonasi', 'Rapor', 'Prestasi', 'Anak Guru', 'Perpindahan Orang Tua'])],
+            'jarak_rumah' => 'required|string|max:255',
+            'transportasi_sekolah' => 'required|string|max:255',
+            'transportasi_rumah' => 'required|string|max:255',
+            'agama' => ['required', Rule::in(['Islam', 'Kristen Protestan', 'Kristen Katolik', 'Hindu', 'Budha', 'Konghucu'])],
+            'kewarganegaraan' => 'required|string|max:20',
+            'anak_ke' => 'required|integer|min:1|max:99999',
+            'jumlah_saudara' => 'required|integer|min:0|max:99999',
+            'no_wa' => ['required', 'string', 'max:14', 'regex:/^[0-9+ -]+$/'],
+            'email' => 'required|email|max:50',
+            'nis' => ['required', 'string', 'max:20', Rule::unique('biodata_siswas', 'nis')],
+            'nisn' => ['required', 'string', 'max:20', Rule::unique('biodata_siswas', 'nisn')],
+            'kelas' => ['required', Rule::in(['X', 'XI', 'XII', 'XIII'])],
+            'kompetensi' => ['required', Rule::in(['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP', 'TFLM', 'TKR', 'TOI'])],
+            'tahun_masuk' => 'required|digits:4',
+            'nama_ayah' => 'required|string|max:80',
+            'pekerjaan_ayah' => $ayahPekerjaanRules,
+            'pekerjaan_ayah_lainnya' => 'nullable|string|max:80',
+            'tempat_lahir_ayah' => 'required|string|max:50',
+            'tanggal_lahir_ayah' => 'required|date|before_or_equal:today',
+            'alamat_ayah' => 'required|string',
+            'no_wa_ayah' => ['required', 'string', 'max:15', 'regex:/^[0-9+ -]+$/'],
+            'nama_ibu' => 'required|string|max:50',
+            'pekerjaan_ibu' => $ibuPekerjaanRules,
+            'pekerjaan_ibu_lainnya' => 'nullable|string|max:50',
+            'tempat_lahir_ibu' => 'required|string|max:50',
+            'tanggal_lahir_ibu' => 'required|date|before_or_equal:today',
+            'alamat_ibu' => 'required|string',
+            'no_wa_ibu' => ['required', 'string', 'max:15', 'regex:/^[0-9+ -]+$/'],
+            'pendapatan_ortu' => ['required', 'string', 'max:80', Rule::in([
+                'Kurang dari Rp1.000.000,00',
+                'Rp1.000.000,00 - Rp3.000.000,00',
+                'Rp3.000.000,00 - Rp5.000.000,00',
+                'Rp5.000.000,00 - Rp10.000.000,00',
+                'Rp10.000.000,00 - Rp25.000.000,00',
+                'Rp25.000.000,00 - Rp50.000.000,00',
+                'Lebih dari Rp50.000.000,00',
+            ])],
+            'namasekolah_asal' => 'required|string|max:50',
+            'alamat_sekolah' => 'required|string',
+            'tahun_lulus' => 'required|digits:4',
+            'riwayat_penyakit' => 'nullable|string|max:50',
+            'alergi' => 'nullable|string|max:50',
+            'prestasi_akademik' => 'nullable|string',
+            'prestasi_non_akademik' => 'nullable|string',
+            'pengalaman_ekskul' => 'nullable|string',
+            'kepribadian' => 'nullable|string',
+        ], [
+            'required' => 'Kolom :attribute wajib diisi.',
+            'exists' => 'Pilihan :attribute tidak valid.',
+            'in' => 'Pilihan :attribute tidak valid.',
+            'email' => 'Format :attribute harus berupa alamat email yang valid.',
+            'unique' => ':attribute sudah terdaftar. Periksa kembali datanya.',
+            'image' => 'File :attribute harus berupa gambar.',
+            'mimes' => 'Format :attribute harus JPG, JPEG, PNG, atau GIF.',
+            'max' => 'Kolom :attribute melebihi batas maksimal.',
+            'digits' => 'Kolom :attribute harus berisi tepat :digits angka.',
+            'before_or_equal' => 'Tanggal :attribute tidak boleh melebihi hari ini.',
+            'regex' => 'Kolom :attribute hanya boleh berisi angka, spasi, tanda +, atau -.',
+            'integer' => 'Kolom :attribute harus berupa angka bulat.',
+            'min' => 'Nilai :attribute terlalu kecil.',
+        ], [
+            'walas_id' => 'wali kelas',
+            'nama_lengkap' => 'nama lengkap',
+            'jenis_kelamin' => 'jenis kelamin',
+            'tempat_lahir' => 'tempat lahir',
+            'tanggal_lahir' => 'tanggal lahir',
+            'alamat' => 'alamat',
+            'alamat_maps' => 'alamat maps',
+            'fotorumah_url' => 'foto rumah',
+            'kepemilikan_rumah' => 'kepemilikan rumah',
+            'jalur_masuk' => 'jalur masuk',
+            'jarak_rumah' => 'jarak rumah',
+            'transportasi_sekolah' => 'transportasi ke sekolah',
+            'transportasi_rumah' => 'transportasi ke rumah',
+            'agama' => 'agama',
+            'kewarganegaraan' => 'kewarganegaraan',
+            'anak_ke' => 'anak ke',
+            'jumlah_saudara' => 'jumlah saudara',
+            'no_wa' => 'nomor WhatsApp siswa',
+            'email' => 'email',
+            'nis' => 'NIS',
+            'nisn' => 'NISN',
+            'kelas' => 'kelas',
+            'kompetensi' => 'kompetensi',
+            'tahun_masuk' => 'tahun masuk',
+            'nama_ayah' => 'nama ayah',
+            'pekerjaan_ayah' => 'pekerjaan ayah',
+            'pekerjaan_ayah_lainnya' => 'pekerjaan ayah lainnya',
+            'tempat_lahir_ayah' => 'tempat lahir ayah',
+            'tanggal_lahir_ayah' => 'tanggal lahir ayah',
+            'alamat_ayah' => 'alamat ayah',
+            'no_wa_ayah' => 'nomor WhatsApp ayah',
+            'nama_ibu' => 'nama ibu',
+            'pekerjaan_ibu' => 'pekerjaan ibu',
+            'pekerjaan_ibu_lainnya' => 'pekerjaan ibu lainnya',
+            'tempat_lahir_ibu' => 'tempat lahir ibu',
+            'tanggal_lahir_ibu' => 'tanggal lahir ibu',
+            'alamat_ibu' => 'alamat ibu',
+            'no_wa_ibu' => 'nomor WhatsApp ibu',
+            'pendapatan_ortu' => 'rentang pendapatan orang tua',
+            'namasekolah_asal' => 'nama sekolah asal',
+            'alamat_sekolah' => 'alamat sekolah asal',
+            'tahun_lulus' => 'tahun lulus',
         ]);
+
+        unset($validatedData['pekerjaan_ayah_lainnya'], $validatedData['pekerjaan_ibu_lainnya']);
     
         // Cek apakah NIS atau NISN sudah ada di database
-        $nisExists = BiodataSiswa::where('nis', $validatedData['nis'])->exists();
-        $nisnExists = BiodataSiswa::where('nisn', $validatedData['nisn'])->exists();
-    
-        if ($nisExists || $nisnExists) {
-            return redirect()->back()->with('error', 'NIS atau NISN sudah digunakan.');
-        }
-    
         // Menambahkan siswas_id ke request
         $validatedData['siswas_id'] = $siswa->id;
+
+        foreach (['riwayat_penyakit', 'alergi', 'prestasi_akademik', 'prestasi_non_akademik', 'pengalaman_ekskul', 'kepribadian'] as $optionalField) {
+            $validatedData[$optionalField] = ($validatedData[$optionalField] ?? null) ?: 'Tidak ada';
+        }
     
         // Cek dan simpan file gambar jika ada
         if ($request->hasFile('fotorumah_url')) {
             $fileName = uniqid() . '.' . $request->file('fotorumah_url')->getClientOriginalExtension();
             $fotoRumahPath = $request->file('fotorumah_url')->storeAs('images/photos', $fileName, 'public');
             $validatedData['fotorumah_url'] = $fotoRumahPath;
-        }
-    
-        // Mengecek pekerjaan orang tua jika "Lainnya" diisi
-        if ($request->pekerjaan_ayah === 'Lainnya' && $request->filled('pekerjaan_ayah_lainnya')) {
-            $validatedData['pekerjaan_ayah'] = $request->pekerjaan_ayah_lainnya;
-        }
-        if ($request->pekerjaan_ibu === 'Lainnya' && $request->filled('pekerjaan_ibu_lainnya')) {
-            $validatedData['pekerjaan_ibu'] = $request->pekerjaan_ibu_lainnya;
         }
     
         // Simpan data ke database

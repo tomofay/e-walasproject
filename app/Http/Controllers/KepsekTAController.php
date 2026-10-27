@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kepsek;
+use App\Models\KeluarRombel;
 use Illuminate\Support\Facades\Auth;
+use App\Support\AcademicYear;
 
 class KepsekTAController extends Controller
 {
@@ -29,20 +31,10 @@ class KepsekTAController extends Controller
           return redirect('/loginkepsek')->with('error', 'Data Kepala Sekolah tidak ditemukan.');
       }
 
-      $today = date('Y-m-d');
-      $year = date('Y');
-      $month = date('m');
-      $day = date('d');
+      ['year' => $tahunAjaran, 'status' => $status] = AcademicYear::current();
+      $keluarRombelPeriods = KeluarRombel::availableAcademicPeriods();
 
-      if ($month >= 7 && $day >= 7) {
-          $tahunAjaran = "$year/" . ($year + 1);
-          $status = "GANJIL";
-      } else {
-          $tahunAjaran = ($year - 1) . "/$year";
-          $status = "GENAP";
-      }
-
-      return view ('homepagekepsek.tahunakademik', compact('kepsek', 'tahunAjaran', 'status'));
+      return view ('homepagekepsek.tahunakademik', compact('kepsek', 'tahunAjaran', 'status', 'keluarRombelPeriods'));
     }
 
     /**

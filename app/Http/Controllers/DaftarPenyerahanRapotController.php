@@ -7,6 +7,7 @@ use App\Http\Concerns\HasWalasAuth;
 use Illuminate\Http\Request;
 use App\Models\DaftarSerahTerimaRapor;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DaftarPenyerahanRapotController extends Controller
 {
@@ -23,18 +24,18 @@ class DaftarPenyerahanRapotController extends Controller
 
     public function downloadTemplate()
     {
-        $pathToFile = storage_path('app/public/Penyerahan Pengembalian Rapor.pdf');
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-        if (! file_exists($pathToFile)) {
-            return back()->with('error', 'Template belum tersedia.');
-        }
-
-        return response()->download($pathToFile);
+        return Pdf::loadView('pdf.template-berita-acara-serah-terima', compact('walas', 'rombel'))
+            ->setPaper('a4')
+            ->download('Berita_Acara_Serah_Terima_Rapor.pdf');
     }
 
     public function create()
     {
-        $walas = $this->getAuthenticatedWalas();
+        $this->getAuthenticatedWalas();
+        $walas = Walas::select('id', 'nama')->orderBy('nama')->get();
         $penyerahanrapot = DaftarSerahTerimaRapor::all();
 
         return view('admwalas.daftarpenyerahanrapot.create', compact('penyerahanrapot', 'walas'));
@@ -63,7 +64,8 @@ class DaftarPenyerahanRapotController extends Controller
 
     public function edit($id)
     {
-        $walas = $this->getAuthenticatedWalas();
+        $this->getAuthenticatedWalas();
+        $walas = Walas::select('id', 'nama')->orderBy('nama')->get();
         $penyerahanrapot = DaftarSerahTerimaRapor::findOrFail($id);
 
         return view('admwalas.daftarpenyerahanrapot.edit', compact('penyerahanrapot', 'walas'));

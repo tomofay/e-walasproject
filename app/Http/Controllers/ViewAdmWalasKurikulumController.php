@@ -253,7 +253,7 @@ class ViewAdmWalasKurikulumController extends Controller
         $walasIdSelected = $request->query('walas_id'); 
 
         // **[PERBAIKAN]: Buat variabel query sebelum filter**
-        $jadwalKbmsQuery = JadwalKBM::with(['rombel', 'walas', 'mapels', 'gurus']);
+        $jadwalKbmsQuery = JadwalKBM::with(['rombel', 'walas']);
 
         if ($walasIdSelected) {
             $jadwalKbmsQuery->where('walas_id', $walasIdSelected);
@@ -261,6 +261,8 @@ class ViewAdmWalasKurikulumController extends Controller
 
         // Eksekusi query untuk mendapatkan hasil
         $jadwalKbms = $jadwalKbmsQuery->get();
+        $rombel = $jadwalKbms->first()?->rombel
+            ?? Rombel::where('walas_id', $walasIdSelected)->first();
 
         // Ambil data mapel dan guru untuk ditampilkan
         $mapels = Mapel::all()->keyBy('id');
@@ -278,7 +280,16 @@ class ViewAdmWalasKurikulumController extends Controller
         }
 
         // Return view dengan data yang difilter
-        return view("homepagekurikulum.admwalas.jadwalkbm.index", compact('walasList', 'walasIds', 'kurikulum', 'jadwalKbms', 'walasIdSelected'));
+        return view("homepagekurikulum.admwalas.jadwalkbm.index", compact(
+            'walasList',
+            'walasIds',
+            'kurikulum',
+            'jadwalKbms',
+            'walasIdSelected',
+            'rombel',
+            'mapels',
+            'gurus'
+        ));
     }
 
 

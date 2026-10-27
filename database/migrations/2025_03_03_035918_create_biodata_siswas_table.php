@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('email', 50);
             $table->string('nis', 20)->unique();
             $table->string('nisn', 20)->unique();
-            $table->string('kelas', 4);
+            $table->string('kelas', 255);
             $table->enum('kompetensi', ['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP','TFLM', 'TKR', 'TOI'])->default('SIJA');
             $table->string('tahun_masuk', 4);
             $table->string('nama_ayah', 80);

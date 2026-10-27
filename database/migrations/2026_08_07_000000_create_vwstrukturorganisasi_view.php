@@ -14,22 +14,23 @@ return new class extends Migration
                 s.id,
                 s.walas_id,
                 w.nama AS wali_kelas,
-                s.kepala_sekolah,
-                s.walas AS walas_nama,
-                sk.nama AS ketua_kelas_nama,
-                swak.nama AS waketua_kelas_nama,
-                sb.nama AS bendahara_nama,
-                sse.nama AS sekretaris_nama,
-                skeb.nama AS seksi_kebersihan_nama,
-                sper.nama AS seksi_perlengkapan_nama,
-                skam.nama AS seksi_keamanan_nama,
-                sker.nama AS seksi_kerohanian_nama,
+                kp.nama AS kepala_sekolah,
+                s.walas AS walas,
+                sk.nama AS ketua_kelas,
+                swak.nama AS wakil_ketua_kelas,
+                sb.nama AS bendahara,
+                sse.nama AS sekretaris,
+                skeb.nama AS seksi_kebersihan,
+                sper.nama AS seksi_perlengkapan,
+                skam.nama AS seksi_keamanan,
+                sker.nama AS seksi_kerohanian,
                 s.tanggal,
                 s.ttdwalas_url,
                 s.ttdkurikulum_url,
                 s.kurikulum_id
             FROM struktur_organisasi_kelas s
             JOIN walas w ON s.walas_id = w.id
+            LEFT JOIN kepseks kp ON s.kepala_sekolah = kp.id
             LEFT JOIN siswas sk ON s.ketuakelas = sk.id
             LEFT JOIN siswas swak ON s.waketuakelas = swak.id
             LEFT JOIN siswas sb ON s.bendahara = sb.id

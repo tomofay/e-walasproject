@@ -332,6 +332,15 @@
 
 <body class="index-page">
      <!-- Tampilkan pesan error -->
+     @if ($errors->any())
+        <div class="alert alert-danger" id="alertError">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+     @endif
      @if (session('error'))
         <div class="alert alert-danger" id="alertError">
             <p>{{ session('error') }}</p>
@@ -488,15 +497,15 @@
                     @csrf
                     <div class="mb-3">
                         <label for="teacherName" class="form-label">Nama Kurikulum</label>
-                        <input type="text" class="form-control" id="teacherName" placeholder="Masukkan nama Kurikulum" name="nama" required>
+                        <input type="text" class="form-control" id="teacherName" placeholder="Masukkan nama Kurikulum" name="nama" value="{{ old('nama') }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="teacherPhoto" class="form-label">Foto Kurikulum</label>
-                        <input type="file" class="form-control" id="teacherPhoto" name="image_url" required>
+                        <input type="file" class="form-control" id="teacherPhoto" name="image_url" accept="image/*">
                     </div>
                     <div class="mb-3">
                         <label for="teacherWhatsApp" class="form-label">WhatsApp</label>
-                        <input type="number" class="form-control" id="teacherWhatsApp" placeholder="Masukkan nomor WhatsApp" name="no_wa" required>
+                        <input type="text" inputmode="numeric" class="form-control" id="teacherWhatsApp" placeholder="Masukkan nomor WhatsApp" name="no_wa" value="{{ old('no_wa') }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="teacherPassword" class="form-label">Password</label>
@@ -504,7 +513,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="teacherNip" class="form-label">NIP</label>
-                        <input type="number" class="form-control" id="teacherNip" placeholder="Masukkan Nomor NIP" name="nip" required>
+                        <input type="text" inputmode="numeric" class="form-control" id="teacherNip" placeholder="Masukkan Nomor NIP" name="nip" value="{{ old('nip') }}" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -548,6 +557,14 @@
   <script src="assets/js/main.js"></script>
 
   <script>
+    @if ($errors->any())
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('addModal');
+        if (modal && window.bootstrap) {
+            new bootstrap.Modal(modal).show();
+        }
+    });
+    @endif
         window.onload = function() {
             // Cek jika ada pesan error
             var errorAlert = document.getElementById('alertError');

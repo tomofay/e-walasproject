@@ -72,9 +72,9 @@ class KurikulumPageController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'image_url' => 'nullable|image|max:5000',
-            'no_wa' => 'required|numeric',
+            'no_wa' => 'required|string|max:20',
             'password' => 'required|string|min:8',
-            'nip' => 'required|numeric',
+            'nip' => 'required|string|max:50',
         ]);
     
         // Proses penyimpanan file gambar di folder kurikulum/Photos
@@ -92,9 +92,7 @@ class KurikulumPageController extends Controller
         ]);
     
         /// Redirect kembali dengan data terbaru
-        return redirect()->back()->with([
-            'success' => 'Data Kurikulum berhasil ditambahkan!',
-        ]);
+        return redirect()->route('kurikulum.index')->with('success', 'Data Kurikulum berhasil ditambahkan!');
     }
 
     /**
@@ -125,9 +123,9 @@ class KurikulumPageController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'image_url' => 'nullable|image|max:5000', // Foto bersifat opsional
-            'no_wa' => 'required|numeric',
+            'no_wa' => 'required|string|max:20',
             'password' => 'nullable|string|min:8', // Password opsional
-            'nip' => 'required|numeric',
+            'nip' => 'required|string|max:50',
         ]);
     
         // Cari Wali Kelas berdasarkan ID

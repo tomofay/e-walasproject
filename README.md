@@ -188,12 +188,15 @@ docker compose up -d --build
 | Variabel          | Default          | Keterangan          |
 | ----------------- | ---------------- | ------------------- |
 | `APP_PORT`        | `80`           | Port aplikasi       |
-| `DB_DATABASE`     | `ewalas`         | Nama database       |
+| `DOCKER_APP_URL`  | `https://e-walas.sija.smkn1cibinong.sch.id` | URL publik aplikasi |
+| `DOCKER_DB_DATABASE` | `ewalas`      | Nama database Docker |
 | `DB_USERNAME`     | `ewalas`         | User database       |
 | `DB_PASSWORD`     | `ewalas_secret`  | Password database   |
 | `DB_ROOT_PASSWORD`| `root_secret`    | Root password MySQL |
 
-Override variabel di `.env` sebelum `docker compose up`.
+Override variabel di `.env` sebelum `docker compose up`. Gunakan
+`DOCKER_DB_DATABASE` untuk Docker agar nilai `DB_DATABASE` lokal (misalnya path
+SQLite) tidak ikut dipakai container.
 
 ### Perintah Berguna
 ```bash

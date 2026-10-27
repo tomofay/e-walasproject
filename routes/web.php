@@ -164,31 +164,33 @@ Route::middleware('admin')->group(function () {
     Route::resource('adminpage', PageAdminController::class)->name('index', 'homepageadmin.index');
     Route::resource('wargasekolah', WargaSekolahController::class);
     Route::resource('detailkelas', SiswaDataPageAdminController::class);
+    Route::post('/siswa/tambah-ke-rombel', [SiswaDataPageAdminController::class, 'tambahKeRombel'])
+        ->name('siswa.tambah.ke.rombel');
     Route::get('/rombeldetail/{rombel_id}', [ShowDetailRombelController::class, 'showDetail'])->name('detail.kelas');
 
     // CRUD WALAS
-    Route::resource('walas', WaliKelasPageController::class)->except(['edit', 'update']);
+    Route::resource('walas', WaliKelasPageController::class)->except(['edit', 'update', 'destroy']);
     Route::delete('/hapuswalas/{id}', [WaliKelasPageController::class, 'hapuswalas'])->name('walas.destroy');
     Route::get('/walas/{id}/edit', [WaliKelasPageController::class, 'edit'])->name('walas.edit');
-    Route::put('/walas/{id}', [WaliKelasPageController::class, 'update']);
+    Route::put('/walas/{id}', [WaliKelasPageController::class, 'update'])->name('walas.update');
     Route::get('/walas_search', [WaliKelasPageController::class, 'walas_search']);
 
     // CRUD KAKOM
-    Route::resource('kakom', KakomDataController::class)->except(['edit', 'update']);
+    Route::resource('kakom', KakomDataController::class)->except(['edit', 'update', 'destroy']);
     Route::delete('/hapuskakom/{id}', [KakomDataController::class, 'hapuskakom'])->name('kakom.destroy');
     Route::get('/kakom/{id}/edit', [KakomDataController::class, 'edit'])->name('kakom.edit');
-    Route::put('/kakom/{id}', [KakomDataController::class, 'update']);
+    Route::put('/kakom/{id}', [KakomDataController::class, 'update'])->name('kakom.update');
     Route::get('/kakom_search', [KakomDataController::class, 'kakom_search']);
 
     // CRUD KURIKULUM
-    Route::resource('kurikulum', KurikulumPageController::class)->except(['edit', 'update']);
+    Route::resource('kurikulum', KurikulumPageController::class)->except(['edit', 'update', 'destroy']);
     Route::delete('/hapuskurikulum/{id}', [KurikulumPageController::class, 'hapuskurikulum'])->name('kurikulum.destroy');
     Route::get('/kurikulum/{id}/edit', [KurikulumPageController::class, 'edit'])->name('kurikulum.edit');
-    Route::put('/kurikulum/{id}', [KurikulumPageController::class, 'update']);
+    Route::put('/kurikulum/{id}', [KurikulumPageController::class, 'update'])->name('kurikulum.update');
     Route::get('/kurikulum_search', [KurikulumPageController::class, 'kurikulum_search']);
 
     // CRUD KEPSEK
-    Route::resource('kepalasekolah', KepsekPageController::class)->except(['edit', 'update']);
+    Route::resource('kepalasekolah', KepsekPageController::class)->except(['edit', 'update', 'destroy']);
     Route::delete('/hapuskepsek/{id}', [KepsekPageController::class, 'hapuskepsek'])->name('kepsek.destroy');
     Route::get('/kepsek/{id}/edit', [KepsekPageController::class, 'edit'])->name('kepsek.edit');
     Route::put('/kepsek/{id}', [KepsekPageController::class, 'update'])->name('kepsek.update');
@@ -196,10 +198,10 @@ Route::middleware('admin')->group(function () {
     Route::get('/kepsek_search', [KepsekPageController::class, 'kepsek_search']);
 
     // CRUD GURU
-    Route::resource('guru', GuruPageController::class)->except(['edit', 'update']);
+    Route::resource('guru', GuruPageController::class)->except(['edit', 'update', 'destroy']);
     Route::delete('/hapusguru/{id}', [GuruPageController::class, 'hapusguru'])->name('guru.destroy');
     Route::get('/guru/{id}/edit', [GuruPageController::class, 'edit'])->name('guru.edit');
-    Route::put('/guru/{id}', [GuruPageController::class, 'update']);
+    Route::put('/guru/{id}', [GuruPageController::class, 'update'])->name('guru.update');
     Route::get('/guru_search', [GuruPageController::class, 'guru_search']);
     Route::get('/guru-export', [GuruPageController::class, 'export']);
 
@@ -225,7 +227,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/mapel-export', [MapelPageController::class, 'export']);
 
     // CRUD ROMBEL
-    Route::resource('rombel', RombelPageController::class)->except(['edit', 'update', 'store']);
+    Route::resource('rombel', RombelPageController::class)->except(['edit', 'update', 'store', 'destroy']);
     Route::post('/rombel/store', [RombelPageController::class, 'store'])->name('rombels.store');
     Route::put('/rombels/{id}', [RombelPageController::class, 'update'])->name('rombels.update');
     Route::get('/rombels/{id}/edit', [RombelPageController::class, 'edit'])->name('rombels.edit');
@@ -233,7 +235,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/rombel_search', [RombelPageController::class, 'rombel_search']);
 
     // CRUD MAPEL
-    Route::resource('datamapel', MapelPageController::class)->except(['edit', 'update', 'store']);
+    Route::resource('datamapel', MapelPageController::class)->except(['edit', 'update', 'store', 'destroy']);
     Route::delete('/hapusmapel/{id}', [MapelPageController::class, 'hapusmapel'])->name('mapel.destroy');
     Route::get('/mapel/{id}/edit', [MapelPageController::class, 'edit'])->name('mapel.edit');
     Route::put('/mapel/{id}', [MapelPageController::class, 'update'])->name('mapel.update');
@@ -335,7 +337,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/jadwalpiket/siswa/{id}', [JadwalPiketController::class, 'update'])->name('jadwalpiket.updateSiswa');
 
     // Serah terima rapot
-    Route::resource('serahterimarapor', DaftarPenyerahanRapotController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('serahterimarapor', DaftarPenyerahanRapotController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/serahterimarapor-download-template', [DaftarPenyerahanRapotController::class, 'downloadTemplate'])->name('serahterimarapor.download-template');
     Route::get('/penyerahanrapotcreate', [DaftarPenyerahanRapotController::class, 'create'])->name('penyerahanrapot.create');
     Route::post('/penyerahanrapot/store', [DaftarPenyerahanRapotController::class, 'store'])->name('penyerahanrapot.store');
@@ -344,7 +346,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/penyerahanrapot/{id}', [DaftarPenyerahanRapotController::class, 'update'])->name('penyerahanrapot.update');
 
     // Home visit
-    Route::resource('homevisit', HomeVisitController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('homevisit', HomeVisitController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/homevisit/generatepdf', [HomeVisitController::class, 'generatePDF'])->name('homevisit.generatepdf');
     Route::get('/homevisitcreate', [HomeVisitController::class, 'create'])->name('homevisit.create');
     Route::post('/homevisit/store', [HomeVisitController::class, 'store'])->name('homevisit.store');
@@ -353,7 +355,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/homevisit/{id}', [HomeVisitController::class, 'update'])->name('homevisit.update');
 
     // Buku tamu ortu
-    Route::resource('bukutamuortu', BukuTamuOrtuController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('bukutamuortu', BukuTamuOrtuController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/bukutamuortu/generatepdf', [BukuTamuOrtuController::class, 'generatePDF'])->name('bukutamuortu.generatepdf');
     Route::get('/bukutamuortucreate', [BukuTamuOrtuController::class, 'create'])->name('bukutamuortu.create');
     Route::post('/bukutamuortu/store', [BukuTamuOrtuController::class, 'store'])->name('bukutamuortu.store');
@@ -362,7 +364,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/bukutamuortu/{id}', [BukuTamuOrtuController::class, 'update'])->name('bukutamuortu.update');
 
     // Agenda walas
-    Route::resource('agendawalas', AgendaKegiatanWalasController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('agendawalas', AgendaKegiatanWalasController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/agendawalascreate', [AgendaKegiatanWalasController::class, 'create'])->name('agendawalas.create');
     Route::post('/agendawalas/store', [AgendaKegiatanWalasController::class, 'store'])->name('agendawalas.store');
     Route::get('/agendawalas/{id}/edit', [AgendaKegiatanWalasController::class, 'edit'])->name('agendawalas.edit');
@@ -370,7 +372,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/agendawalas/{id}', [AgendaKegiatanWalasController::class, 'update'])->name('agendawalas.update');
 
     // Catatan kasus
-    Route::resource('catatankasus', CatatanKasusSiswaController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('catatankasus', CatatanKasusSiswaController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/catatankasuscreate', [CatatanKasusSiswaController::class, 'create'])->name('catatankasus.create');
     Route::post('/catatankasus/store', [CatatanKasusSiswaController::class, 'store'])->name('catatankasus.store');
     Route::get('/catatankasus/{id}/edit', [CatatanKasusSiswaController::class, 'edit'])->name('catatankasus.edit');
@@ -379,7 +381,8 @@ Route::middleware('walas')->group(function () {
     Route::get('/catatankasus/export/pdf', [CatatanKasusSiswaController::class, 'index'])->name('catatankasus.export');
 
     // Daftar peserta didik
-    Route::resource('daftarpesertadidik', DaftarPesertaDidikController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('daftarpesertadidik', DaftarPesertaDidikController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::get('/get-siswa/{id}', [DaftarPesertaDidikController::class, 'getSiswa'])->name('siswa.get');
     Route::get('/daftarpesertadidikcreate', [DaftarPesertaDidikController::class, 'create'])->name('daftarpesertadidik.create');
     Route::post('/daftarpesertadidik/store', [DaftarPesertaDidikController::class, 'store'])->name('daftarpesertadidik.store');
     Route::get('/daftarpesertadidik/{id}/edit', [DaftarPesertaDidikController::class, 'edit'])->name('daftarpesertadidik.edit');
@@ -387,7 +390,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/daftarpesertadidik/{id}', [DaftarPesertaDidikController::class, 'update'])->name('daftarpesertadidik.update');
 
     // Rekap jumlah siswa
-    Route::resource('rekapjumlahsiswa', RekapitulasiJumlahSiswaController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('rekapjumlahsiswa', RekapitulasiJumlahSiswaController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/rekapjumlahsiswacreate', [RekapitulasiJumlahSiswaController::class, 'create'])->name('rekapjumlahsiswa.create');
     Route::post('/rekapjumlahsiswa/store', [RekapitulasiJumlahSiswaController::class, 'store'])->name('rekapjumlahsiswa.store');
     Route::get('/rekapjumlahsiswa/{id}/edit', [RekapitulasiJumlahSiswaController::class, 'edit'])->name('rekapjumlahsiswa.edit');
@@ -395,7 +398,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/rekapjumlahsiswa/{id}', [RekapitulasiJumlahSiswaController::class, 'update'])->name('rekapjumlahsiswa.update');
 
     // Persentase sosial ekonomi
-    Route::resource('persentasesosialekonomi', PersentasePekerjaanOrtuController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('persentasesosialekonomi', PersentasePekerjaanOrtuController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/persentasesosialekonomicreate', [PersentasePekerjaanOrtuController::class, 'create'])->name('persentasesosialekonomi.create');
     Route::post('/persentasesosialekonomi/store', [PersentasePekerjaanOrtuController::class, 'store'])->name('persentasesosialekonomi.store');
     Route::get('/persentasesosialekonomi/{id}/edit', [PersentasePekerjaanOrtuController::class, 'edit'])->name('persentasesosialekonomi.edit');
@@ -403,7 +406,7 @@ Route::middleware('walas')->group(function () {
     Route::put('/persentasesosialekonomi/{id}', [PersentasePekerjaanOrtuController::class, 'update'])->name('persentasesosialekonomi.update');
 
     // Prestasi siswa (walas)
-    Route::resource('prestasisiswa', PrestasiSiswaController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('prestasisiswa', PrestasiSiswaController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/prestasisiswa/generatepdf', [PrestasiSiswaController::class, 'generatePDF'])->name('prestasisiswa.generatepdf');
     Route::get('/prestasisiswacreate', [PrestasiSiswaController::class, 'create'])->name('prestasisiswa.create');
     Route::post('/prestasisiswa/store', [PrestasiSiswaController::class, 'store'])->name('prestasisiswa.store');
@@ -462,8 +465,8 @@ Route::middleware('kakom')->group(function () {
         ->name('detail.keluarormbelkakom');
 
     Route::resource('profilekakom', ProfileKakomController::class)->except(['edit', 'update']);
-    Route::get('/profilekakom/{id}/edit', [ProfileKakomController::class, 'edit'])->name('profilekaprog.edit');
-    Route::put('/profilekakom/{id}', [ProfileKakomController::class, 'update'])->name('profilekaprog.update');
+    Route::get('/profilekakom/{id}/edit', [ProfileKakomController::class, 'edit'])->name('profilekakom.edit');
+    Route::put('/profilekakom/{id}', [ProfileKakomController::class, 'update'])->name('profilekakom.update');
 });
 
 /*
@@ -584,7 +587,7 @@ Route::middleware('siswa')->group(function () {
     Route::put('/biodatasiswaupdate/{id}', [InputDataDiriSiswaController::class, 'update'])->name('biodatasiswa.update');
     Route::resource('catatankasussiswa', CatatanKasusController::class);
 
-    Route::resource('prestasisiswainput', PrestasiSiswaInputController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::resource('prestasisiswainput', PrestasiSiswaInputController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('/prestasisiswainputcreate', [PrestasiSiswaInputController::class, 'create'])->name('prestasisiswainput.create');
     Route::post('/prestasisiswainput/store', [PrestasiSiswaInputController::class, 'store'])->name('prestasisiswainput.store');
     Route::get('/prestasisiswainput/{id}/edit', [PrestasiSiswaInputController::class, 'edit'])->name('prestasisiswainput.edit');

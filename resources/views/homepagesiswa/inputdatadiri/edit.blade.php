@@ -490,6 +490,7 @@
                         <option value="X" {{ old('kelas', $biodata->kelas ?? '') == 'X' ? 'selected' : '' }}>X</option>
                         <option value="XI" {{ old('kelas', $biodata->kelas ?? '') == 'XI' ? 'selected' : '' }}>XI</option>
                         <option value="XII" {{ old('kelas', $biodata->kelas ?? '') == 'XII' ? 'selected' : '' }}>XII</option>
+                        <option value="XIII" {{ old('kelas', $biodata->kelas ?? '') == 'XIII' ? 'selected' : '' }}>XIII</option>
                     </select>
                 </div>
                 <div class="col-md-6">

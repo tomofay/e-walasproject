@@ -185,7 +185,7 @@
                             <div class="mb-3">
                                 <label for="nama_peserta_didik" class="form-label">Nama Peserta Didik:</label>
                                 <input type="text" name="nama_peserta_didik" id="nama_peserta_didik" 
-                                    class="form-control" value="{{ old('nama_peserta_didik', $homevisit->siswa->nama) }}" required>
+                                    class="form-control" value="{{ old('nama_peserta_didik', $homevisit->siswa?->nama ?? $homevisit->nama_peserta_didik) }}" required>
                             </div>
 
                             <!-- Kasus -->

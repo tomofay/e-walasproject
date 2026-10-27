@@ -15,13 +15,16 @@ use App\Models\Kurikulum;
 use App\Models\Kakom;
 use App\Models\KeluarRombel;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Concerns\BuildsKeluarRombelPeriods;
 
 class KeluarRombelViewKakomController extends Controller
 {
+    use BuildsKeluarRombelPeriods;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Periksa apakah session 'kakom_id' ada
         if (!session()->has('kakom_id')) {
@@ -42,17 +45,21 @@ class KeluarRombelViewKakomController extends Controller
         // Ambil ID rombels yang memiliki kompetensi yang sama dengan kakom
         $rombelIds = Rombel::where('kompetensi', $kompetensi)->pluck('id');
 
-        // Ambil hanya data KeluarRombel yang memiliki siswa dalam rombel yang sesuai
-        $keluarrombel = KeluarRombel::whereHas('siswa', function ($query) use ($rombelIds) {
+        // Batasi periode dan data hanya pada kompetensi yang diampu Kakom.
+        $periodQuery = KeluarRombel::whereHas('siswa', function ($query) use ($rombelIds) {
             $query->whereIn('rombels_id', $rombelIds);
-        })->with(['siswa.rombel'])->get();
-
-        // Kelompokkan data berdasarkan nama_kelas
-        $kelasGroup = $keluarrombel->groupBy(function ($item) {
-            return $item->siswa->rombel->nama_kelas ?? 'Tidak Ada Kelas';
         });
+        $periods = $this->availableAcademicPeriods(clone $periodQuery);
+        $selectedPeriod = $this->selectedAcademicPeriod($request);
+        $kelasGroup = collect();
 
-        return view('homepagekaprog.keluarrombel.index', compact('kakom', 'kelasGroup'));
+        if ($selectedPeriod) {
+            $kelasGroup = $this->groupKeluarRombelByClass(
+                $this->recordsForAcademicPeriod(clone $periodQuery, $selectedPeriod)
+            );
+        }
+
+        return view('homepagekaprog.keluarrombel.index', compact('kakom', 'periods', 'selectedPeriod', 'kelasGroup'));
     }
 
 
@@ -75,7 +82,7 @@ class KeluarRombelViewKakomController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showSiswaKeluarRombelKakom(string $id)
+    public function showSiswaKeluarRombelKakom(string $id, Request $request)
     {
         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
         $kakom = Auth::guard('kakoms')->user();  // ini akan mendapatkan data siswa yang sedang login
@@ -93,15 +100,17 @@ class KeluarRombelViewKakomController extends Controller
             return redirect('/loginkakom')->with('error', 'Data kakom tidak ditemukan.');
         }
 
-        // Ambil data KeluarRombel berdasarkan rombel_id yang dipilih
-        $keluarrombel = KeluarRombel::with(['siswa.rombel'])->where('rombels_id', $id)->get();
+        $rombelIds = Rombel::where('kompetensi', $kakom->kompetensi)->pluck('id');
+        abort_unless($rombelIds->contains((int) $id), 404);
 
-        // Kelompokkan berdasarkan nama_kelas
-        $kelasGroup = $keluarrombel->groupBy(function ($item) {
-            return $item->siswa->rombel->nama_kelas ?? 'Tidak Ada Kelas';
-        });
+        $selectedPeriod = $this->selectedAcademicPeriod($request);
+        $query = KeluarRombel::query()->where('rombels_id', $id);
+        if ($selectedPeriod) {
+            $query = $this->recordsForAcademicPeriod($query, $selectedPeriod);
+        }
+        $kelasGroup = $this->groupKeluarRombelByClass($query);
 
-        return view('homepagekaprog.keluarrombel.show', compact('kakom', 'kelasGroup'));
+        return view('homepagekaprog.keluarrombel.show', compact('kakom', 'kelasGroup', 'selectedPeriod'));
     }
 
     /**

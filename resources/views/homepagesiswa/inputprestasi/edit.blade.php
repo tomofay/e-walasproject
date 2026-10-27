@@ -199,7 +199,7 @@
                                     <label for="jenis_prestasi" class="form-label">Jenis Prestasi:</label>
                                     <select name="jenis_prestasi" id="jenis_prestasi" class="form-select" required>
                                         <option value="Akademik" {{ old('jenis_prestasi', $prestasisiswa->jenis_prestasi) == 'Akademik' ? 'selected' : '' }}>Akademik</option>
-                                        <option value="Non-Akademik" {{ old('jenis_prestasi', $prestasisiswa->jenis_prestasi) == 'Non-Akademik' ? 'selected' : '' }}>Non Akademik</option>
+                                        <option value="Non-akademik" {{ old('jenis_prestasi', $prestasisiswa->jenis_prestasi) == 'Non-akademik' ? 'selected' : '' }}>Non Akademik</option>
                                     </select>
                                 </div>
 

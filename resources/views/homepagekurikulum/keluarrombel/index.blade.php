@@ -305,7 +305,7 @@
           <li><a href="/keluarrombeldata" class="active" data-bs-toggle="tooltip" data-bs-placement="top" title="Data Siswa Keluar Rombel">Data Siswa Keluar Rombel</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2024/2025 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -337,6 +337,34 @@
             </div>
         </div>
 
+        @if (!$selectedPeriod)
+        <div class="table-container">
+            <table class="table table-bordered text-center align-middle">
+                <thead>
+                    <tr><th>No</th><th>Tahun Ajaran</th><th>Semester</th><th>Jumlah Data</th><th>Aksi</th></tr>
+                </thead>
+                <tbody>
+                    @forelse ($periods as $period)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $period->academic_year }}</td>
+                            <td>{{ $period->semester }}</td>
+                            <td>{{ $period->record_count }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-info text-white"
+                                   href="{{ route('keluarrombeldatakurikulum.index', ['academic_year' => $period->academic_year, 'semester' => $period->semester]) }}">Detail</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="text-center text-muted">Belum ada data siswa keluar rombel.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @else
+        <p class="mb-3">Periode: <strong>{{ $selectedPeriod['year'] }} - {{ $selectedPeriod['semester'] }}</strong>
+            <a href="{{ route('keluarrombeldatakurikulum.index') }}" class="btn btn-sm btn-outline-secondary ms-2">Kembali ke periode</a>
+        </p>
         <div class="table-container">
             <table class="table">
             <table class="table">
@@ -349,47 +377,54 @@
     </tr>
 </thead>
 <tbody>
-    @foreach ($kelasGroup as $nama_kelas => $kelas)
-        @php
-            // Ambil salah satu siswa di kelas ini
-            $firstSiswa = $kelas->first()->siswa ?? null;
-
-            // Ambil kompetensi dan rombels_id jika tersedia
-            $kompetensi = $firstSiswa->rombel->kompetensi ?? 'Tidak Ada Kompetensi';
-            $rombels_id = $firstSiswa->rombel->id ?? null; // Ambil ID rombel dengan aman
-
-            // Buat ID unik untuk collapse
-            $idCollapse = 'kelas-' . Str::slug($nama_kelas);
-        @endphp
+    @if ($kelasGroup->isEmpty())
         <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $kompetensi }}</td>
-            <td>{{ $nama_kelas }}</td>
-            <td>
-                @if($rombels_id)
-                    <a href="{{ route('detail.keluarormbelkurikulum', ['rombels_id' => $rombels_id]) }}" 
-                       class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Detail kelas">
-                        <i class="bi bi-info-circle text-white"></i> Detail Kelas
-                    </a>
-                @else
-                    <span class="text-danger">Data Tidak Lengkap</span>
-                @endif
-            </td>
+            <td colspan="4" class="text-center text-muted">Belum ada data siswa keluar rombel.</td>
         </tr>
-        <!-- Daftar siswa -->
-        <tr class="collapse" id="{{ $idCollapse }}">
-            <td colspan="4">
-                <ul>
-                    @foreach ($kelas as $data)
-                        <li>{{ $data->siswa->nama ?? 'Tidak Ada Nama' }}</li>
-                    @endforeach
-                </ul>
-            </td>
-        </tr>
-    @endforeach
+    @else
+        @foreach ($kelasGroup as $nama_kelas => $kelas)
+            @php
+                // Ambil salah satu siswa di kelas ini
+                $firstSiswa = $kelas->first()->siswa ?? null;
+
+                // Ambil kompetensi dan rombels_id jika tersedia
+                $kompetensi = $firstSiswa->rombel->kompetensi ?? 'Tidak Ada Kompetensi';
+                $rombels_id = $firstSiswa->rombel->id ?? null; // Ambil ID rombel dengan aman
+
+                // Buat ID unik untuk collapse
+                $idCollapse = 'kelas-' . Str::slug($nama_kelas);
+            @endphp
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $kompetensi }}</td>
+                <td>{{ $nama_kelas }}</td>
+                <td>
+                    @if($rombels_id)
+                       <a href="{{ route('detail.keluarormbelkurikulum', ['rombels_id' => $rombels_id, 'academic_year' => $selectedPeriod['year'], 'semester' => $selectedPeriod['semester']]) }}"
+                           class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Detail kelas">
+                           <i class="bi bi-info-circle text-white"></i> Detail Kelas
+                       </a>
+                    @else
+                       <span class="text-danger">Data Tidak Lengkap</span>
+                    @endif
+                </td>
+            </tr>
+            <!-- Daftar siswa -->
+            <tr class="collapse" id="{{ $idCollapse }}">
+                <td colspan="4">
+                    <ul>
+                       @foreach ($kelas as $data)
+                           <li>{{ $data->siswa->nama ?? 'Tidak Ada Nama' }}</li>
+                       @endforeach
+                    </ul>
+                </td>
+            </tr>
+        @endforeach
+    @endif
 </tbody>
 
     </table>
+        @endif
 </main>
   
     <div class="container copyright text-center mt-4">

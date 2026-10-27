@@ -199,7 +199,7 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $homevisit->tanggal }}</td>
-                <td>{{ $homevisit->siswa->nama ?? 'Siswa Tidak Ditemukan' }}</td>
+                <td>{{ $homevisit->siswa?->nama ?? $homevisit->nama_peserta_didik }}</td>
                 <td>{{ $homevisit->kasus }}</td>
                 <td>{{ $homevisit->solusi }}</td>
                 <td>{{ $homevisit->tindak_lanjut }}</td>

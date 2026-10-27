@@ -245,7 +245,6 @@
       <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="/jadwalpiket">Jadwal Piket</a></li>
-          <li><a href="/createpiket" class="active">Buat Piket</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>

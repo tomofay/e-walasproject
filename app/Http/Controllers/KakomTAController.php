@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Rombel;
 use App\Models\Kakom;
+use App\Models\KeluarRombel;
 use Illuminate\Support\Facades\Auth;
+use App\Support\AcademicYear;
 
 class KakomTAController extends Controller
 {
@@ -35,21 +37,20 @@ class KakomTAController extends Controller
         // Ambil semua rombel yang memiliki kompetensi yang sama dengan kompetensi kakom yang sedang login
         $kompetensi = Rombel::where('kompetensi', $kompetensi_kakom)->get();
 
-        $today = date('Y-m-d');
-        $year = date('Y');
-        $month = date('m');
-        $day = date('d');
-  
-        if ($month >= 7 && $day >= 7) {
-            $tahunAjaran = "$year/" . ($year + 1);
-            $status = "GANJIL";
-        } else {
-            $tahunAjaran = ($year - 1) . "/$year";
-            $status = "GENAP";
-        }
+        ['year' => $tahunAjaran, 'status' => $status] = AcademicYear::current();
+        $keluarRombelPeriods = KeluarRombel::query()
+            ->whereHas('siswa.rombel', fn ($query) => $query->where('kompetensi', $kakom->kompetensi))
+            ->select(['academic_year', 'semester'])
+            ->selectRaw('COUNT(*) as record_count')
+            ->whereNotNull('academic_year')
+            ->whereNotNull('semester')
+            ->groupBy('academic_year', 'semester')
+            ->orderByDesc('academic_year')
+            ->orderBy('semester')
+            ->get();
   
 
-        return view ('homepagekaprog.tahunakademik', compact('kakom', 'kompetensi_kakom', 'kompetensi', 'tahunAjaran', 'status'));
+        return view ('homepagekaprog.tahunakademik', compact('kakom', 'kompetensi_kakom', 'kompetensi', 'tahunAjaran', 'status', 'keluarRombelPeriods'));
     }
 
     /**

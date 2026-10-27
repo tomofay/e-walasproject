@@ -186,13 +186,13 @@
                                     <!-- Jumlah -->
                                     <div class="mb-3">
                                         <label for="jumlah" class="form-label">Jumlah:</label>
-                                        <input type="number" name="jumlah" id="jumlah" class="form-control" value="{{ old('jumlah', $persentase->jumlah) }}" readonly required>
+                                        <input type="number" name="jumlah" id="jumlah" class="form-control" value="{{ old('jumlah', $persentase->jumlah) }}" min="0" required>
                                     </div>
 
                                     <!-- Persentase -->
                                     <div class="mb-3">
                                         <label for="persentase" class="form-label">Persentase:</label>
-                                        <input type="text" name="persentase" id="persentase" class="form-control" value="{{ old('persentase', $persentase->persentase) }}" readonly required>
+                                        <input type="text" name="persentase" id="persentase" class="form-control" value="{{ old('persentase', $persentase->persentase) }}" required>
                                     </div>
 
                                     <!-- Keterangan -->

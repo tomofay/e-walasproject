@@ -8,6 +8,7 @@ use App\Http\Concerns\HasWalasAuth;
 use Illuminate\Http\Request;
 use App\Models\LembarPengesahan;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LembarPengesahanController extends Controller
 {
@@ -25,13 +26,12 @@ class LembarPengesahanController extends Controller
 
     public function downloadTemplate()
     {
-        $pathToFile = storage_path('app/public/Lembar_Pengesahan.pdf');
+        $walas = $this->getAuthenticatedWalas();
+        $rombel = $this->getWalasRombel();
 
-        if (! file_exists($pathToFile)) {
-            return back()->with('error', 'Template belum tersedia.');
-        }
-
-        return response()->download($pathToFile);
+        return Pdf::loadView('pdf.template-lembar-pengesahan', compact('walas', 'rombel'))
+            ->setPaper('a4')
+            ->download('Lembar_Pengesahan_Wali_Kelas.pdf');
     }
 
     public function create()

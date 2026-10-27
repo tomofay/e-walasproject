@@ -16,17 +16,22 @@ class WalasImport implements ToModel, WithHeadingRow
       // Tentukan baris awal header data
     public function headingRow(): int
     {
-        return 5;
+        return 4;
     }
     
     public function model(array $row)
     {
+        $nama = trim((string) ($row['nama'] ?? ''));
+        if ($nama === '') {
+            return null;
+        }
+
         return new Walas([
-        'nama' => $row['nama'],
-        'jenis_kelamin' => $row['jenis_kelamin'],
-        'no_wa' => $row['no_wa'],
-        'password' => Hash::make($row['password']),
-        'nip' => $row['nip'],
+        'nama' => $nama,
+        'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
+        'no_wa' => $row['no_wa'] ?? null,
+        'password' => Hash::make((string) ($row['password'] ?? '')),
+        'nip' => $row['nip'] ?? null,
         ]);
     }
 }

@@ -173,8 +173,8 @@
                                         <option value="" disabled selected>Pilih Siswa</option>
                                         @foreach ($siswas as $s)
                                             <option value="{{ $s->id }}" 
-                                                data-nis="{{ $s->biodataSiswa->nis ?? '' }}" 
-                                                data-nisn="{{ $s->biodataSiswa->nisn ?? '' }}">
+                                                data-nis="{{ $s->biodata?->nis ?? '' }}" 
+                                                data-nisn="{{ $s->biodata?->nisn ?? '' }}">
                                                 {{ $s->nama }}
                                             </option>
                                         @endforeach
@@ -184,13 +184,13 @@
                                 <!-- NIS -->
                                 <div class="mb-3">
                                     <label for="nis" class="form-label">NIS:</label>
-                                    <input type="number" name="nis" id="nis" class="form-control" required readonly>
+                                    <input type="text" name="nis" id="nis" class="form-control" required>
                                 </div>
 
                                 <!-- NISN -->
                                 <div class="mb-3">
                                     <label for="nisn" class="form-label">NISN:</label>
-                                    <input type="number" name="nisn" id="nisn" class="form-control" required readonly>
+                                    <input type="text" name="nisn" id="nisn" class="form-control" required>
                                 </div>
 
                                 <!-- Jenis Kelamin -->

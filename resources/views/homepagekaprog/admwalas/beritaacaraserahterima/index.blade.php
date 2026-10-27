@@ -153,10 +153,6 @@
             <h2 class="font-weight-bold">Berita Acara Serah Terima</h2>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
-                <!-- Tombol Download Data PDF -->
-                <a href="{{ route('beritaacaraserahterima.download-template') }}" class="btn btn-outline-secondary" download>
-                    <i class="bi bi-cloud-download"></i> Download Berita Acara Serah Terima
-                </a>
             </div>
         </div>
         <br>

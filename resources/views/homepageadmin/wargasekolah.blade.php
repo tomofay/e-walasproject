@@ -181,13 +181,27 @@
           </div>
         </div>
 
-<div class="row stats-row gy-7 mt-9 justify-content-center align-items-center" data-aos="fade-up" data-aos-delay="500">
-    <div class="col-lg-4 col-md-8">
-        <h1 class="mb-4 text-center">
-               Data Warga Sekolah <br>
-                <span class="accent-text">Update</span>
-        </h1>
-    </div>
+<div class="row g-4 mt-5 justify-content-center" data-aos="fade-up" data-aos-delay="500">
+    @php
+        $dataWarga = [
+            ['label' => 'Wali Kelas', 'url' => route('walas.index'), 'icon' => 'bi-person-workspace'],
+            ['label' => 'Guru', 'url' => route('guru.index'), 'icon' => 'bi-person-video3'],
+            ['label' => 'Kepala Kompetensi', 'url' => route('kakom.index'), 'icon' => 'bi-person-badge'],
+            ['label' => 'Kurikulum', 'url' => route('kurikulum.index'), 'icon' => 'bi-journal-text'],
+            ['label' => 'Kepala Sekolah', 'url' => route('kepalasekolah.index'), 'icon' => 'bi-person-vcard'],
+        ];
+    @endphp
+    @foreach ($dataWarga as $item)
+        <div class="col-sm-6 col-lg-4">
+            <a href="{{ $item['url'] }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                    <i class="bi {{ $item['icon'] }} accent-text" style="font-size: 2.4rem;"></i>
+                    <h3 class="mt-3 mb-0">{{ $item['label'] }}</h3>
+                    <span class="text-muted small">Kelola data</span>
+                </div>
+            </a>
+        </div>
+    @endforeach
 </div>
 
     </section><!-- /Hero Section -->

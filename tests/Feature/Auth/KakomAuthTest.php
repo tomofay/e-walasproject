@@ -29,6 +29,15 @@ class KakomAuthTest extends TestCase
         $this->get('/kakomwalas')->assertStatus(200);
     }
 
+    public function test_kakom_can_view_and_edit_profile(): void
+    {
+        $this->loginKakom();
+
+        $this->get('/profilekakom')->assertStatus(200);
+        $this->get(route('profilekakom.edit', \App\Models\Kakom::firstOrFail()->id))
+            ->assertStatus(200);
+    }
+
     public function test_kakom_can_view_rombel(): void
     {
         $this->loginKakom();

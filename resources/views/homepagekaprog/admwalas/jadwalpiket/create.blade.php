@@ -244,9 +244,8 @@
       </a>
       <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="/jadwalpiket">Jadwal Piket</a></li>
-          <li><a href="/createpiket" class="active">Buat Piket</a></li>
-        </ul>
+        <li><a href="{{ route('jadwalpiket.index') }}">Jadwal Piket</a></li>
+      </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
        <!-- Menampilkan ikon user dan informasi walas yang sedang login -->
@@ -328,8 +327,13 @@
             </div>
 
             <!-- Button Simpan -->
-            <div class="d-flex justify-content-center mt-4">
-                <button type="submit" class="btn btn-primary">Simpan</button>
+            <div class="d-flex justify-content-center gap-2 mt-4">
+                <a href="{{ route('jadwalpiket.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    Batal
+                </a>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-check2-circle me-2"></i>Simpan Jadwal
+                </button>
             </div>
         </form>
 

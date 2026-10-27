@@ -208,7 +208,7 @@
           <li><a href="/datamapel">Mata Pelajaran</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2025/2026 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -227,7 +227,7 @@
 
   <div class="container mt-5">
     <div class="form-container">
-    <h3>Form Edit Wali Kelas </h3>
+    <h3>Form Edit Kepala Kompetensi</h3>
     <br>
         <!-- Form Edit Data Wali Kelas -->
 <form action="{{ route('kakom.update', $kakom->id) }}" method="POST" enctype="multipart/form-data">
@@ -256,7 +256,14 @@
     </div>
     <div class="mb-3">
         <label for="kompetensi" class="form-label">Kompetensi Keahlian</label>
-        <input type="text" class="form-control" id="teacherName" name="kompetensi" value="{{ old('kompetensi', $kakom->kompetensi) }}" required>
+        <select class="form-select" id="kompetensi" name="kompetensi" required>
+            <option value="" disabled>Pilih Kompetensi</option>
+            @foreach (['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP', 'TFLM', 'TOI', 'TKR'] as $kompetensi)
+                <option value="{{ $kompetensi }}" {{ old('kompetensi', $kakom->kompetensi) === $kompetensi ? 'selected' : '' }}>
+                    {{ $kompetensi }}
+                </option>
+            @endforeach
+        </select>
     </div>
     <div class="mb-3">
         <button type="submit" class="btn btn-success">Update Data</button>

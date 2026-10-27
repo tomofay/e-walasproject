@@ -85,8 +85,8 @@ class PersentasePekerjaanOrtuController extends Controller
 
         $validatedData = $request->validate([
             'jenis_sosial_ekonomi' => 'required',
-            'jumlah' => 'required',
-            'persentase' => 'required',
+            'jumlah' => 'required|numeric|min:0',
+            'persentase' => 'required|string|max:20',
             'keterangan' => 'required',
             'tanggal' => 'required',
             'ttdwalas_url' => 'nullable|url',
@@ -162,8 +162,8 @@ class PersentasePekerjaanOrtuController extends Controller
 
         $validatedData = $request->validate([
             'jenis_sosial_ekonomi' => 'required',
-            'jumlah' => 'required',
-            'persentase' => 'required',
+            'jumlah' => 'required|numeric|min:0',
+            'persentase' => 'required|string|max:20',
             'keterangan' => 'required',
             'tanggal' => 'required',
             'ttdwalas_url' => 'nullable|url',

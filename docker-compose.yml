@@ -12,10 +12,11 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY}
+      APP_URL: ${DOCKER_APP_URL:-https://e-walas.sija.smkn1cibinong.sch.id}
       DB_CONNECTION: mariadb
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-ewalas}
+      DB_DATABASE: ${DOCKER_DB_DATABASE:-ewalas}
       DB_USERNAME: ${DB_USERNAME:-ewalas}
       DB_PASSWORD: ${DB_PASSWORD:-ewalas_secret}
     volumes:
@@ -27,7 +28,7 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
-      MARIADB_DATABASE: ${DB_DATABASE:-ewalas}
+      MARIADB_DATABASE: ${DOCKER_DB_DATABASE:-ewalas}
       MARIADB_USER: ${DB_USERNAME:-ewalas}
       MARIADB_PASSWORD: ${DB_PASSWORD:-ewalas_secret}
     ports:

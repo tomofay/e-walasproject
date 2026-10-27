@@ -84,7 +84,7 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $item->tanggal }}</td>
-                <td>{{ optional($item->siswa)->nama ?? 'Siswa Tidak Ditemukan' }}</td>
+                <td>{{ $item->siswa?->nama ?? $item->nama_peserta_didik }}</td>
                 <td>{{ $item->nama_orang_tua }}</td>
                 <td>{{ $item->kasus }}</td>
                 <td>{{ $item->solusi }}</td>

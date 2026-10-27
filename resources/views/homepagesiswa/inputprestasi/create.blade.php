@@ -200,7 +200,7 @@
                                     <select name="jenis_prestasi" id="jenis_prestasi" class="form-select" required>
                                         <option value="" disabled selected>Pilih Jenis Prestasi</option>
                                         <option value="Akademik">Akademik</option>
-                                        <option value="Non-Akademik">Non Akademik</option>
+                                        <option value="Non-akademik">Non Akademik</option>
                                     </select>
                                 </div>
 

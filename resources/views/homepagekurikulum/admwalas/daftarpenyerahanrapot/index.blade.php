@@ -157,9 +157,6 @@
             <div class="d-flex align-items-center justify-content-start">
                 <!-- Form Cari Administrasi -->
                 
-                <a href="{{ route('serahterimarapor.download-template') }}" class="btn btn-outline-secondary" download>
-                    <i class="bi bi-cloud-download"></i> Download File
-                </a>
             </div>
         </div>
         <br><br>

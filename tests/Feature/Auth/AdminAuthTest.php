@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use Tests\TestCase;
 use App\Models\Admin;
+use App\Support\AcademicYear;
 use Illuminate\Support\Facades\Hash;
 
 class AdminAuthTest extends TestCase
@@ -48,6 +49,20 @@ class AdminAuthTest extends TestCase
         ]);
 
         $this->get('/adminpage')->assertStatus(200);
+    }
+
+    public function test_academic_year_navbar_uses_the_current_academic_year(): void
+    {
+        $this->post('/loginadmin', [
+            'nama' => 'admin',
+            'password' => $this->password(),
+        ]);
+
+        $year = AcademicYear::current()['year'];
+
+        $this->get('/tahunajaran')
+            ->assertOk()
+            ->assertSee("Tahun Ajaran {$year} - Aktif");
     }
 
     public function test_admin_can_view_warga_sekolah(): void

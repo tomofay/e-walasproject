@@ -64,7 +64,7 @@ class PrestasiSiswaController extends Controller
             'walas_id' => 'required|exists:walas,id',
             'siswas_id' => 'required|exists:siswas,id',
             'rombels_id' => 'required',
-            'jenis_prestasi' => 'required',
+            'jenis_prestasi' => 'required|in:Akademik,Non-akademik,Non-Akademik',
             'nama_prestasi' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'sertifikat_url' => 'nullable',
@@ -79,11 +79,15 @@ class PrestasiSiswaController extends Controller
             ? $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public')
             : null;
 
+        $jenisPrestasi = $request->jenis_prestasi === 'Non-Akademik'
+            ? 'Non-akademik'
+            : $request->jenis_prestasi;
+
         PrestasiSiswa::create([
             'walas_id' => $request->walas_id,
             'siswas_id' => $request->siswas_id,
             'rombels_id' => $request->rombels_id,
-            'jenis_prestasi' => $request->jenis_prestasi,
+            'jenis_prestasi' => $jenisPrestasi,
             'nama_prestasi' => $request->nama_prestasi,
             'tanggal' => $request->tanggal,
             'sertifikat_url' => $sertifikatPath,
@@ -114,7 +118,7 @@ class PrestasiSiswaController extends Controller
             'walas_id' => 'required|exists:walas,id',
             'siswas_id' => 'required|exists:siswas,id',
             'rombels_id' => 'required',
-            'jenis_prestasi' => 'required',
+            'jenis_prestasi' => 'required|in:Akademik,Non-akademik,Non-Akademik',
             'nama_prestasi' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'sertifikat_url' => 'nullable',
@@ -139,11 +143,15 @@ class PrestasiSiswaController extends Controller
             $dokumentasiPath = $prestasisiswa->dokumentasi_url;
         }
 
+        $jenisPrestasi = $request->jenis_prestasi === 'Non-Akademik'
+            ? 'Non-akademik'
+            : $request->jenis_prestasi;
+
         $prestasisiswa->update([
             'walas_id' => $request->walas_id,
             'siswas_id' => $request->siswas_id,
             'rombels_id' => $request->rombels_id,
-            'jenis_prestasi' => $request->jenis_prestasi,
+            'jenis_prestasi' => $jenisPrestasi,
             'nama_prestasi' => $request->nama_prestasi,
             'tanggal' => $request->tanggal,
             'sertifikat_url' => $sertifikatPath,

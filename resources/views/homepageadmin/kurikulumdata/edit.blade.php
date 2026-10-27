@@ -179,6 +179,15 @@
 
 <body>
   <!-- Tampilkan pesan error -->
+  @if ($errors->any())
+    <div class="alert alert-danger" id="alertError">
+      <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+          <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+    </div>
+  @endif
   @if (session('error'))
     <div class="alert alert-danger" id="alertError">
       <p>{{ session('error') }}</p>
@@ -208,7 +217,7 @@
           <li><a href="/datamapel">Mata Pelajaran</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2025/2026 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -248,7 +257,7 @@
     </div>
     <div class="mb-3">
         <label for="teacherWhatsApp" class="form-label">WhatsApp</label>
-        <input type="number" class="form-control" id="teacherWhatsApp" name="no_wa" value="{{ old('no_wa', $kurikulum->no_wa) }}" required>
+        <input type="text" inputmode="numeric" class="form-control" id="teacherWhatsApp" name="no_wa" value="{{ old('no_wa', $kurikulum->no_wa) }}" required>
     </div>
     <div class="mb-3">
         <label for="teacherPassword" class="form-label">Password</label>
@@ -256,7 +265,7 @@
     </div>
     <div class="mb-3">
         <label for="teacherNip" class="form-label">NIP</label>
-        <input type="number" class="form-control" id="teacherNip" name="nip" value="{{ old('nip', $kurikulum->nip) }}" required>
+        <input type="text" inputmode="numeric" class="form-control" id="teacherNip" name="nip" value="{{ old('nip', $kurikulum->nip) }}" required>
     </div>
     <div class="mb-3">
         <button type="submit" class="btn btn-success">Update Data</button>

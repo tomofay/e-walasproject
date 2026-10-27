@@ -73,6 +73,7 @@ class AdmWalasKurikulumViewController extends Controller
   
         // Ambil data kurikulum berdasarkan 'kurikulum_id' yang ada di session
         $kurikulum = Kurikulum::find(session('kurikulum_id'));
+        $kurikulums = $kurikulum;
         
         // Periksa apakah data kurikulum ditemukan
         if (!$kurikulum) {
@@ -87,8 +88,8 @@ class AdmWalasKurikulumViewController extends Controller
             return redirect('/kurikulumwalas')->with('error', 'Data Walas tidak ditemukan.');
         }
     
-        // Kirim data ke view detail
-        return view('homepagekurikulum.admwalasview.admwalas', compact('walas', 'kurikulum'));
+        // Kirim data ke view detail; nama variabel dibuat konsisten agar Blade tidak crash
+        return view('homepagekurikulum.admwalasview.admwalas', compact('walas', 'kurikulum', 'kurikulums'));
     }
 
     /**

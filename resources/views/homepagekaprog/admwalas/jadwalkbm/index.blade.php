@@ -206,9 +206,11 @@
                 <td>{{ $jam }}</td>
                 @foreach (['senin', 'selasa', 'rabu', 'kamis', 'jumat'] as $hariKey)
                     @php
-                        $jadwalHari = collect($hari[$hariKey] ?? [])->firstWhere('jam', $jam);
-                        $mapelNama = $jadwalHari ? ($mapels[$jadwalHari['mapel_id']] ?? 'Tidak ditemukan') : '-';
-                        $guruNama = $jadwalHari ? ($gurus[$jadwalHari['guru_id']] ?? 'Tidak ditemukan') : '-';
+                        $rawSchedule = $hari[$hariKey] ?? null;
+                        $scheduleData = is_string($rawSchedule) ? json_decode($rawSchedule, true) : (is_array($rawSchedule) ? $rawSchedule : []);
+                        $jadwalHari = collect($scheduleData)->firstWhere('jam', $jam);
+                        $mapelNama = $jadwalHari && isset($jadwalHari['mapel_id']) && isset($mapels[$jadwalHari['mapel_id']]) ? ($mapels[$jadwalHari['mapel_id']]->nama_mapel ?? 'Tidak ditemukan') : '-';
+                        $guruNama = $jadwalHari && isset($jadwalHari['guru_id']) && isset($gurus[$jadwalHari['guru_id']]) ? ($gurus[$jadwalHari['guru_id']]->nama ?? 'Tidak ditemukan') : '-';
                     @endphp
                     <td>{{ $mapelNama }}</td>
                     <td>{{ $guruNama }}</td>

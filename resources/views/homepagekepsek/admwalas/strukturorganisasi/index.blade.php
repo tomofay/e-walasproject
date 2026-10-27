@@ -235,40 +235,40 @@
                 <ul>
                     <!-- Kepala Sekolah -->
                     <li>
-                        <a href="#" class="node">Kepala Sekolah<br>{{ $data->kepala_sekolah }}</a>
+                        <a href="#" class="node">Kepala Sekolah<br>{{ $data->kepala_sekolah ?? 'Belum diisi' }}</a>
                         <ul>
                             <!-- Wali Kelas -->
                             <li>
-                                <a href="#" class="node">Wali Kelas<br>{{ $data->wali_kelas }}</a>
+                                <a href="#" class="node">Wali Kelas<br>{{ $data->wali_kelas ?? 'Belum diisi' }}</a>
                                 <ul>
                                     <!-- Ketua Kelas -->
                                     <li>
-                                        <a href="#" class="node">Ketua Kelas<br>{{ $data->ketua_kelas }}</a>
+                                        <a href="#" class="node">Ketua Kelas<br>{{ $data->ketua_kelas ?? 'Belum diisi' }}</a>
                                         <ul>
                                             <!-- Wakil Ketua Kelas -->
                                             <li>
-                                                <a href="#" class="node">Wakil Ketua Kelas<br>{{ $data->wakil_ketua_kelas }}</a>
+                                                <a href="#" class="node">Wakil Ketua Kelas<br>{{ $data->wakil_ketua_kelas ?? 'Belum diisi' }}</a>
                                                 <ul>
                                                     <!-- Bendahara & Sekretaris -->
                                                     <li>
-                                                        <a href="#" class="node">Bendahara<br>{{ $data->bendahara }}</a>
+                                                        <a href="#" class="node">Bendahara<br>{{ $data->bendahara ?? 'Belum diisi' }}</a>
                                                         <ul>
                                                             <li>
-                                                                <a href="#" class="node">Seksi Kebersihan<br>{{ $data->seksi_kebersihan }}</a>
+                                                                <a href="#" class="node">Seksi Kebersihan<br>{{ $data->seksi_kebersihan ?? 'Belum diisi' }}</a>
                                                             </li>
                                                             <li>
-                                                                <a href="#" class="node">Seksi Perlengkapan<br>{{ $data->seksi_perlengkapan }}</a>
+                                                                <a href="#" class="node">Seksi Perlengkapan<br>{{ $data->seksi_perlengkapan ?? 'Belum diisi' }}</a>
                                                             </li>
                                                         </ul>
                                                     </li>
                                                     <li>
-                                                        <a href="#" class="node">Sekretaris<br>{{ $data->sekretaris }}</a>
+                                                        <a href="#" class="node">Sekretaris<br>{{ $data->sekretaris ?? 'Belum diisi' }}</a>
                                                         <ul>
                                                             <li>
-                                                                <a href="#" class="node">Seksi Keamanan<br>{{ $data->seksi_keamanan }}</a>
+                                                                <a href="#" class="node">Seksi Keamanan<br>{{ $data->seksi_keamanan ?? 'Belum diisi' }}</a>
                                                             </li>
                                                             <li>
-                                                                <a href="#" class="node">Seksi Kerohanian<br>{{ $data->seksi_kerohanian }}</a>
+                                                                <a href="#" class="node">Seksi Kerohanian<br>{{ $data->seksi_kerohanian ?? 'Belum diisi' }}</a>
                                                             </li>
                                                         </ul>
                                                     </li>

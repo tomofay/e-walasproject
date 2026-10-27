@@ -111,8 +111,9 @@ class HomeVisitController extends Controller
 
         $homevisit = HomeVisit::findOrFail($id);
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
+        $walas = Walas::select('id', 'nama')->orderBy('nama')->get();
 
-        return view('admwalas.homevisit.edit', compact('homevisit', 'walaslogin', 'siswas'));
+        return view('admwalas.homevisit.edit', compact('homevisit', 'walaslogin', 'walas', 'siswas'));
     }
 
     public function update(Request $request, $id)

@@ -187,7 +187,7 @@
           <li><a href="/alumnidatakepsek" data-bs-toggle="tooltip" data-bs-placement="top" title="Alumni Data">Alumni</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2025/2026 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -267,21 +267,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <a href="/keluarrombeldatakepsek" class="text-decoration-none fw-bold text-primary table-link-hover" data-bs-toggle="tooltip" data-bs-placement="top" title="Detail Siswa Keluar Rombel">
-                                2024/2025 - GANJIL
-                            </a>
-                        </td>
-                        <td>
-                            <!-- Aksi -->
-                            <div class="d-inline-flex gap-2">
-                                <a href="/keluarrombeldatakepsek" class="btn btn-sm btn-primary text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Detail Siswa Keluar Rombel">
-                                    <i class="bi bi-info-circle text-white"></i> Detail
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse ($keluarRombelPeriods as $period)
+                        <tr>
+                            <td>{{ $period->academic_year }} - {{ $period->semester }}</td>
+                            <td>
+                                <a href="{{ route('keluarrombeldatakepsek.index', ['academic_year' => $period->academic_year, 'semester' => $period->semester]) }}"
+                                   class="btn btn-sm btn-primary text-white">Detail ({{ $period->record_count }})</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="2" class="text-muted">Belum ada data keluar rombel.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

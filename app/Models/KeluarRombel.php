@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Collection;
 
 class KeluarRombel extends Model
 {
@@ -11,8 +12,23 @@ class KeluarRombel extends Model
     protected $fillable = [
         'siswa_id',
         'keterangan',
-        'rombels_id'
+        'rombels_id',
+        'academic_year',
+        'semester',
     ];
+
+    public static function availableAcademicPeriods(): Collection
+    {
+        return static::query()
+            ->select(['academic_year', 'semester'])
+            ->selectRaw('COUNT(*) as record_count')
+            ->whereNotNull('academic_year')
+            ->whereNotNull('semester')
+            ->groupBy('academic_year', 'semester')
+            ->orderByDesc('academic_year')
+            ->orderBy('semester')
+            ->get();
+    }
 
     // Definisikan enum jika menggunakan enum type
     const KETERANGAN = [
@@ -33,4 +49,3 @@ class KeluarRombel extends Model
     }
 
 }
-

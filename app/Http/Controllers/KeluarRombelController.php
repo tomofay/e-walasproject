@@ -7,6 +7,7 @@ use App\Models\Walas;
 use App\Models\Rombel;
 use App\Http\Concerns\HasWalasAuth;
 use App\Models\KeluarRombel;
+use App\Support\AcademicYear;
 use Illuminate\Http\Request;
 
 class KeluarRombelController extends Controller
@@ -34,10 +35,13 @@ class KeluarRombelController extends Controller
             return back()->with('error', 'Kelas tidak ditemukan');
         }
 
+        $period = AcademicYear::current();
         KeluarRombel::create([
             'siswa_id' => $siswa->id,
             'keterangan' => $validated['keterangan'],
             'rombels_id' => $rombels->id,
+            'academic_year' => $period['year'],
+            'semester' => $period['status'],
         ]);
 
         return back()->with('success', 'Keterangan Siswa berhasil Dirubah');
@@ -60,10 +64,13 @@ class KeluarRombelController extends Controller
 
         $siswa = Siswa::find($request->siswa_id);
 
+        $period = AcademicYear::current();
         $keluarRombel = KeluarRombel::create([
             'siswa_id' => $siswa->id,
             'keterangan' => $request->keterangan,
             'rombels_id' => $rombel->id,
+            'academic_year' => $period['year'],
+            'semester' => $period['status'],
         ]);
 
         return response()->json(['success' => 'Data berhasil disimpan!', 'keluarRombel' => $keluarRombel]);

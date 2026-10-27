@@ -248,7 +248,6 @@
       <nav id="navmenu" class="navmenu">
         <ul>
         <li><a href="/jadwalpiket" class="active">Jadwal Piket</a></li>
-          <li><a href="/createpiket" >Buat Piket</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -277,7 +276,7 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <div class="mb-4">
             <h2 class="font-weight-bold">Jadwal Piket Siswa</h2>
-            <a href="/createpiket" class="btn btn-primary btn-sm mt-2">+ Buat Piket Baru</a>
+            <a href="{{ route('jadwalpiket.create') }}" class="btn btn-primary btn-sm mt-2">+ Buat Piket Baru</a>
             <hr class="my-3">
         </div>
         <br>

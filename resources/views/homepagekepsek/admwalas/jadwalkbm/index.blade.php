@@ -217,23 +217,14 @@
                                 <td>{{ $jam }}</td>
                                 @foreach (['senin', 'selasa', 'rabu', 'kamis', 'jumat'] as $hari)
                                     @php
-                                        // Menemukan jadwal yang sesuai untuk hari dan jam tertentu
-                                        $jadwalHari = $jadwal->$hari ? collect(json_decode($jadwal->$hari, true))->firstWhere('jam', $jam) : null;
+                                        $rawSchedule = $jadwal->$hari ?? null;
+                                        $scheduleData = is_string($rawSchedule) ? json_decode($rawSchedule, true) : (is_array($rawSchedule) ? $rawSchedule : []);
+                                        $jadwalHari = $scheduleData ? collect($scheduleData)->firstWhere('jam', $jam) : null;
+                                        $mapelNama = $jadwalHari && isset($jadwalHari['mapel_id']) && isset($mapels[$jadwalHari['mapel_id']]) ? ($mapels[$jadwalHari['mapel_id']]->nama_mapel ?? '-') : '-';
+                                        $guruNama = $jadwalHari && isset($jadwalHari['guru_id']) && isset($gurus[$jadwalHari['guru_id']]) ? ($gurus[$jadwalHari['guru_id']]->nama ?? '-') : '-';
                                     @endphp
-                                    <td>
-                                        @if ($jadwalHari)
-                                            {{ $mapels[$jadwalHari['mapel_id']]->nama_mapel ?? '-' }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($jadwalHari)
-                                            {{ $gurus[$jadwalHari['guru_id']]->nama ?? '-' }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    <td>{{ $mapelNama }}</td>
+                                    <td>{{ $guruNama }}</td>
                                 @endforeach
                             </tr>
                         @endfor

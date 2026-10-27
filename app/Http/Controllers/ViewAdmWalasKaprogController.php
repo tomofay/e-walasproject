@@ -231,7 +231,7 @@ class ViewAdmWalasKaprogController extends Controller
 
     $walasIdSelected = $request->query('walas_id');
 
-    $jadwalKbm = JadwalKBM::with(['rombel', 'walas', 'mapels', 'gurus'])
+    $jadwalKbm = JadwalKBM::with(['rombel', 'walas'])
         ->whereIn('walas_id', $walasIds)
         ->when($walasIdSelected, function ($query) use ($walasIdSelected) {
             return $query->where('walas_id', $walasIdSelected);
@@ -241,12 +241,25 @@ class ViewAdmWalasKaprogController extends Controller
     $mapels = Mapel::all()->keyBy('id');
     $gurus = Guru::all()->keyBy('id');
 
+    $jadwalPertama = $jadwalKbm->first();
+    $decodeHari = static function ($value): array {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (! is_string($value) || $value === '') {
+            return [];
+        }
+
+        return json_decode($value, true) ?? [];
+    };
+
     $dataHari = [
-        'senin'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->senin, true)  ?? [] : [],
-        'selasa' => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->selasa, true) ?? [] : [],
-        'rabu'   => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->rabu, true)   ?? [] : [],
-        'kamis'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->kamis, true)  ?? [] : [],
-        'jumat'  => $jadwalKbm->isNotEmpty() ? json_decode($jadwalKbm->first()->jumat, true)  ?? [] : [],
+        'senin' => $jadwalPertama ? $decodeHari($jadwalPertama->senin) : [],
+        'selasa' => $jadwalPertama ? $decodeHari($jadwalPertama->selasa) : [],
+        'rabu' => $jadwalPertama ? $decodeHari($jadwalPertama->rabu) : [],
+        'kamis' => $jadwalPertama ? $decodeHari($jadwalPertama->kamis) : [],
+        'jumat' => $jadwalPertama ? $decodeHari($jadwalPertama->jumat) : [],
     ];
 
     return view("homepagekaprog.admwalas.jadwalkbm.index", [

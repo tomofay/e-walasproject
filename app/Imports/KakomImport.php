@@ -16,16 +16,21 @@ class KakomImport implements ToModel, WithHeadingRow
     */
     public function headingRow(): int
     {
-        return 5;
+        return 1;
     }
     
     public function model(array $row)
     {
+        $nama = trim((string) ($row['nama'] ?? ''));
+        if ($nama === '') {
+            return null;
+        }
+
         return new Kakom([
-        'nama' => $row['nama'],
-        'no_wa' => $row['no_wa'],
-        'password' => Hash::make($row['password']),
-        'kompetensi' => $row['kompetensi'],
+        'nama' => $nama,
+        'no_wa' => $row['no_wa'] ?? null,
+        'password' => Hash::make((string) ($row['password'] ?? '')),
+        'kompetensi' => $row['kompetensi'] ?? null,
         ]);
     }
 }

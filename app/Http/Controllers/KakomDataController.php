@@ -127,7 +127,7 @@ class KakomDataController extends Controller
             'nama' => 'required|string|max:255',
             'no_wa' => 'required|numeric',
             'password' => 'nullable|string|min:8',
-            'kompetensi' => 'required',
+            'kompetensi' => 'required|string|in:SIJA,TKJ,RPL,DKV,DPIB,TKP,TP,TFLM,TOI,TKR',
             'image_url' => 'nullable|image|max:5000', 
         ]);
     

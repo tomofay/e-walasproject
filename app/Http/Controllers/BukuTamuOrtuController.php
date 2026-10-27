@@ -91,13 +91,14 @@ class BukuTamuOrtuController extends Controller
 
     public function edit($id)
     {
-        $walas = $this->getAuthenticatedWalas();
+        $walaslogin = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
 
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
         $bukutamuortu = BukuTamuOrangtua::findOrFail($id);
+        $walas = Walas::select('id', 'nama')->orderBy('nama')->get();
 
-        return view('admwalas.bukutamuortu.edit', compact('bukutamuortu', 'walas', 'siswas', 'rombel'));
+        return view('admwalas.bukutamuortu.edit', compact('bukutamuortu', 'walas', 'walaslogin', 'siswas', 'rombel'));
     }
 
     public function update(Request $request, $id)

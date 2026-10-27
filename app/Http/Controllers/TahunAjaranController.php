@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Admin;
+use App\Models\KeluarRombel;
 use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Support\AcademicYear;
 
 class TahunAjaranController extends Controller
 {
@@ -32,21 +34,11 @@ class TahunAjaranController extends Controller
             return redirect('/loginadmin')->with('error', 'Data Admin tidak ditemukan.');
         }
 
-        $today = date('Y-m-d');
-        $year = date('Y');
-        $month = date('m');
-        $day = date('d');
-
-        if ($month >= 7 && $day >= 7) {
-            $tahunAjaran = "$year/" . ($year + 1);
-            $status = "GANJIL";
-        } else {
-            $tahunAjaran = ($year - 1) . "/$year";
-            $status = "GENAP";
-        }
+        ['year' => $tahunAjaran, 'status' => $status] = AcademicYear::current();
+        $keluarRombelPeriods = KeluarRombel::availableAcademicPeriods();
   
       // Kirim data siswa, rombels, dan walas ke view
-      return view('homepageadmin.tahunajaran', compact('admin', 'tahunAjaran', 'status'));
+      return view('homepageadmin.tahunajaran', compact('admin', 'tahunAjaran', 'status', 'keluarRombelPeriods'));
     }
 
     /**

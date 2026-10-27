@@ -174,7 +174,7 @@ table td {
                 
                 <!-- Tautkan nama walas ke /userprofile -->
                 <a href="/profilekurikulum" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Profile Kurikulum">
-                    <span>{{ $kurikulums->nama }}</span>  <!-- Nama Walas yang sedang login -->
+                    <span>{{ optional($kurikulums ?? $kurikulum)->nama ?? 'Kurikulum' }}</span>  <!-- Nama Kurikulum yang sedang login -->
                 </a>
             @endif
             <form action="{{ route('logoutkurikulum') }}" method="POST" class="ms-3">

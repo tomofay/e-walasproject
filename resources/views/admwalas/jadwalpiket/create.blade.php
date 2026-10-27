@@ -9,8 +9,8 @@
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="images/logokampak.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="{{ asset('images/logokampak.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -18,18 +18,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
   <link
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -215,6 +215,66 @@
         padding: 10px 20px;
         font-size: 16px;
     }
+
+    #hero {
+        padding: 120px 0 60px;
+        background: #f7f9fc;
+    }
+
+    .starter-section {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        max-width: 850px;
+        margin: 0 auto;
+        border: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(31, 45, 61, .1);
+    }
+
+    .form-card .card-body {
+        padding: 1.5rem;
+        background: #fff;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: .45rem;
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .form-group select {
+        width: 100%;
+        min-height: 44px;
+        padding: .65rem .85rem;
+        border: 1px solid #d0d5dd;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .form-group select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+        outline: 0;
+    }
+
+    @media (max-width: 768px) {
+        #hero {
+            padding: 100px 0 40px;
+        }
+
+        .form-card .card-body {
+            padding: 1rem;
+        }
+    }
 </style>
     
 </head>
@@ -245,7 +305,6 @@
       <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="/jadwalpiket">Jadwal Piket</a></li>
-          <li><a href="/createpiket" class="active">Buat Piket</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -276,8 +335,7 @@
 <section id="hero" class="hero section">
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <div class="text-center mb-4">
-            <br><br><br><br>
-            <h2 class="font-weight-bold">Jadwal Piket</h2>
+            <h2 class="font-weight-bold">Buat Jadwal Piket</h2>
             <hr class="my-3">
         </div>
 
@@ -286,7 +344,7 @@
 
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card shadow-lg">
+                    <div class="card form-card">
                         <div class="card-header bg-primary text-white">
                             <h5>Form Buat Jadwal Piket</h5>
                         </div>
@@ -328,8 +386,11 @@
             </div>
 
             <!-- Button Simpan -->
-            <div class="d-flex justify-content-center mt-4">
-                <button type="submit" class="btn btn-primary">Simpan</button>
+            <div class="d-flex justify-content-center gap-2 mt-4">
+                <a href="{{ route('jadwalpiket.index') }}" class="btn btn-outline-secondary rounded-pill px-4">Batal</a>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-check2-circle me-2"></i>Simpan Jadwal
+                </button>
             </div>
         </form>
 
@@ -356,15 +417,15 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 <!-- Vendor JS Files -->
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/php-email-form/validate.js"></script>
-<script src="assets/vendor/aos/aos.js"></script>
-<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+<script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+<script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+<script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
 
 <!-- Main JS File -->
-<script src="assets/js/main.js"></script>
+<script src="{{ asset('assets/js/main.js') }}"></script>
 
 <script>
 window.onload = function() {

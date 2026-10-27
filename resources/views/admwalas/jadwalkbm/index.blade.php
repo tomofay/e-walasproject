@@ -216,10 +216,14 @@
                                 <td>{{ $jam }}</td>
                                 @foreach (['senin', 'selasa', 'rabu', 'kamis', 'jumat'] as $hari)
                                 @php
-                                $jadwalHari = collect(json_decode($jadwalKbms->first()->$hari, true) ?? [])->firstWhere('jam', $jam);
+                                    $rawSchedule = $jadwalKbms->first()->{$hari} ?? null;
+                                    $scheduleData = is_string($rawSchedule) ? json_decode($rawSchedule, true) : (is_array($rawSchedule) ? $rawSchedule : []);
+                                    $jadwalHari = collect($scheduleData)->firstWhere('jam', $jam);
+                                    $mapelNama = $jadwalHari && isset($jadwalHari['mapel_id']) && isset($mapels[$jadwalHari['mapel_id']]) ? ($mapels[$jadwalHari['mapel_id']]->nama_mapel ?? '-') : '-';
+                                    $guruNama = $jadwalHari && isset($jadwalHari['guru_id']) && isset($gurus[$jadwalHari['guru_id']]) ? ($gurus[$jadwalHari['guru_id']]->nama ?? '-') : '-';
                                 @endphp
-                                    <td>{{ $jadwalHari ? $mapels[$jadwalHari['mapel_id']]->nama_mapel ?? '-' : '-' }}</td>
-                                    <td>{{ $jadwalHari ? $gurus[$jadwalHari['guru_id']]->nama ?? '-' : '-' }}</td>
+                                    <td>{{ $mapelNama }}</td>
+                                    <td>{{ $guruNama }}</td>
                                 @endforeach
                             </tr>
                         @endfor

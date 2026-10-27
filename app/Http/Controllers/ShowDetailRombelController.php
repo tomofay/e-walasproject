@@ -10,6 +10,7 @@ use App\Imports\SiswaImport;
 use App\Models\Siswa;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 use App\Imports\RombelImport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -50,12 +51,21 @@ class ShowDetailRombelController extends Controller
     }
     
 
-    public function importsiswaadmin(Request $request){
-        if (! $request->hasFile('file')) {
-            return back()->with('error', 'File tidak ditemukan.');
+    public function importsiswaadmin(Request $request)
+    {
+        set_time_limit(300);
+
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,csv,txt|max:10240',
+            ]);
+
+            Excel::import(new SiswaImport, $request->file('file'));
+        } catch (ValidationException $exception) {
+            return back()->with('error', collect($exception->errors())->flatten()->first());
         }
-        Excel::import(new SiswaImport, $request->file('file'));
-        return back();
+
+        return back()->with('success', 'Data siswa berhasil diimpor.');
     }
 
     public function downloadTemplateAdmin()

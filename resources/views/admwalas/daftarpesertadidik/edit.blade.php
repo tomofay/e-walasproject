@@ -169,15 +169,15 @@
                                <!-- Siswa -->
                                 <div class="mb-3">
                                     <label for="siswa_id" class="form-label">Pilih Siswa:</label>
-                                    <select name="nama_siswa" id="siswa_id" class="form-control" required>
+                                    <select name="nama_siswa" id="nama_siswa" class="form-control" required>
                                         <option value="" disabled>
-                                            {{ old('siswa_id') ? $siswas->firstWhere('id', old('siswa_id'))->nama ?? 'Pilih Siswa' : 'Pilih Siswa' }}
+                                            Pilih Siswa
                                         </option>
                                         @foreach ($siswas as $s)
                                             <option value="{{ $s->id }}" 
-                                                {{ old('siswa_id', $daftarPesertaDidik->siswa_id) == $s->id ? 'selected' : '' }}
-                                                data-nis="{{ $s->biodataSiswa->nis ?? '' }}" 
-                                                data-nisn="{{ $s->biodataSiswa->nisn ?? '' }}">
+                                                {{ old('nama_siswa', $daftarPesertaDidik->nama_siswa) == $s->id ? 'selected' : '' }}
+                                                data-nis="{{ $s->biodata?->nis ?? '' }}" 
+                                                data-nisn="{{ $s->biodata?->nisn ?? '' }}">
                                                 {{ $s->nama }}
                                             </option>
                                         @endforeach
@@ -187,13 +187,13 @@
                                 <!-- NIS -->
                                 <div class="mb-3">
                                     <label for="nis" class="form-label">NIS:</label>
-                                    <input type="number" name="nis" id="nis" class="form-control" required readonly value="{{ $daftarPesertaDidik->nis }}">
+                                    <input type="text" name="nis" id="nis" class="form-control" required value="{{ old('nis', $daftarPesertaDidik->nis) }}">
                                 </div>
 
                                 <!-- NISN -->
                                 <div class="mb-3">
                                     <label for="nisn" class="form-label">NISN:</label>
-                                    <input type="number" name="nisn" id="nisn" class="form-control" required readonly value="{{ $daftarPesertaDidik->nisn }}">
+                                    <input type="text" name="nisn" id="nisn" class="form-control" required value="{{ old('nisn', $daftarPesertaDidik->nisn) }}">
                                 </div>
 
                                 <!-- Jenis Kelamin -->

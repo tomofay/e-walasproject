@@ -387,18 +387,33 @@
                                   <p><strong>Tahun Masuk:</strong> {{ $biodata->tahun_masuk }}</p>
                               </div>
                           </div>
-                         <!-- Google Maps -->
-                          <div class="mt-4">
-                              <h5>Lokasi Alamat</h5>
-                              <iframe
-                                  src="{{ $biodata->alamat_maps }}"
-                                  width="100%"
-                                  height="300"
-                                  style="border:0;"
-                                  allowfullscreen=""
-                                  loading="lazy">
-                              </iframe>
-                          </div>
+                         @php
+                             $mapUrl = trim((string) ($biodata->alamat_maps ?? ''));
+                             $mapEmbedUrl = \App\Support\GoogleMapsUrl::embedUrl($mapUrl);
+                             $isGoogleMapsUrl = \App\Support\GoogleMapsUrl::isGoogleMapsUrl($mapUrl);
+                         @endphp
+
+                         <div class="mt-4">
+                             <h5>Lokasi Alamat</h5>
+                             @if($mapEmbedUrl)
+                                 <iframe
+                                     src="{{ $mapEmbedUrl }}"
+                                     width="100%"
+                                     height="300"
+                                     style="border:0;"
+                                     allowfullscreen=""
+                                     loading="lazy"
+                                     referrerpolicy="no-referrer-when-downgrade">
+                                 </iframe>
+                             @elseif($isGoogleMapsUrl)
+                                 <p class="text-muted">Link singkat Google Maps tidak bisa ditampilkan langsung di sini.</p>
+                                 <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                                     Buka di Google Maps
+                                 </a>
+                             @else
+                                 <p class="text-muted mb-0">Lokasi tidak tersedia.</p>
+                             @endif
+                         </div>
                           <td>
                           <td>
                                 <div class="mt-4 text-center">

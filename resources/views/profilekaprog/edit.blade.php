@@ -208,7 +208,7 @@
           <li><a href="/datamapel">Mata Pelajaran</a></li>
           <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Tahun Ajaran 2025/2026 - Aktif</a></li>
+              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
             </ul>
           </li>
         </ul>
@@ -240,7 +240,7 @@
     <h3>Form Edit Kakom </h3>
     <br>
         <!-- Form Edit Data Wali Kelas -->
-<form action="{{ route('profilekaprog.update', $kakom->id) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('profilekakom.update', $kakom->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT') <!-- Menyatakan bahwa ini adalah request PUT untuk update -->
     <div class="mb-3">

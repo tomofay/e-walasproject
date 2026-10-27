@@ -98,7 +98,8 @@ class JadwalKbmController extends Controller
         }
 
         foreach (['senin', 'selasa', 'rabu', 'kamis', 'jumat'] as $hari) {
-            $jadwalKbm->$hari = json_decode($jadwalKbm->$hari, true) ?? [];
+            $rawSchedule = $jadwalKbm->$hari ?? null;
+            $jadwalKbm->$hari = is_string($rawSchedule) ? (json_decode($rawSchedule, true) ?? []) : (is_array($rawSchedule) ? $rawSchedule : []);
         }
 
         $rombels = Rombel::all();

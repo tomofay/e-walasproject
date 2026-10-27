@@ -85,13 +85,9 @@ class MapelPageController extends Controller
      */
     public function edit(string $id)
     {
-        {
-            // Ambil data produk berdasarkan ID
-            $mapel = Mapel::findOrFail($id);
-    
-            // Kirim data ke view edit
-            return view('homepageadmin.mapeldata.edit', compact('mapeldata'));
-        }
+        $mapel = Mapel::findOrFail($id);
+
+        return view('homepageadmin.mapeldata.edit', compact('mapel'));
     }
     /**
      * Update the specified resource in storage.

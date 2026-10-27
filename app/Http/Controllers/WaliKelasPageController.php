@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Walas;
+use App\Models\Rombel;
 use App\Models\Admin;
 use App\Imports\WalasImport;
 use Illuminate\Http\Request;
@@ -118,7 +119,9 @@ class WaliKelasPageController extends Controller
         $walas = Walas::findOrFail($id);
 
         // Kirim data ke view edit
-        return view('homepageadmin.walikelasdata.edit', compact('walas'));
+        $kompetensiOptions = ['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP', 'TFLM', 'TKR', 'TOI'];
+
+        return view('homepageadmin.walikelasdata.edit', compact('walas', 'kompetensiOptions'));
     }
 
     /**
@@ -134,6 +137,7 @@ class WaliKelasPageController extends Controller
         'password' => 'nullable|string|min:8', // Password opsional
         'nip' => 'required|numeric',
         'jenis_kelamin' => 'required|string',
+        'kompetensi' => 'required|in:SIJA,TKJ,RPL,DKV,DPIB,TKP,TP,TFLM,TKR,TOI',
     ]);
 
     // Cari Wali Kelas berdasarkan ID
@@ -156,6 +160,10 @@ class WaliKelasPageController extends Controller
     $walas->no_wa = $request->no_wa;
     $walas->jenis_kelamin = $request->jenis_kelamin;
     $walas->nip = $request->nip;
+
+    if ($walas->rombel) {
+        $walas->rombel->update(['kompetensi' => $request->kompetensi]);
+    }
 
     // Update password jika diisi (jika tidak, biarkan yang lama)
     if ($request->filled('password')) {

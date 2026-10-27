@@ -48,6 +48,7 @@ RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/zz-uploads.ini
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

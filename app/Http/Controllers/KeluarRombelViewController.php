@@ -12,13 +12,16 @@ use App\Models\Walas;
 use App\Models\Admin;
 use App\Models\KeluarRombel;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Concerns\BuildsKeluarRombelPeriods;
 
 class KeluarRombelViewController extends Controller
 {
+    use BuildsKeluarRombelPeriods;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
         $admin = Auth::guard('admins')->user();  // ini akan mendapatkan data siswa yang sedang login
@@ -36,15 +39,18 @@ class KeluarRombelViewController extends Controller
             return redirect('/loginadmin')->with('error', 'Data Admin tidak ditemukan.');
         }
 
-       // Ambil data KeluarRombel dengan siswa dan rombel
-        $keluarrombel = KeluarRombel::with(['siswa.rombel'])->get();
+        $periodQuery = KeluarRombel::query();
+        $periods = $this->availableAcademicPeriods(clone $periodQuery);
+        $selectedPeriod = $this->selectedAcademicPeriod($request);
+        $kelasGroup = collect();
 
-        // Kelompokkan data berdasarkan nama_kelas
-        $kelasGroup = $keluarrombel->groupBy(function ($item) {
-            return $item->siswa->rombel->nama_kelas ?? 'Tidak Ada Kelas';
-        });
+        if ($selectedPeriod) {
+            $kelasGroup = $this->groupKeluarRombelByClass(
+                $this->recordsForAcademicPeriod(clone $periodQuery, $selectedPeriod)
+            );
+        }
 
-        return view('homepageadmin.keluarrombel.index', compact('admin', 'kelasGroup'));
+        return view('homepageadmin.keluarrombel.index', compact('admin', 'periods', 'selectedPeriod', 'kelasGroup'));
     }
 
     /**
@@ -66,7 +72,14 @@ class KeluarRombelViewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showSiswaKeluarRombel(string $id)
+    public function show(string $id, Request $request)
+    {
+        $keluarrombel = KeluarRombel::findOrFail($id);
+
+        return $this->showSiswaKeluarRombel((string) $keluarrombel->rombels_id, $request);
+    }
+
+    public function showSiswaKeluarRombel(string $id, Request $request)
     {
         // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
         $admin = Auth::guard('admins')->user();  // ini akan mendapatkan data siswa yang sedang login
@@ -84,15 +97,14 @@ class KeluarRombelViewController extends Controller
             return redirect('/loginadmin')->with('error', 'Data Admin tidak ditemukan.');
         }
 
-        // Ambil data KeluarRombel berdasarkan rombel_id yang dipilih
-        $keluarrombel = KeluarRombel::with(['siswa.rombel'])->where('rombels_id', $id)->get();
+        $selectedPeriod = $this->selectedAcademicPeriod($request);
+        $query = KeluarRombel::query()->where('rombels_id', $id);
+        if ($selectedPeriod) {
+            $query = $this->recordsForAcademicPeriod($query, $selectedPeriod);
+        }
+        $kelasGroup = $this->groupKeluarRombelByClass($query);
 
-        // Kelompokkan berdasarkan nama_kelas
-        $kelasGroup = $keluarrombel->groupBy(function ($item) {
-            return $item->siswa->rombel->nama_kelas ?? 'Tidak Ada Kelas';
-        });
-
-        return view('homepageadmin.keluarrombel.show', compact('admin', 'kelasGroup'));
+        return view('homepageadmin.keluarrombel.show', compact('admin', 'kelasGroup', 'selectedPeriod'));
     }
 
     /**

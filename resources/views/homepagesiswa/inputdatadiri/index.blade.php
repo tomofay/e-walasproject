@@ -67,6 +67,22 @@
             background-color: #2ecc71; /* Hijau */
         }
 
+        #server-validation-errors,
+        #client-validation-errors {
+            position: static;
+            display: block;
+            max-height: none;
+            overflow: visible;
+            color: #842029;
+            text-align: left;
+            animation: none;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+        }
+
         /* Animasi slide down */
         @keyframes slideDown {
             from {
@@ -302,8 +318,22 @@
         </h1>
         <br>
         <div class="container">
-            <form action="{{ route('biodatasiswa.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="biodata-form" action="{{ route('biodatasiswa.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert" tabindex="-1" id="server-validation-errors">
+                        <strong>Data belum dapat dikirim. Perbaiki bagian berikut:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <div id="client-validation-errors" class="alert alert-danger d-none" role="alert" tabindex="-1">
+                    <strong>Data belum lengkap atau tidak valid:</strong>
+                    <ul class="mb-0 mt-2"></ul>
+                </div>
         <h4 class="text-bold">Data Pribadi</h4>
                 <div class="row mb-3">
                     <div class="col-md-12">
@@ -323,7 +353,7 @@
                 <div class="mb-3">
                         <label for="walas" class="form-label">Wali Kelas</label>
                         <select class="form-select" id="walas" name="walas_id" required>
-                            <option selected disabled>Pilih Wali Kelas</option>
+                            <option value="" selected disabled>Pilih Wali Kelas</option>
                             @foreach ($walas as $wali)
                                 <option value="{{ $wali->id }}">{{ $wali->nama }}</option>
                             @endforeach
@@ -360,7 +390,7 @@
                   <!-- Dokumentasi (Gambar) -->
                   <div class="row mb-3">
                         <label for="fotorumah_url" class="form-label">Unggah Foto Tampak Depan Rumah (Gambar):</label>
-                        <input type="file" name="fotorumah_url" id="fotorumah_url" class="form-control" required>
+                        <input type="file" name="fotorumah_url" id="fotorumah_url" class="form-control" accept=".jpg,.jpeg,.png,.gif" required>
                         <small id="fileWarning" class="text-danger d-none">Ukuran file tidak boleh lebih dari 2 MB!</small>
                 </div>
 
@@ -425,17 +455,17 @@
                     </div>
                     <div class="col-md-3">
                         <label for="anak_ke" class="form-label">Anak Ke</label>
-                        <input type="number" name="anak_ke" id="anak_ke" class="form-control" maxlength="5" required>
+                        <input type="number" name="anak_ke" id="anak_ke" class="form-control" min="1" max="99999" required>
                     </div>
                     <div class="col-md-3">
                         <label for="jumlah_saudara" class="form-label">Jumlah Saudara</label>
-                        <input type="number" name="jumlah_saudara" id="jumlah_saudara" class="form-control" maxlength="5" required>
+                        <input type="number" name="jumlah_saudara" id="jumlah_saudara" class="form-control" min="0" max="99999" required>
                     </div>
                 </div>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="no_wa" class="form-label">Nomor WhatsApp</label>
-                    <input type="text" name="no_wa" id="no_wa" class="form-control" maxlength="15" placeholder="Contoh: 081234567890" required>
+                    <input type="text" name="no_wa" id="no_wa" class="form-control" maxlength="14" pattern="[0-9+ -]+" placeholder="Contoh: 081234567890" required>
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label">Email</label>
@@ -445,11 +475,11 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="nis" class="form-label">NIS</label>
-                        <input type="text" name="nis" id="nis" class="form-control" required>
+                        <input type="text" name="nis" id="nis" class="form-control" maxlength="20" required>
                     </div>
                     <div class="col-md-6">
                         <label for="nisn" class="form-label">NISN</label>
-                        <input type="text" name="nisn" id="nisn" class="form-control" required>
+                        <input type="text" name="nisn" id="nisn" class="form-control" maxlength="20" required>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -459,6 +489,7 @@
                             <option value="X">X</option>
                             <option value="XI">XI</option>
                             <option value="XII">XII</option>
+                            <option value="XIII">XIII</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -480,7 +511,7 @@
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
-                        <input type="text" name="tahun_masuk" id="tahun_masuk" class="form-control" required>
+                        <input type="text" name="tahun_masuk" id="tahun_masuk" class="form-control" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required>
                     </div>
                 </div>  
                 <br>
@@ -488,13 +519,13 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="nama_ayah" class="form-label">Nama Ayah</label>
-                        <input type="text" name="nama_ayah" id="nama_ayah" class="form-control" required>
+                        <input type="text" name="nama_ayah" id="nama_ayah" class="form-control" maxlength="80" required>
                     </div>
                     <div class="col-md-6">
                         <label for="pekerjaan_ayah" class="form-label">Pekerjaan Ayah</label>
                         <ul id="pekerjaan_ayah" class="list-unstyled d-flex flex-wrap">
                             <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="TNI/POLRI" id="TNI_POLRI" onchange="togglePekerjaanInput()"> 
+                                <input type="radio" name="pekerjaan_ayah" value="TNI/POLRI" id="ayah_tni_polri" required>
                                 <label for="TNI_POLRI">TNI/POLRI</label>
                             </li>
                             <li class="col-md-6">
@@ -551,20 +582,20 @@
                     </div>
                     <div class="col-md-6">
                         <label for="no_wa_ayah" class="form-label">Nomor WhatsApp Ayah</label>
-                        <input type="text" name="no_wa_ayah" id="no_wa_ayah" class="form-control" maxlength="15" placeholder="Contoh: 62895672349221 (Masukkan No Telp Aktif dan Valid)" required>
+                        <input type="text" name="no_wa_ayah" id="no_wa_ayah" class="form-control" maxlength="15" pattern="[0-9+ -]+" placeholder="Contoh: 62895672349221 (Masukkan No Telp Aktif dan Valid)" required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="nama_ibu" class="form-label">Nama Ibu</label>
-                        <input type="text" name="nama_ibu" id="nama_ibu" class="form-control" required>
+                        <input type="text" name="nama_ibu" id="nama_ibu" class="form-control" maxlength="50" required>
                     </div>
                     <div class="col-md-6">
                         <label for="pekerjaan_ibu" class="form-label">Pekerjaan Ibu</label>
                         <ul id="pekerjaan_ibu" class="list-unstyled d-flex flex-wrap">
                             <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="TNI/POLRI" id="TNI_POLRI" onchange="togglePekerjaanInput()"> 
+                                <input type="radio" name="pekerjaan_ibu" value="TNI/POLRI" id="ibu_tni_polri" required>
                                 <label for="TNI_POLRI">TNI/POLRI</label>
                             </li>
                             <li class="col-md-6">
@@ -621,7 +652,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="no_wa_ibu" class="form-label">Nomor WhatsApp Ibu</label>
-                        <input type="text" name="no_wa_ibu" id="no_wa_ibu" class="form-control" maxlength="15" placeholder="Contoh: 6289623472983721 (Masukkan No Telp Aktif dan Valid)" required>
+                        <input type="text" name="no_wa_ibu" id="no_wa_ibu" class="form-control" maxlength="15" pattern="[0-9+ -]+" placeholder="Contoh: 6289623472983721 (Masukkan No Telp Aktif dan Valid)" required>
                     </div>
                 </div>
                 <br>
@@ -631,7 +662,7 @@
                             <label for="pendapatan_ortu" class="form-label">Pendapatan Ayah dan Ibu</label>
                             <ul id="pendapatan_ortu" class="list-unstyled d-flex flex-wrap">
                                 <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Kurang dari Rp1.000.000,00" id="Kurang_dari_Rp1_000_000_00" onchange="togglePekerjaanInput()">
+                                    <input type="radio" name="pendapatan_ortu" value="Kurang dari Rp1.000.000,00" id="Kurang_dari_Rp1_000_000_00" required>
                                     <label for="Kurang_dari_Rp1_000_000_00">Kurang dari Rp1.000.000,00</label>
                                 </li>
                                 <li class="col-md-3 col-sm-6">
@@ -671,7 +702,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
-                        <input type="text" name="tahun_lulus" id="tahun_lulus" class="form-control" maxlength="4" placeholder="Contoh: 2024" required>
+                        <input type="text" name="tahun_lulus" id="tahun_lulus" class="form-control" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Contoh: 2024" required>
                     </div>
                 </div>
 
@@ -717,10 +748,10 @@
                     </div>
                 </div>
               
-                        <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Kirim Data">
+                        <button type="submit" class="btn btn-primary" title="Kirim Data">
                             Kirim
                         </button>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addModal"data-bs-toggle="tooltip" data-bs-placement="top" title="Batal Kirim">
+                        <button type="reset" class="btn btn-danger" title="Kosongkan Form">
                             Batal
                         </button>
                 </div>
@@ -764,50 +795,20 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var radioButtons = document.querySelectorAll('input[name="pekerjaan_ayah"]');
-    var pekerjaanInput = document.getElementById("pekerjaan_ayah_lainnya");
+<script>
+  function togglePekerjaanInput() {
+    ['ayah', 'ibu'].forEach(function (parent) {
+        var selected = document.querySelector('input[name="pekerjaan_' + parent + '"]:checked');
+        var input = document.getElementById('pekerjaan_' + parent + '_lainnya');
+        var showOther = selected && selected.value === 'Lainnya';
 
-    radioButtons.forEach(function (radio) {
-        radio.addEventListener("change", function () {
-            if (this.value === "Lainnya") {
-                pekerjaanInput.style.display = "block";
-                pekerjaanInput.focus(); // Memberikan fokus ke input box
-            } else {
-                pekerjaanInput.style.display = "none";
-                pekerjaanInput.value = ""; // Reset value jika tidak dipilih "Lainnya"
-            }
-        });
+        input.style.display = showOther ? 'block' : 'none';
+        input.required = Boolean(showOther);
+        if (!showOther) {
+            input.value = '';
+        }
     });
-  });
-</script>
-
-
-<script>
-  function togglePekerjaanInput() {
-    var pekerjaanAyah = document.querySelector('input[name="pekerjaan_ayah"]:checked').value;
-    var pekerjaanInput = document.getElementById("pekerjaan_ayah_lainnya");
-
-    if (pekerjaanAyah === "Lainnya") {
-        pekerjaanInput.style.display = "block";
-    } else {
-        pekerjaanInput.style.display = "none";
-    }
-}
-</script>
-
-<script>
-  function togglePekerjaanInput() {
-    var pekerjaanibu = document.querySelector('input[name="pekerjaan_ibu"]:checked').value;
-    var pekerjaanInput = document.getElementById("pekerjaan_ibu_lainnya");
-
-    if (pekerjaanibu === "Lainnya") {
-        pekerjaanInput.style.display = "block";
-    } else {
-        pekerjaanInput.style.display = "none";
-    }
-}
+  }
 </script>
 
   <script>
@@ -839,14 +840,128 @@
     </script>
 
 <script>
-    document.getElementById("fotorumah_url").addEventListener("change", function () {
-        let file = this.files[0]; 
-        let warning = document.getElementById("fileWarning");
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('biodata-form');
+        const summary = document.getElementById('client-validation-errors');
+        const summaryList = summary.querySelector('ul');
+        const fileInput = document.getElementById('fotorumah_url');
+        const fileWarning = document.getElementById('fileWarning');
+        const oldValues = @json(old());
 
-        if (file && file.size > 2 * 1024 * 1024) { // 2 MB dalam bytes
-            warning.classList.remove("d-none"); // Munculkan peringatan
-        } else {
-            warning.classList.add("d-none"); // Sembunyikan peringatan
+        Object.keys(oldValues).forEach(function (name) {
+            const fields = form.querySelectorAll('[name="' + CSS.escape(name) + '"]');
+            fields.forEach(function (field) {
+                if (field.type === 'file') {
+                    return;
+                }
+                if (field.type === 'radio') {
+                    field.checked = field.value === String(oldValues[name]);
+                } else {
+                    field.value = oldValues[name] ?? '';
+                }
+            });
+        });
+        togglePekerjaanInput();
+        const todayDate = new Date();
+        todayDate.setMinutes(todayDate.getMinutes() - todayDate.getTimezoneOffset());
+        const today = todayDate.toISOString().slice(0, 10);
+        form.querySelectorAll('input[type="date"]').forEach(function (field) {
+            field.max = today;
+        });
+
+        function updateFileValidation() {
+            const file = fileInput.files[0];
+            const tooLarge = file && file.size > 2 * 1024 * 1024;
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            const extension = file ? file.name.split('.').pop().toLowerCase() : '';
+            const invalidType = file && !allowedExtensions.includes(extension);
+            fileInput.setCustomValidity(tooLarge
+                ? 'Ukuran foto maksimal 2 MB.'
+                : (invalidType ? 'Foto harus berformat JPG, PNG, atau GIF.' : ''));
+            fileWarning.textContent = tooLarge
+                ? 'Ukuran file tidak boleh lebih dari 2 MB!'
+                : 'Format foto harus JPG, PNG, atau GIF.';
+            fileWarning.classList.toggle('d-none', !tooLarge && !invalidType);
+        }
+
+        fileInput.addEventListener('change', updateFileValidation);
+        updateFileValidation();
+
+        form.addEventListener('submit', function (event) {
+            togglePekerjaanInput();
+            updateFileValidation();
+
+            const invalidFields = Array.from(form.elements).filter(function (field) {
+                return field.willValidate && !field.validity.valid;
+            });
+            const invalidGroups = new Set();
+            const errors = [];
+
+            invalidFields.forEach(function (field) {
+                if (field.type === 'radio') {
+                    if (invalidGroups.has(field.name)) {
+                        return;
+                    }
+                    invalidGroups.add(field.name);
+                }
+
+                const label = field.type === 'radio'
+                    ? ({
+                        pekerjaan_ayah: 'Pekerjaan ayah',
+                        pekerjaan_ibu: 'Pekerjaan ibu',
+                        pendapatan_ortu: 'Rentang pendapatan orang tua'
+                    }[field.name] || field.name)
+                    : (form.querySelector('label[for="' + CSS.escape(field.id) + '"]')?.textContent.trim()
+                        || field.name);
+                let message = field.validationMessage;
+                if (field.validity.valueMissing) {
+                    message = label + ' wajib diisi.';
+                } else if (field.validity.typeMismatch) {
+                    message = label + ' tidak valid.';
+                } else if (field.validity.patternMismatch) {
+                    message = label + ' harus menggunakan format yang diminta.';
+                }
+                errors.push({ field: field, message: message });
+            });
+
+            if (errors.length > 0) {
+                event.preventDefault();
+                summaryList.replaceChildren();
+                errors.forEach(function (error) {
+                    const item = document.createElement('li');
+                    item.textContent = error.message;
+                    summaryList.appendChild(item);
+                    error.field.classList.add('is-invalid');
+                });
+                summary.classList.remove('d-none');
+                summary.focus();
+                summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                errors[0].field.focus({ preventScroll: true });
+                return;
+            }
+
+            summary.classList.add('d-none');
+            form.querySelectorAll('.is-invalid').forEach(function (field) {
+                field.classList.remove('is-invalid');
+            });
+        });
+
+        form.addEventListener('input', function (event) {
+            if (event.target.matches('.is-invalid') && event.target.validity.valid) {
+                event.target.classList.remove('is-invalid');
+            }
+        });
+
+        form.addEventListener('change', function (event) {
+            if (event.target.matches('input[type="radio"]')) {
+                togglePekerjaanInput();
+            }
+        });
+
+        const serverErrors = document.getElementById('server-validation-errors');
+        if (serverErrors) {
+            serverErrors.focus();
+            serverErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
 </script>

@@ -23,4 +23,9 @@ class BukuTamuOrangtua extends Model
     {
         return $this->belongsTo(Walas::class, 'walas_id');
     }
+
+    public function siswa()
+    {
+        return $this->belongsTo(Siswa::class, 'nama_peserta_didik', 'id');
+    }
 }

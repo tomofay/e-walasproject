@@ -385,6 +385,9 @@
         <div class="mb-4">
             @forelse ($kelasGroup as $namaKelas => $keluarSiswa)
                 <h2 class="font-weight-bold">Daftar Siswa Keluar Rombel Kelas: {{ $namaKelas }} </h2>
+                @if ($selectedPeriod)
+                    <p>Periode: {{ $selectedPeriod['year'] }} - {{ $selectedPeriod['semester'] }}</p>
+                @endif
                 <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             @empty
                 <p class="text-muted">Tidak ada siswa yang keluar dari rombel.</p>

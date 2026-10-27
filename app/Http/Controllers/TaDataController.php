@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kurikulum;
+use App\Models\KeluarRombel;
 use Illuminate\Support\Facades\Auth;
+use App\Support\AcademicYear;
 
 class TaDataController extends Controller
 {
@@ -29,20 +31,10 @@ class TaDataController extends Controller
             return redirect('/loginkurikulum')->with('error', 'Data kurikulum tidak ditemukan.');
         }
 
-        $today = date('Y-m-d');
-        $year = date('Y');
-        $month = date('m');
-        $day = date('d');
-  
-        if ($month >= 7 && $day >= 7) {
-            $tahunAjaran = "$year/" . ($year + 1);
-            $status = "GANJIL";
-        } else {
-            $tahunAjaran = ($year - 1) . "/$year";
-            $status = "GENAP";
-        }
+        ['year' => $tahunAjaran, 'status' => $status] = AcademicYear::current();
+        $keluarRombelPeriods = KeluarRombel::availableAcademicPeriods();
 
-        return view('homepagekurikulum.tadata', compact('kurikulum', 'tahunAjaran', 'status'));
+        return view('homepagekurikulum.tadata', compact('kurikulum', 'tahunAjaran', 'status', 'keluarRombelPeriods'));
     }
 
     /**
