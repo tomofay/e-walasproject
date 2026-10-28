@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,7 +14,7 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName();
 
-        if ($driver === 'mysql') {
+        if (in_array($driver, ['mysql', 'mariadb'], true)) {
             // Drop foreign key constraints on nis and nisn if they exist
             $foreignKeys = DB::select("
                 SELECT CONSTRAINT_NAME 
@@ -23,7 +23,7 @@ return new class extends Migration
                   AND TABLE_NAME = 'daftar_peserta_didiks' 
                   AND CONSTRAINT_TYPE = 'FOREIGN KEY'
             ");
-            $fkNames = array_map(fn($item) => $item->CONSTRAINT_NAME, $foreignKeys);
+            $fkNames = array_map(fn ($item) => $item->CONSTRAINT_NAME, $foreignKeys);
 
             Schema::table('daftar_peserta_didiks', function (Blueprint $table) use ($fkNames) {
                 if (in_array('daftar_peserta_didiks_nis_foreign', $fkNames)) {

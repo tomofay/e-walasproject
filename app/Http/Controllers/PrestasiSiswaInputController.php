@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\PrestasiSiswa;
+use App\Models\Rombel;
 use App\Models\Siswa;
 use App\Models\Walas;
-use App\Models\Rombel;
-use App\Models\Kurikulum;
-use App\Models\PrestasiSiswa;
-use App\Models\RekapitulasiJumlahSiswa;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
 
 class PrestasiSiswaInputController extends Controller
 {
@@ -20,25 +17,25 @@ class PrestasiSiswaInputController extends Controller
      */
     public function index()
     {
-       // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
-       $siswa = Auth::guard('siswas')->user();
-        
-       // Periksa apakah session 'walas_id' ada
-       if (!session()->has('siswa_id')) {
-           return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
-       }
-       
-       // Ambil data walas berdasarkan 'siswa_id' yang ada di session
-       $siswa = Siswa::find(session('siswa_id'));
-       
-       // Periksa apakah data walas ditemukan
-       if (!$siswa) {
-           return redirect('/loginsiswa')->with('error', 'Data walas tidak ditemukan.');
-       }
+        // Menggunakan guard 'walas' untuk mendapatkan data walas yang login
+        $siswa = Auth::guard('siswas')->user();
+
+        // Periksa apakah session 'walas_id' ada
+        if (! session()->has('siswa_id')) {
+            return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Ambil data walas berdasarkan 'siswa_id' yang ada di session
+        $siswa = Siswa::find(session('siswa_id'));
+
+        // Periksa apakah data walas ditemukan
+        if (! $siswa) {
+            return redirect('/loginsiswa')->with('error', 'Data walas tidak ditemukan.');
+        }
 
         // Ambil data siswa berdasarkan rombel_id yang sama dengan rombel
         $siswas = Siswa::all();
-        
+
         // Ambil data prestasi siswa berdasarkan siswa_id dan siswas_id yang sedang login
         $prestasisiswa = PrestasiSiswa::where('siswas_id', $siswa->id)->get();
 
@@ -51,12 +48,12 @@ class PrestasiSiswaInputController extends Controller
      */
     public function create()
     {
-        if (!session()->has('siswa_id')) {
+        if (! session()->has('siswa_id')) {
             return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $siswa = Siswa::with('rombel.walas')->find(session('siswa_id'));
-        if (!$siswa) {
+        if (! $siswa) {
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
 
@@ -68,26 +65,26 @@ class PrestasiSiswaInputController extends Controller
      */
     public function store(Request $request)
     {
-        if (!session()->has('siswa_id')) {
+        if (! session()->has('siswa_id')) {
             return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $siswa = Siswa::with('rombel.walas')->find(session('siswa_id'));
-        if (!$siswa) {
+        if (! $siswa) {
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
 
         // Validasi input
         $request->validate([
-            'jenis_prestasi'    => 'required|in:Akademik,Non-akademik,Non-Akademik',
-            'nama_prestasi'     => 'required|string|max:255',
-            'mata_lomba'        => 'nullable|string|max:255',
-            'nama_pembimbing'   => 'nullable|string|max:255',
-            'tingkat'           => 'nullable|string|max:255',
-            'lokasi'            => 'nullable|string|max:255',
-            'tanggal'           => 'required|date',
-            'sertifikat_url'    => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,docx|max:10240',
-            'dokumentasi_url'   => 'nullable',
+            'jenis_prestasi' => 'required|in:Akademik,Non-akademik,Non-Akademik',
+            'nama_prestasi' => 'required|string|max:255',
+            'mata_lomba' => 'nullable|string|max:255',
+            'nama_pembimbing' => 'nullable|string|max:255',
+            'tingkat' => 'nullable|string|max:255',
+            'lokasi' => 'nullable|string|max:255',
+            'tanggal' => 'required|date',
+            'sertifikat_url' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,docx|max:10240',
+            'dokumentasi_url' => 'nullable|array|max:10',
             'dokumentasi_url.*' => 'file|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
@@ -101,7 +98,7 @@ class PrestasiSiswaInputController extends Controller
         $dokumentasiPaths = [];
         if ($request->hasFile('dokumentasi_url')) {
             $files = $request->file('dokumentasi_url');
-            if (!is_array($files)) {
+            if (! is_array($files)) {
                 $files = [$files];
             }
             foreach ($files as $file) {
@@ -120,18 +117,18 @@ class PrestasiSiswaInputController extends Controller
 
         // Simpan data ke database
         PrestasiSiswa::create([
-            'walas_id'        => $walasId,
-            'siswas_id'       => $siswa->id,
-            'rombels_id'      => $rombelsId,
-            'jenis_prestasi'  => $jenisPrestasi,
-            'nama_prestasi'   => $request->nama_prestasi,
-            'mata_lomba'      => $request->mata_lomba,
+            'walas_id' => $walasId,
+            'siswas_id' => $siswa->id,
+            'rombels_id' => $rombelsId,
+            'jenis_prestasi' => $jenisPrestasi,
+            'nama_prestasi' => $request->nama_prestasi,
+            'mata_lomba' => $request->mata_lomba,
             'nama_pembimbing' => $request->nama_pembimbing,
-            'tingkat'         => $request->tingkat,
-            'lokasi'          => $request->lokasi,
-            'tanggal'         => $request->tanggal,
-            'sertifikat_url'  => $sertifikatPath,
-            'dokumentasi_url' => !empty($dokumentasiPaths) ? $dokumentasiPaths : null,
+            'tingkat' => $request->tingkat,
+            'lokasi' => $request->lokasi,
+            'tanggal' => $request->tanggal,
+            'sertifikat_url' => $sertifikatPath,
+            'dokumentasi_url' => ! empty($dokumentasiPaths) ? $dokumentasiPaths : null,
         ]);
 
         return redirect('/prestasisiswainput')->with('success', 'Data prestasi berhasil disimpan.');
@@ -150,12 +147,12 @@ class PrestasiSiswaInputController extends Controller
      */
     public function edit($id)
     {
-        if (!session()->has('siswa_id')) {
+        if (! session()->has('siswa_id')) {
             return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $siswa = Siswa::with('rombel.walas')->find(session('siswa_id'));
-        if (!$siswa) {
+        if (! $siswa) {
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
 
@@ -169,12 +166,12 @@ class PrestasiSiswaInputController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!session()->has('siswa_id')) {
+        if (! session()->has('siswa_id')) {
             return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $siswa = Siswa::with('rombel.walas')->find(session('siswa_id'));
-        if (!$siswa) {
+        if (! $siswa) {
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
 
@@ -182,15 +179,15 @@ class PrestasiSiswaInputController extends Controller
 
         // Validasi input
         $request->validate([
-            'jenis_prestasi'    => 'required|in:Akademik,Non-akademik,Non-Akademik',
-            'nama_prestasi'     => 'required|string|max:255',
-            'mata_lomba'        => 'nullable|string|max:255',
-            'nama_pembimbing'   => 'nullable|string|max:255',
-            'tingkat'           => 'nullable|string|max:255',
-            'lokasi'            => 'nullable|string|max:255',
-            'tanggal'           => 'required|date',
-            'sertifikat_url'    => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,docx|max:10240',
-            'dokumentasi_url'   => 'nullable',
+            'jenis_prestasi' => 'required|in:Akademik,Non-akademik,Non-Akademik',
+            'nama_prestasi' => 'required|string|max:255',
+            'mata_lomba' => 'nullable|string|max:255',
+            'nama_pembimbing' => 'nullable|string|max:255',
+            'tingkat' => 'nullable|string|max:255',
+            'lokasi' => 'nullable|string|max:255',
+            'tanggal' => 'required|date',
+            'sertifikat_url' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,docx|max:10240',
+            'dokumentasi_url' => 'nullable|array|max:10',
             'dokumentasi_url.*' => 'file|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
@@ -205,17 +202,17 @@ class PrestasiSiswaInputController extends Controller
         }
 
         // Multiple Dokumentasi
-        $currentDocs = is_array($prestasisiswa->dokumentasi_url) 
-            ? $prestasisiswa->dokumentasi_url 
+        $currentDocs = is_array($prestasisiswa->dokumentasi_url)
+            ? $prestasisiswa->dokumentasi_url
             : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
 
         if ($request->has('form_has_docs')) {
             $keepDocs = $request->input('keep_docs', []);
-            if (!is_array($keepDocs)) {
+            if (! is_array($keepDocs)) {
                 $keepDocs = [];
             }
             foreach ($currentDocs as $doc) {
-                if (!in_array($doc, $keepDocs)) {
+                if (! in_array($doc, $keepDocs)) {
                     if (Storage::disk('public')->exists($doc)) {
                         Storage::disk('public')->delete($doc);
                     }
@@ -237,7 +234,7 @@ class PrestasiSiswaInputController extends Controller
 
         if ($request->hasFile('dokumentasi_url')) {
             $newDocs = $request->file('dokumentasi_url');
-            if (!is_array($newDocs)) {
+            if (! is_array($newDocs)) {
                 $newDocs = [$newDocs];
             }
             foreach ($newDocs as $doc) {
@@ -251,18 +248,18 @@ class PrestasiSiswaInputController extends Controller
         $rombelsId = $siswa->rombels_id ?? $prestasisiswa->rombels_id;
 
         $prestasisiswa->update([
-            'walas_id'        => $walasId,
-            'siswas_id'       => $siswa->id,
-            'rombels_id'      => $rombelsId,
-            'jenis_prestasi'  => $request->jenis_prestasi === 'Non-Akademik' ? 'Non-akademik' : $request->jenis_prestasi,
-            'nama_prestasi'   => $request->nama_prestasi,
-            'mata_lomba'      => $request->mata_lomba,
+            'walas_id' => $walasId,
+            'siswas_id' => $siswa->id,
+            'rombels_id' => $rombelsId,
+            'jenis_prestasi' => $request->jenis_prestasi === 'Non-Akademik' ? 'Non-akademik' : $request->jenis_prestasi,
+            'nama_prestasi' => $request->nama_prestasi,
+            'mata_lomba' => $request->mata_lomba,
             'nama_pembimbing' => $request->nama_pembimbing,
-            'tingkat'         => $request->tingkat,
-            'lokasi'          => $request->lokasi,
-            'tanggal'         => $request->tanggal,
-            'sertifikat_url'  => $sertifikatPath,
-            'dokumentasi_url' => !empty($finalDocs) ? $finalDocs : null,
+            'tingkat' => $request->tingkat,
+            'lokasi' => $request->lokasi,
+            'tanggal' => $request->tanggal,
+            'sertifikat_url' => $sertifikatPath,
+            'dokumentasi_url' => ! empty($finalDocs) ? $finalDocs : null,
         ]);
 
         return redirect('/prestasisiswainput')->with('success', 'Data prestasi berhasil diperbarui.');
@@ -278,8 +275,8 @@ class PrestasiSiswaInputController extends Controller
             if ($prestasisiswa->sertifikat_url && Storage::disk('public')->exists($prestasisiswa->sertifikat_url)) {
                 Storage::disk('public')->delete($prestasisiswa->sertifikat_url);
             }
-            $docs = is_array($prestasisiswa->dokumentasi_url) 
-                ? $prestasisiswa->dokumentasi_url 
+            $docs = is_array($prestasisiswa->dokumentasi_url)
+                ? $prestasisiswa->dokumentasi_url
                 : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
             foreach ($docs as $doc) {
                 if ($doc && Storage::disk('public')->exists($doc)) {
@@ -287,8 +284,10 @@ class PrestasiSiswaInputController extends Controller
                 }
             }
             $prestasisiswa->delete();
+
             return redirect('/prestasisiswainput')->with('success', 'Data Prestasi Berhasil Dihapus');
         }
+
         return redirect('/prestasisiswainput')->with('error', 'Data Prestasi not found!');
     }
 }

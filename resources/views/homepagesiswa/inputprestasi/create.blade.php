@@ -257,7 +257,7 @@
                                 <div class="mb-3">
                                     <label for="dokumentasi_url" class="form-label">Unggah Foto Dokumentasi (Bisa lebih dari 1 foto):</label>
                                     <input type="file" name="dokumentasi_url[]" id="dokumentasi_url" class="form-control" accept="image/*" multiple>
-                                    <small class="text-muted">Bisa memilih lebih dari 1 foto sekaligus. Format: JPG, JPEG, PNG, GIF (Maks 10MB per foto)</small>
+                                    <small class="text-muted">Pilih maksimal 10 foto sekaligus. Format: JPG, JPEG, PNG, GIF (maksimal 10MB per file).</small>
                                 </div>
 
                                 <!-- Tombol Simpan -->
@@ -391,27 +391,26 @@ document.getElementById('nama_siswa').addEventListener('change', function() {
 </script>
 
 <script>
-    document.getElementById("sertifikat_url").addEventListener("change", function () {
-        let file = this.files[0]; 
-        let warning = document.getElementById("fileWarning1");
+    const sertifikatInput = document.getElementById("sertifikat_url");
+    const dokumentasiInput = document.getElementById("dokumentasi_url");
+    const maxFileSize = 10 * 1024 * 1024;
+    const maxDocumentationFiles = 10;
 
-        if (file && file.size > 2 * 1024 * 1024) { // 2 MB dalam bytes
-            warning.classList.remove("d-none"); // Munculkan peringatan
-        } else {
-            warning.classList.add("d-none"); // Sembunyikan peringatan
+    sertifikatInput.addEventListener("change", function () {
+        if (this.files[0]?.size > maxFileSize) {
+            alert("Ukuran sertifikat maksimal 10MB.");
+            this.value = "";
         }
     });
-</script>
 
-<script>
-    document.getElementById("dokumentasi_url").addEventListener("change", function () {
-        let file = this.files[0]; 
-        let warning = document.getElementById("fileWarning2");
-
-        if (file && file.size > 1 * 1024 * 1024) { // 1 MB dalam bytes
-            warning.classList.remove("d-none"); // Munculkan peringatan
-        } else {
-            warning.classList.add("d-none"); // Sembunyikan peringatan
+    dokumentasiInput.addEventListener("change", function () {
+        const files = Array.from(this.files);
+        if (files.length > maxDocumentationFiles) {
+            alert("Dokumentasi maksimal 10 foto dalam satu kali unggah.");
+            this.value = "";
+        } else if (files.some((file) => file.size > maxFileSize)) {
+            alert("Ukuran setiap foto dokumentasi maksimal 10MB.");
+            this.value = "";
         }
     });
 </script>

@@ -202,10 +202,29 @@ SQLite) tidak ikut dipakai container.
 ```bash
 docker compose up -d --build   # Build ulang & jalankan
 docker compose down            # Hentikan container
-docker compose down -v         # Hentikan + hapus volume DB
-docker compose logs -f app     # Pantau log aplikasi
-docker compose exec app php artisan migrate:fresh --seed  # Reset DB
+docker compose logs -f app      # Pantau log aplikasi
+docker compose exec app php artisan migrate --force       # Jalankan migrasi tanpa menghapus data
 ```
+
+> **Penting:** Jangan menjalankan `docker compose down -v` pada server yang berisi
+> data penting. Opsi `-v` menghapus volume database secara permanen. Untuk
+> pembaruan kode, gunakan `docker compose down` (tanpa `-v`) atau
+> `docker compose up -d --build`; volume database akan tetap tersimpan.
+>
+> Buat backup sebelum pembaruan atau perubahan database:
+> ```bash
+> mkdir -p backups
+> docker compose exec -T db sh -c 'mariadb-dump -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" "$MARIADB_DATABASE"' > "backups/ewalas_$(date +%F_%H%M%S).sql"
+> ```
+
+### Unggahan Banyak Foto
+Form prestasi menerima maksimal 10 foto dokumentasi sekaligus (maksimal 10 MB per foto)
+dan satu sertifikat (maksimal 10 MB). Nginx dan PHP-FPM di container dikonfigurasi
+untuk request hingga 120 MB. Jika aplikasi berada di belakang Nginx reverse proxy
+di host, tambahkan `client_max_body_size 120m;` pada blok `server` HTTPS yang
+meneruskan request ke aplikasi, lalu jalankan `sudo nginx -t && sudo systemctl reload nginx`.
+Tanpa batas tersebut di reverse proxy, browser dapat tetap mendapat error 413
+sebelum request mencapai Laravel.
 
 ---
 

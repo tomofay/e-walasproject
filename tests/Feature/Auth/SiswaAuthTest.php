@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Walas;
 use App\Models\PrestasiSiswa;
+use App\Models\Walas;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -18,7 +18,7 @@ class SiswaAuthTest extends TestCase
     public function test_siswa_can_login(): void
     {
         $response = $this->post('/loginsiswa', [
-            'nama'     => 'Andi Pratama',
+            'nama' => 'Andi Pratama',
             'password' => $this->password(),
         ]);
 
@@ -162,7 +162,7 @@ class SiswaAuthTest extends TestCase
         $this->loginSiswa();
         $biodata = \App\Models\BiodataSiswa::where('siswas_id', session('siswa_id'))->first();
 
-        if (!$biodata) {
+        if (! $biodata) {
             $biodata = \App\Models\BiodataSiswa::create([
                 'siswas_id' => session('siswa_id'),
                 'nama_lengkap' => 'Andi Pratama',
@@ -252,28 +252,30 @@ class SiswaAuthTest extends TestCase
         $sertif = UploadedFile::fake()->create('sertifikat.pdf', 500, 'application/pdf');
         $foto1 = UploadedFile::fake()->create('foto1.jpg', 300, 'image/jpeg');
         $foto2 = UploadedFile::fake()->create('foto2.jpg', 300, 'image/jpeg');
+        $foto3 = UploadedFile::fake()->create('foto3.jpg', 300, 'image/jpeg');
+        $foto4 = UploadedFile::fake()->create('foto4.jpg', 300, 'image/jpeg');
 
         // Store: no walas_id, siswas_id, rombels_id needed from form!
         $response = $this->post('/prestasisiswainput/store', [
-            'jenis_prestasi'  => 'Akademik',
-            'nama_prestasi'   => 'Juara 1 Lomba Coding',
-            'mata_lomba'      => 'Web Technologies',
+            'jenis_prestasi' => 'Akademik',
+            'nama_prestasi' => 'Juara 1 Lomba Coding',
+            'mata_lomba' => 'Web Technologies',
             'nama_pembimbing' => 'Bpk. Ahmad, S.Pd.',
-            'tingkat'         => 'Tingkat Provinsi',
-            'lokasi'          => 'SMKN 1 Cibinong',
-            'tanggal'         => '2026-10-28',
-            'sertifikat_url'  => $sertif,
-            'dokumentasi_url' => [$foto1, $foto2],
+            'tingkat' => 'Tingkat Provinsi',
+            'lokasi' => 'SMKN 1 Cibinong',
+            'tanggal' => '2026-10-28',
+            'sertifikat_url' => $sertif,
+            'dokumentasi_url' => [$foto1, $foto2, $foto3, $foto4],
         ]);
 
         $response->assertRedirect('/prestasisiswainput');
 
         $this->assertDatabaseHas('prestasi_siswas', [
-            'nama_prestasi'   => 'Juara 1 Lomba Coding',
-            'mata_lomba'      => 'Web Technologies',
+            'nama_prestasi' => 'Juara 1 Lomba Coding',
+            'mata_lomba' => 'Web Technologies',
             'nama_pembimbing' => 'Bpk. Ahmad, S.Pd.',
-            'tingkat'         => 'Tingkat Provinsi',
-            'lokasi'          => 'SMKN 1 Cibinong',
+            'tingkat' => 'Tingkat Provinsi',
+            'lokasi' => 'SMKN 1 Cibinong',
         ]);
 
         $created = PrestasiSiswa::where('nama_prestasi', 'Juara 1 Lomba Coding')->first();
@@ -281,10 +283,12 @@ class SiswaAuthTest extends TestCase
         $this->assertNotNull($created->rombels_id);
         $this->assertNotNull($created->sertifikat_url);
         $this->assertIsArray($created->dokumentasi_url);
-        $this->assertCount(2, $created->dokumentasi_url);
+        $this->assertCount(4, $created->dokumentasi_url);
         Storage::disk('public')->assertExists($created->sertifikat_url);
         Storage::disk('public')->assertExists($created->dokumentasi_url[0]);
         Storage::disk('public')->assertExists($created->dokumentasi_url[1]);
+        Storage::disk('public')->assertExists($created->dokumentasi_url[2]);
+        Storage::disk('public')->assertExists($created->dokumentasi_url[3]);
 
         // Edit page
         $this->get("/prestasisiswainput/{$created->id}/edit")->assertStatus(200);
@@ -292,15 +296,15 @@ class SiswaAuthTest extends TestCase
         // Update
         $foto3 = UploadedFile::fake()->create('foto3.jpg', 300, 'image/jpeg');
         $updateResp = $this->put("/prestasisiswainput/{$created->id}", [
-            'jenis_prestasi'  => 'Akademik',
-            'nama_prestasi'   => 'Juara 1 Lomba Coding (Revisi)',
-            'mata_lomba'      => 'Web Technologies Advanced',
+            'jenis_prestasi' => 'Akademik',
+            'nama_prestasi' => 'Juara 1 Lomba Coding (Revisi)',
+            'mata_lomba' => 'Web Technologies Advanced',
             'nama_pembimbing' => 'Bpk. Ahmad, S.Pd. & Tim',
-            'tingkat'         => 'Tingkat Nasional',
-            'lokasi'          => 'Jakarta Convention Center',
-            'tanggal'         => '2026-10-29',
-            'form_has_docs'   => 1,
-            'keep_docs'       => [$created->dokumentasi_url[0]],
+            'tingkat' => 'Tingkat Nasional',
+            'lokasi' => 'Jakarta Convention Center',
+            'tanggal' => '2026-10-29',
+            'form_has_docs' => 1,
+            'keep_docs' => [$created->dokumentasi_url[0]],
             'dokumentasi_url' => [$foto3],
         ]);
         $updateResp->assertRedirect('/prestasisiswainput');
@@ -319,6 +323,31 @@ class SiswaAuthTest extends TestCase
         $this->assertDatabaseMissing('prestasi_siswas', ['id' => $created->id]);
     }
 
+    public function test_prestasi_documentation_upload_is_limited_to_ten_photos(): void
+    {
+        Storage::fake('public');
+        $this->loginSiswa();
+
+        $photos = array_map(
+            fn (int $index) => UploadedFile::fake()->create("foto{$index}.jpg", 100, 'image/jpeg'),
+            range(1, 11)
+        );
+
+        $response = $this->post('/prestasisiswainput/store', [
+            'jenis_prestasi' => 'Akademik',
+            'nama_prestasi' => 'Prestasi Uji Batas Foto',
+            'tanggal' => '2026-10-28',
+            'dokumentasi_url' => $photos,
+        ]);
+
+        $response->assertRedirect()
+            ->assertSessionHasErrors('dokumentasi_url');
+
+        $this->assertDatabaseMissing('prestasi_siswas', [
+            'nama_prestasi' => 'Prestasi Uji Batas Foto',
+        ]);
+    }
+
     public function test_siswa_logout(): void
     {
         $this->loginSiswa();
@@ -331,7 +360,7 @@ class SiswaAuthTest extends TestCase
     private function loginSiswa(): void
     {
         $this->post('/loginsiswa', [
-            'nama'     => 'Andi Pratama',
+            'nama' => 'Andi Pratama',
             'password' => $this->password(),
         ]);
     }
