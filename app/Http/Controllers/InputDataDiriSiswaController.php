@@ -27,7 +27,7 @@ class InputDataDiriSiswaController extends Controller
         }
 
         // Ambil data siswa berdasarkan 'siswa_id' yang ada di session
-        $siswa = Siswa::find(session('siswa_id'));
+        $siswa = Siswa::with('rombel.walas', 'biodata')->find(session('siswa_id'));
 
         // Periksa apakah data siswa ditemukan
         if (!$siswa) {
@@ -56,7 +56,7 @@ class InputDataDiriSiswaController extends Controller
         }
     
         // Ambil data siswa berdasarkan 'siswa_id' yang ada di session
-        $siswa = Siswa::find(session('siswa_id'));
+        $siswa = Siswa::with('rombel.walas', 'biodata')->find(session('siswa_id'));
     
         // Periksa apakah data siswa ditemukan
         if (!$siswa) {
@@ -82,7 +82,7 @@ class InputDataDiriSiswaController extends Controller
         }
 
         $validatedData = $request->validate([
-            'walas_id' => ['required', 'integer', Rule::exists('walas', 'id')],
+            'walas_id' => 'nullable|integer',
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => ['required', Rule::in(['Perempuan', 'Laki-laki'])],
             'tempat_lahir' => 'required|string|max:255',
@@ -90,8 +90,7 @@ class InputDataDiriSiswaController extends Controller
             'alamat' => 'required|string',
             'alamat_maps' => 'required|string',
             'fotorumah_url' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'kepemilikan_rumah' => ['required', Rule::in(['Lunas', 'Sewa', 'KPR/Kredit', 'Kontrak', 'Inden'])],
-            'jalur_masuk' => ['required', Rule::in(['Afirmasi', 'Zonasi', 'Rapor', 'Prestasi', 'Anak Guru', 'Perpindahan Orang Tua'])],
+            'jalur_masuk' => 'required|string|max:100',
             'jarak_rumah' => 'required|string|max:255',
             'transportasi_sekolah' => 'required|string|max:255',
             'transportasi_rumah' => 'required|string|max:255',
@@ -101,10 +100,10 @@ class InputDataDiriSiswaController extends Controller
             'jumlah_saudara' => 'required|integer|min:0|max:99999',
             'no_wa' => ['required', 'string', 'max:14', 'regex:/^[0-9+ -]+$/'],
             'email' => 'required|email|max:50',
-            'nis' => ['required', 'string', 'max:20', Rule::unique('biodata_siswas', 'nis')],
+            'nis' => 'nullable|string|max:20',
             'nisn' => ['required', 'string', 'max:20', Rule::unique('biodata_siswas', 'nisn')],
-            'kelas' => ['required', Rule::in(['X', 'XI', 'XII', 'XIII'])],
-            'kompetensi' => ['required', Rule::in(['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP', 'TFLM', 'TKR', 'TOI'])],
+            'kelas' => 'nullable|string|max:50',
+            'kompetensi' => 'nullable|string|max:100',
             'tahun_masuk' => 'required|digits:4',
             'nama_ayah' => 'required|string|max:80',
             'pekerjaan_ayah' => $ayahPekerjaanRules,
@@ -161,7 +160,6 @@ class InputDataDiriSiswaController extends Controller
             'alamat' => 'alamat',
             'alamat_maps' => 'alamat maps',
             'fotorumah_url' => 'foto rumah',
-            'kepemilikan_rumah' => 'kepemilikan rumah',
             'jalur_masuk' => 'jalur masuk',
             'jarak_rumah' => 'jarak rumah',
             'transportasi_sekolah' => 'transportasi ke sekolah',
@@ -199,9 +197,20 @@ class InputDataDiriSiswaController extends Controller
 
         unset($validatedData['pekerjaan_ayah_lainnya'], $validatedData['pekerjaan_ibu_lainnya']);
     
-        // Cek apakah NIS atau NISN sudah ada di database
         // Menambahkan siswas_id ke request
         $validatedData['siswas_id'] = $siswa->id;
+
+        // Wali Kelas, Kelas, dan Kompetensi otomatis dari rombel siswa
+        $validatedData['walas_id'] = $siswa->rombel?->walas_id ?? ($request->input('walas_id') ?: null);
+        $validatedData['kelas'] = $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? ($request->input('kelas') ?: 'X'));
+        $validatedData['kompetensi'] = $siswa->rombel?->kompetensi ?? ($request->input('kompetensi') ?: 'SIJA');
+
+        // NIS diisi kurikulum atau walas; jika belum ada di biodata tapi ada di daftar peserta didik, gunakan itu
+        $existingNis = $siswa->biodata?->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $siswa->id)->value('nis') ?? null);
+        $validatedData['nis'] = $request->input('nis') ?: $existingNis;
+
+        // Kepemilikan rumah telah dihapus
+        $validatedData['kepemilikan_rumah'] = null;
 
         foreach (['riwayat_penyakit', 'alergi', 'prestasi_akademik', 'prestasi_non_akademik', 'pengalaman_ekskul', 'kepribadian'] as $optionalField) {
             $validatedData[$optionalField] = ($validatedData[$optionalField] ?? null) ?: 'Tidak ada';
@@ -215,7 +224,20 @@ class InputDataDiriSiswaController extends Controller
         }
     
         // Simpan data ke database
-        BiodataSiswa::create($validatedData);
+        $createdBiodata = BiodataSiswa::create($validatedData);
+
+        // Sinkronisasi ke daftar peserta didik
+        \App\Models\DaftarPesertaDidik::updateOrCreate(
+            ['nama_siswa' => $siswa->id],
+            [
+                'walas_id' => $validatedData['walas_id'] ?? 1,
+                'nis' => $createdBiodata->nis,
+                'nisn' => $createdBiodata->nisn ?? null,
+                'jenis_kelamin' => $createdBiodata->jenis_kelamin ?? 'Laki-laki',
+                'keterangan' => 'Aktif',
+                'tanggal' => now()->toDateString(),
+            ]
+        );
     
         return redirect('/datadiripage')->with('success', 'Data Berhasil Ditambahkan!');
     }
@@ -244,8 +266,8 @@ class InputDataDiriSiswaController extends Controller
             return redirect('/loginsiswa')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Ambil data siswa berdasarkan 'siswa_id' yang ada di session
-        $siswa = Siswa::find(session('siswa_id'));
+        // Ambil data siswa berdasarkan 'siswa_id' yang ada di session beserta relasi rombel dan walas
+        $siswa = Siswa::with('rombel.walas', 'biodata')->find(session('siswa_id'));
 
         // Periksa apakah data siswa ditemukan
         if (!$siswa) {
@@ -260,25 +282,14 @@ class InputDataDiriSiswaController extends Controller
             return redirect('/homepagesiswa')->with('error', 'Data biodata tidak ditemukan.');
         }
 
-        // Cek apakah siswa sedang login
-        if ($siswa) {
-            // Ambil walas_id dari biodata
-            $walas_id = $biodata ? $biodata->walas_id : null;
-
-            // Ambil wali kelas berdasarkan walas_id (jika ada)
-            $walas = $walas_id ? Walas::find($walas_id) : null;
-
-            // Ambil nomor WhatsApp Walas atau tampilkan pesan default
-            $no_wa_walas = $walas && !empty($walas->no_wa) ? $walas->no_wa : 'Nomor tidak tersedia';
-        } else {
-            $no_wa_walas = 'Nomor tidak tersedia';
-        }
-
         // Ambil data rombel siswa
         $rombel = $siswa->rombel;
 
-        // Ambil wali kelas dari rombel siswa
+        // Ambil wali kelas dari rombel siswa atau dari biodata
         $nowalas = $rombel ? $rombel->walas : null;
+        $walas_id = $rombel?->walas_id ?? $biodata->walas_id;
+        $walas = $walas_id ? Walas::find($walas_id) : null;
+        $no_wa_walas = $walas && !empty($walas->no_wa) ? $walas->no_wa : 'Nomor tidak tersedia';
 
         // Mengambil data dari tabel walas
         $walasList = DB::table('walas')->select('id', 'nama')->get();
@@ -311,8 +322,7 @@ class InputDataDiriSiswaController extends Controller
             'alamat' => 'nullable|string|max:255',
             'alamat_maps' => 'nullable|string|max:5000',
             'fotorumah_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'kepemilikan_rumah' => 'nullable|string|max:50',
-            'jalur_masuk' => 'nullable|string|max:50',
+            'jalur_masuk' => 'nullable|string|max:100',
             'jarak_rumah' => 'nullable|string|max:50',
             'transportasi_sekolah' => 'nullable|string|max:50',
             'transportasi_rumah' => 'nullable|string|max:50',
@@ -323,7 +333,7 @@ class InputDataDiriSiswaController extends Controller
             'no_wa' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255',
             'nis' => 'nullable|string|max:20',
-            'nisn' => 'nullable|string|max:20',
+            'nisn' => 'required|string|max:20',
             'kelas' => 'nullable|string|max:50',
             'kompetensi' => 'nullable|string|max:100',
             'tahun_masuk' => 'nullable|string|max:4',
@@ -339,6 +349,7 @@ class InputDataDiriSiswaController extends Controller
             'tanggal_lahir_ibu' => 'nullable|date',
             'alamat_ibu' => 'nullable|string|max:255',
             'no_wa_ibu' => 'nullable|string|max:15',
+            'pendapatan_ortu' => 'nullable|string|max:80',
             'namasekolah_asal' => 'nullable|string|max:255',
             'alamat_sekolah' => 'nullable|string|max:255',
             'tahun_lulus' => 'nullable|string|max:4',
@@ -356,7 +367,7 @@ class InputDataDiriSiswaController extends Controller
         }
 
         // Ambil data siswa dari sesi
-        $siswa = Siswa::find(session('siswa_id'));
+        $siswa = Siswa::with('rombel.walas', 'biodata')->find(session('siswa_id'));
         if (!$siswa) {
             return redirect('/loginsiswa')->with('error', 'Data siswa tidak ditemukan.');
         }
@@ -365,86 +376,90 @@ class InputDataDiriSiswaController extends Controller
         $biodata = BiodataSiswa::findOrFail($id);
 
         // Mengecek apakah pekerjaan ayah adalah "Lainnya" dan mengganti nilainya jika perlu
-    if ($request->pekerjaan_ayah === 'Lainnya' && $request->has('pekerjaan_ayah_lainnya')) {
-        $request->merge(['pekerjaan_ayah' => $request->pekerjaan_ayah_lainnya]);
-    }
-
-    // Mengecek apakah pekerjaan ibu adalah "Lainnya" dan mengganti nilainya jika perlu
-    if ($request->pekerjaan_ibu === 'Lainnya' && $request->has('pekerjaan_ibu_lainnya')) {
-        $request->merge(['pekerjaan_ibu' => $request->pekerjaan_ibu_lainnya]);
-    }
-
-    // Periksa apakah ada file baru yang diunggah
-    if ($request->hasFile('fotorumah_url')) {
-        // Hapus file lama jika ada
-        if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
-            Storage::delete('public/' . $biodata->fotorumah_url);
+        if ($request->pekerjaan_ayah === 'Lainnya' && $request->has('pekerjaan_ayah_lainnya')) {
+            $request->merge(['pekerjaan_ayah' => $request->pekerjaan_ayah_lainnya]);
         }
-        // Simpan file baru
-        $fotoRumahPath = $request->file('fotorumah_url')->store('images/photos', 'public');
-    } else {
-        $fotoRumahPath = $biodata->fotorumah_url; // Gunakan file lama jika tidak ada perubahan
-    }
+
+        // Mengecek apakah pekerjaan ibu adalah "Lainnya" dan mengganti nilainya jika perlu
+        if ($request->pekerjaan_ibu === 'Lainnya' && $request->has('pekerjaan_ibu_lainnya')) {
+            $request->merge(['pekerjaan_ibu' => $request->pekerjaan_ibu_lainnya]);
+        }
+
+        // Periksa apakah ada file baru yang diunggah
+        if ($request->hasFile('fotorumah_url')) {
+            // Hapus file lama jika ada
+            if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
+                Storage::delete('public/' . $biodata->fotorumah_url);
+            }
+            // Simpan file baru
+            $fotoRumahPath = $request->file('fotorumah_url')->store('images/photos', 'public');
+        } else {
+            $fotoRumahPath = $biodata->fotorumah_url; // Gunakan file lama jika tidak ada perubahan
+        }
 
 
-    // Update data siswa
-    $biodata->fill($request->all());
-    $biodata->siswas_id = $siswa->id; // Tambahkan siswas_id dari session
-    $biodata->nama_lengkap = $request->nama_lengkap;
-    $biodata->jenis_kelamin = $request->jenis_kelamin;
-    $biodata->tempat_lahir = $request->tempat_lahir;
-    $biodata->tanggal_lahir = $request->tanggal_lahir;
-    $biodata->alamat = $request->alamat;
-    $biodata->alamat_maps = $request->alamat_maps;
-    $biodata->fotorumah_url = $fotoRumahPath;
-    $biodata->kepemilikan_rumah = $request->kepemilikan_rumah;
-    $biodata->jalur_masuk = $request->jalur_masuk;
-    $biodata->jarak_rumah = $request->jarak_rumah;
-    $biodata->transportasi_sekolah = $request->transportasi_sekolah;
-    $biodata->transportasi_rumah = $request->transportasi_rumah;
-    $biodata->agama = $request->agama;
-    $biodata->kewarganegaraan = $request->kewarganegaraan;
-    $biodata->anak_ke = $request->anak_ke;
-    $biodata->jumlah_saudara = $request->jumlah_saudara;
-    $biodata->no_wa = $request->no_wa;
-    $biodata->email = $request->email;
-    $biodata->nis = $request->nis;
-    $biodata->nisn = $request->nisn;
-    $biodata->kelas = $request->kelas;
-    $biodata->kompetensi = $request->kompetensi;
-    $biodata->tahun_masuk = $request->tahun_masuk;
-    $biodata->nama_ayah = $request->nama_ayah;
-    $biodata->pekerjaan_ayah = $request->pekerjaan_ayah;
-    $biodata->tempat_lahir_ayah = $request->tempat_lahir_ayah;
-    $biodata->tanggal_lahir_ayah = $request->tanggal_lahir_ayah;
-    $biodata->alamat_ayah = $request->alamat_ayah;
-    $biodata->no_wa_ayah = $request->no_wa_ayah;
-    $biodata->nama_ibu = $request->nama_ibu;
-    $biodata->pekerjaan_ibu = $request->pekerjaan_ibu;
-    $biodata->tempat_lahir_ibu = $request->tempat_lahir_ibu;
-    $biodata->tanggal_lahir_ibu = $request->tanggal_lahir_ibu;
-    $biodata->alamat_ibu = $request->alamat_ibu;
-    $biodata->no_wa_ibu = $request->no_wa_ibu;
-    $biodata->namasekolah_asal = $request->namasekolah_asal;
-    $biodata->alamat_sekolah = $request->alamat_sekolah;
-    $biodata->tahun_lulus = $request->tahun_lulus;
-    $biodata->riwayat_penyakit = $request->riwayat_penyakit;
-    $biodata->alergi = $request->alergi;
-    $biodata->prestasi_akademik = $request->prestasi_akademik;
-    $biodata->prestasi_non_akademik = $request->prestasi_non_akademik;
-    $biodata->pengalaman_ekskul = $request->pengalaman_ekskul;
-    $biodata->kepribadian = $request->kepribadian;
+        $originalNis = $biodata->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $siswa->id)->value('nis') ?? null);
 
-    // Simpan data yang telah diubah
-    $biodata->save();
+        $fieldsToUpdate = [
+            'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'alamat_maps',
+            'jalur_masuk', 'jarak_rumah', 'transportasi_sekolah', 'transportasi_rumah', 'agama',
+            'kewarganegaraan', 'anak_ke', 'jumlah_saudara', 'no_wa', 'email', 'nisn',
+            'tahun_masuk', 'nama_ayah', 'pekerjaan_ayah', 'tempat_lahir_ayah', 'tanggal_lahir_ayah',
+            'alamat_ayah', 'no_wa_ayah', 'nama_ibu', 'pekerjaan_ibu', 'tempat_lahir_ibu',
+            'tanggal_lahir_ibu', 'alamat_ibu', 'no_wa_ibu', 'pendapatan_ortu', 'namasekolah_asal', 'alamat_sekolah',
+            'tahun_lulus', 'riwayat_penyakit', 'alergi', 'prestasi_akademik', 'prestasi_non_akademik',
+            'pengalaman_ekskul', 'kepribadian'
+        ];
 
-    // Redirect ke halaman dengan pesan sukses
-    return redirect('/datadiripage')->with([
-        'success' => 'Data berhasil diperbarui!',
-        'biodatas' => BiodataSiswa::all(),
-        'siswa' => $siswa,
-        'walas' => DB::table('walas')->select('id', 'nama')->get()
-    ]);
+        foreach ($fieldsToUpdate as $field) {
+            // Jika sudah pernah terisi dan input dikosongkan, jangan timpa dengan data kosong
+            if (in_array($field, ['pekerjaan_ayah', 'pekerjaan_ibu', 'pendapatan_ortu']) && empty($request->input($field)) && !empty($biodata->{$field})) {
+                continue;
+            }
+            if ($request->has($field)) {
+                $biodata->{$field} = $request->input($field);
+            }
+        }
+
+        $biodata->siswas_id = $siswa->id;
+        $biodata->fotorumah_url = $fotoRumahPath;
+
+        // Kepemilikan rumah telah dihapus
+        $biodata->kepemilikan_rumah = null;
+
+        // NIS dilindungi dari edit oleh siswa (hanya diisi kurikulum atau walas)
+        $biodata->nis = $originalNis;
+
+        // Wali Kelas, Kelas, dan Kompetensi otomatis dari rombel
+        if ($siswa->rombel) {
+            $biodata->walas_id = $siswa->rombel->walas_id ?? $biodata->walas_id;
+            $biodata->kelas = $siswa->rombel->tingkat ?? ($siswa->rombel->nama_kelas ?? $biodata->kelas);
+            $biodata->kompetensi = $siswa->rombel->kompetensi ?? $biodata->kompetensi;
+        }
+
+        // Simpan data yang telah diubah
+        $biodata->save();
+
+        // Sinkronisasi ke daftar peserta didik
+        \App\Models\DaftarPesertaDidik::updateOrCreate(
+            ['nama_siswa' => $siswa->id],
+            [
+                'walas_id' => $biodata->walas_id ?? 1,
+                'nis' => $biodata->nis,
+                'nisn' => $biodata->nisn,
+                'jenis_kelamin' => $biodata->jenis_kelamin ?? 'Laki-laki',
+                'keterangan' => 'Aktif',
+                'tanggal' => now()->toDateString(),
+            ]
+        );
+
+        // Redirect ke halaman dengan pesan sukses
+        return redirect('/datadiripage')->with([
+            'success' => 'Data berhasil diperbarui!',
+            'biodatas' => BiodataSiswa::all(),
+            'siswa' => $siswa,
+            'walas' => DB::table('walas')->select('id', 'nama')->get()
+        ]);
 }
 
     /**

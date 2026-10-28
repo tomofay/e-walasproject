@@ -9,8 +9,8 @@
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="../../images/logokampak.png" rel="icon">
-  <link href="../../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="{{ asset('images/logokampak.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -18,14 +18,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-  <link href="/../../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/../../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="/../../assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="/../../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="/../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="/../../assets/css/main.css" rel="stylesheet">
+  <link href="{{ asset('assets/css/main.css?v=2') }}" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -218,6 +218,7 @@
 }
 
 </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -284,10 +285,15 @@
           <div class="col-lg-6">
             
              <div class="hero-content" data-aos="fade-up" data-aos-delay="200">
-              <div class="company-badge mb-4">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <div class="company-badge mb-4">
                 <i class="bi bi-gear-fill me-2"></i>
                     Edit Biodata Diri
-              </div> 
+              </div>
+                <a href="{{ route('datadiripage.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Data Diri
+                </a>
+            </div> 
 
               <!-- <h1 class="mb-4">
                Kelola Data Diri Siswa <br>
@@ -339,14 +345,12 @@
                     </select>
                 </div>
             </div>
-            <div class="mb-3">
-                <label for="walas" class="form-label">Wali Kelas</label>
-                <select class="form-select" id="walas" name="walas_id" required>
-                    <option selected disabled>Pilih Wali Kelas</option>
-                    @foreach ($walasList as $wali)
-                        <option value="{{ $wali->id }}" {{ old('walas_id', $biodata->walas_id ?? '') == $wali->id ? 'selected' : '' }}>{{ $wali->nama }}</option>
-                    @endforeach
-                </select>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Wali Kelas</label>
+                    <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->walas?->nama ?? ($biodata->walas?->nama ?? 'Belum ditentukan') }}" readonly tabindex="-1">
+                    <input type="hidden" name="walas_id" value="{{ $siswa->rombel?->walas_id ?? $biodata->walas_id }}">
+                </div>
             </div>
             <div class="row mb-3">
                 <div class="col-12">
@@ -379,41 +383,30 @@
             <!-- Foto Rumah (Gambar) -->
             <div class="mb-3">
                 <label for="fotorumah_url" class="form-label">Unggah Foto Depan Rumah (Gambar):</label>
-                        <input type="file" name="fotorumah_url" id="fotorumah_url" class="form-control" accept="image/*">
-                        <small>Jika tidak ingin mengubah gambar, biarkan kosong.</small>
-                        <small id="fileWarning" class="text-danger d-none">Ukuran file tidak boleh lebih dari 2 MB!</small>
-                </div>
-                            @if($biodata->fotorumah_url)
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $biodata->fotorumah_url) }}" alt="Foto Rumah" class="img-thumbnail" width="100">
-                                </div>
-                            @endif
+                <input type="file" name="fotorumah_url" id="fotorumah_url" class="form-control" accept="image/*">
+                <small>Jika tidak ingin mengubah gambar, biarkan kosong.</small>
+                <small id="fileWarning" class="text-danger d-none">Ukuran file tidak boleh lebih dari 2 MB!</small>
+                @if($biodata->fotorumah_url)
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/' . $biodata->fotorumah_url) }}" alt="Foto Rumah" class="img-thumbnail" width="100">
+                    </div>
+                @endif
             </div>
 
             <div class="row mb-3">
                 <div class="col-12">
-                    <label for="kepemilikan_rumah" class="form-label">Kepemilikan Rumah</label>
-                    <select name="kepemilikan_rumah" id="kepemilikan_rumah" class="form-control w-100" required>
-                        <option value="Lunas" {{ old('kepemilikan_rumah', $biodata->kepemilikan_rumah ?? '') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                        <option value="KPR/Kredit" {{ old('kepemilikan_rumah', $biodata->kepemilikan_rumah ?? '') == 'KPR/Kredit' ? 'selected' : '' }}>KPR/Kredit</option>
-                        <option value="Sewa" {{ old('kepemilikan_rumah', $biodata->kepemilikan_rumah ?? '') == 'Sewa' ? 'selected' : '' }}>Sewa</option>
-                        <option value="Kontrak" {{ old('kepemilikan_rumah', $biodata->kepemilikan_rumah ?? '') == 'Kontrak' ? 'selected' : '' }}>Kontrak</option>
-                        <option value="Inden" {{ old('kepemilikan_rumah', $biodata->kepemilikan_rumah ?? '') == 'Inden' ? 'selected' : '' }}>Inden</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-12">
-                    <label for="jalur_masuk" class="form-label">Jalur Masuk</label>
-                    <select name="jalur_masuk" id="jalur_masuk" class="form-control w-100" required>
-                        <option value="Afirmasi" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Afirmasi' ? 'selected' : '' }}>Afirmasi</option>
-                        <option value="Zonasi" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Zonasi' ? 'selected' : '' }}>Zonasi</option>
-                        <option value="Rapor" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Rapor' ? 'selected' : '' }}>Rapor</option>
-                        <option value="Prestasi" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Prestasi' ? 'selected' : '' }}>Prestasi</option>
-                        <option value="Anak Guru" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Anak Guru' ? 'selected' : '' }}>Anak Guru</option>
-                        <option value="Perpindahan Orang Tua" {{ old('jalur_masuk', $biodata->jalur_masuk ?? '') == 'Perpindahan Orang Tua' ? 'selected' : '' }}>Perpindahan Orang Tua</option>
-                    </select>
+                    <label for="jalur_masuk" class="form-label">Jalur Masuk / SPMB</label>
+                    <input type="text" name="jalur_masuk" id="jalur_masuk" class="form-control w-100" placeholder="Contoh: Rapor / Zonasi / SPMB Bersama / Prestasi" list="jalur_masuk_list" value="{{ old('jalur_masuk', $biodata->jalur_masuk ?? '') }}" required>
+                    <datalist id="jalur_masuk_list">
+                        <option value="Rapor">
+                        <option value="Zonasi">
+                        <option value="SPMB Bersama">
+                        <option value="Prestasi">
+                        <option value="Afirmasi">
+                        <option value="Anak Guru">
+                        <option value="Perpindahan Orang Tua">
+                    </datalist>
+                    <small class="text-muted"><i class="bi bi-pencil-square me-1"></i>Input manual sesuai jalur masuk / SPMB Anda.</small>
                 </div>
             </div>
 
@@ -473,39 +466,38 @@
             </div>
 
             <div class="row mb-3">
+                @php
+                    $resolvedNis = old('nis', $biodata->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id ?? ($siswa->id ?? null))->value('nis') ?? ''));
+                @endphp
                 <div class="col-md-6">
                     <label for="nis" class="form-label">NIS</label>
-                    <input type="text" name="nis" id="nis" class="form-control" value="{{ old('nis', $biodata->nis ?? '') }}" required>
+                    <input type="text" name="nis" id="nis" class="form-control bg-light" value="{{ $resolvedNis }}" placeholder="{{ $resolvedNis ? 'NIS' : 'Belum diisi oleh Walas / Kurikulum' }}" readonly tabindex="-1">
+                    @if($resolvedNis)
+                        <small class="text-success"><i class="bi bi-check-circle-fill"></i> NIS sudah diisi oleh Walas / Kurikulum</small>
+                    @else
+                        <small class="text-muted"><i class="bi bi-info-circle"></i> NIS akan diisi oleh Walas atau Kurikulum</small>
+                    @endif
                 </div>
                 <div class="col-md-6">
                     <label for="nisn" class="form-label">NISN</label>
-                    <input type="text" name="nisn" id="nisn" class="form-control" value="{{ old('nisn', $biodata->nisn ?? '') }}" required>
+                    <input type="text" name="nisn" id="nisn" class="form-control" value="{{ old('nisn', $biodata->nisn ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id ?? ($siswa->id ?? null))->value('nisn') ?? '')) }}" maxlength="20" placeholder="Masukkan NISN Anda" required>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="kelas" class="form-label">Kelas</label>
-                    <select name="kelas" id="kelas" class="form-control" required>
-                        <option value="X" {{ old('kelas', $biodata->kelas ?? '') == 'X' ? 'selected' : '' }}>X</option>
-                        <option value="XI" {{ old('kelas', $biodata->kelas ?? '') == 'XI' ? 'selected' : '' }}>XI</option>
-                        <option value="XII" {{ old('kelas', $biodata->kelas ?? '') == 'XII' ? 'selected' : '' }}>XII</option>
-                        <option value="XIII" {{ old('kelas', $biodata->kelas ?? '') == 'XIII' ? 'selected' : '' }}>XIII</option>
-                    </select>
+                    <label class="form-label fw-semibold">Kelas</label>
+                    <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? ($biodata->kelas ?? 'Belum ditentukan')) }}" readonly tabindex="-1">
+                    <input type="hidden" name="kelas" value="{{ $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? ($biodata->kelas ?? 'X')) }}">
                 </div>
                 <div class="col-md-6">
-                    <label for="kompetensi" class="form-label">Kompetensi</label>
-                    <select name="kompetensi" id="kompetensi" class="form-control" required>
-                        <option value="SIJA" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'SIJA' ? 'selected' : '' }}>SIJA</option>
-                        <option value="TKJ" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'TKJ' ? 'selected' : '' }}>TKJ</option>
-                        <option value="RPL" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'RPL' ? 'selected' : '' }}>RPL</option>
-                        <option value="DKV" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'DKV' ? 'selected' : '' }}>DKV</option>
-                        <option value="DPIB" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'DPIB' ? 'selected' : '' }}>DPIB</option>
-                        <option value="TKP" {{ old('kompetensi', $biodata->kompetensi ?? '') == 'TKP' ? 'selected' : '' }}>TKP</option>
-                    </select>
+                    <label class="form-label fw-semibold">Kompetensi</label>
+                    <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->kompetensi ?? ($biodata->kompetensi ?? 'Belum ditentukan') }}" readonly tabindex="-1">
+                    <input type="hidden" name="kompetensi" value="{{ $siswa->rombel?->kompetensi ?? ($biodata->kompetensi ?? 'SIJA') }}">
                 </div>
-                <div class="row mb-3">
-                <div class="row mb-3">
+            </div>
+
+            <div class="row mb-3">
                 <div class="col-md-12">
                     <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
                     <input type="text" name="tahun_masuk" id="tahun_masuk" class="form-control" value="{{ old('tahun_masuk', $biodata->tahun_masuk ?? '') }}" required>
@@ -519,52 +511,36 @@
                         <input type="text" name="nama_ayah" id="nama_ayah" class="form-control" value="{{ old('nama_ayah', $biodata->nama_ayah ?? '') }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="pekerjaan_ayah" class="form-label">Pekerjaan Ayah</label>
+                        @php
+                            $stdPekerjaanAyah = ['TNI/POLRI', 'ASN/PNS', 'Karyawan', 'Wiraswasta', 'Pengemudi', 'Buruh', 'Tani', 'Pensiunan'];
+                            $curPekerjaanAyah = old('pekerjaan_ayah', $biodata->pekerjaan_ayah ?? '');
+                            $hasAyahJob = !empty($curPekerjaanAyah);
+                            $isOtherAyah = $hasAyahJob && !in_array($curPekerjaanAyah, $stdPekerjaanAyah);
+                        @endphp
+                        <label for="pekerjaan_ayah" class="form-label">
+                            Pekerjaan Ayah
+                            @if(!$hasAyahJob)<span class="text-danger">*</span>@endif
+                        </label>
+                        @if($hasAyahJob)
+                            <div class="mb-2">
+                                <span class="badge bg-success-subtle text-success border border-success p-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Sudah terisi: <strong>{{ $curPekerjaanAyah }}</strong> (Tidak perlu memilih lagi jika tidak ada perubahan)
+                                </span>
+                            </div>
+                        @endif
                         <ul id="pekerjaan_ayah" class="list-unstyled d-flex flex-wrap">
+                            @foreach($stdPekerjaanAyah as $job)
+                                <li class="col-md-6">
+                                    <input type="radio" name="pekerjaan_ayah" value="{{ $job }}" id="ayah_{{ Str::slug($job, '_') }}" onchange="togglePekerjaanInput()" {{ $curPekerjaanAyah === $job ? 'checked' : '' }} {{ $hasAyahJob ? '' : 'required' }}> 
+                                    <label for="ayah_{{ Str::slug($job, '_') }}">{{ $job }}</label>
+                                </li>
+                            @endforeach
                             <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="TNI/POLRI" id="TNI_POLRI" onchange="togglePekerjaanInput()" required> 
-                                <label for="TNI_POLRI">TNI/POLRI</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="ASN/PNS" id="ASN_PNS" onchange="togglePekerjaanInput()" required> 
-                                <label for="ASN_PNS">ASN/PNS</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Karyawan" id="Karyawan" onchange="togglePekerjaanInput()" required> 
-                                <label for="Karyawan">Karyawan</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Wiraswasta" id="Wiraswasta" onchange="togglePekerjaanInput()" required> 
-                                <label for="Wiraswasta">Wiraswasta</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Pengemudi" id="Pengemudi" onchange="togglePekerjaanInput()" required> 
-                                <label for="Pengemudi">Pengemudi</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Buruh" id="Buruh" onchange="togglePekerjaanInput()" required> 
-                                <label for="Buruh">Buruh</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Tani" id="Tani" onchange="togglePekerjaanInput()" required> 
-                                <label for="Tani">Tani</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Pensiunan" id="Pensiunan" onchange="togglePekerjaanInput()" required> 
-                                <label for="Pensiunan">Pensiunan</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ayah" value="Lainnya" id="Lainnya" onchange="togglePekerjaanInput()" required> 
-                                <label for="Lainnya">Lainnya</label>
+                                <input type="radio" name="pekerjaan_ayah" value="Lainnya" id="ayah_lainnya" onchange="togglePekerjaanInput()" {{ $isOtherAyah ? 'checked' : '' }} {{ $hasAyahJob ? '' : 'required' }}> 
+                                <label for="ayah_lainnya">Lainnya</label>
                             </li>
                         </ul>
-                        <input type="text" name="pekerjaan_ayah_lainnya" id="pekerjaan_ayah_lainnya" class="form-control mt-2" placeholder="Masukkan pekerjaan lain..." style="display: none;">
-                        <br>
-                        <div class="col-md-6">
-                            <p class="form-control bg-light">
-                                Pekerjaan Sebelumnya = {{ $biodata->pekerjaan_ayah ?? 'Belum diisi' }}
-                            </p>
-                        </div>
+                        <input type="text" name="pekerjaan_ayah_lainnya" id="pekerjaan_ayah_lainnya" class="form-control mt-2" placeholder="Masukkan pekerjaan lain..." value="{{ $isOtherAyah ? $curPekerjaanAyah : old('pekerjaan_ayah_lainnya', '') }}" style="display: {{ $isOtherAyah ? 'block' : 'none' }};">
                     </div>
 
                 </div>
@@ -613,7 +589,7 @@
                                     @endif
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Tutup</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                 </div>
                             </div>
                         </div>
@@ -626,52 +602,36 @@
                         <input type="text" name="nama_ibu" id="nama_ibu" class="form-control" value="{{ old('nama_ibu', $biodata->nama_ibu ?? '') }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="pekerjaan_ibu" class="form-label">Pekerjaan Ibu</label>
+                        @php
+                            $stdPekerjaanIbu = ['TNI/POLRI', 'ASN/PNS', 'Karyawan', 'Wiraswasta', 'Ibu Rumah Tangga', 'Buruh', 'Tani', 'Pensiunan'];
+                            $curPekerjaanIbu = old('pekerjaan_ibu', $biodata->pekerjaan_ibu ?? '');
+                            $hasIbuJob = !empty($curPekerjaanIbu);
+                            $isOtherIbu = $hasIbuJob && !in_array($curPekerjaanIbu, $stdPekerjaanIbu);
+                        @endphp
+                        <label for="pekerjaan_ibu" class="form-label">
+                            Pekerjaan Ibu
+                            @if(!$hasIbuJob)<span class="text-danger">*</span>@endif
+                        </label>
+                        @if($hasIbuJob)
+                            <div class="mb-2">
+                                <span class="badge bg-success-subtle text-success border border-success p-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Sudah terisi: <strong>{{ $curPekerjaanIbu }}</strong> (Tidak perlu memilih lagi jika tidak ada perubahan)
+                                </span>
+                            </div>
+                        @endif
                         <ul id="pekerjaan_ibu" class="list-unstyled d-flex flex-wrap">
+                            @foreach($stdPekerjaanIbu as $job)
+                                <li class="col-md-6">
+                                    <input type="radio" name="pekerjaan_ibu" value="{{ $job }}" id="ibu_{{ Str::slug($job, '_') }}" onchange="togglePekerjaanInput()" {{ $curPekerjaanIbu === $job ? 'checked' : '' }} {{ $hasIbuJob ? '' : 'required' }}> 
+                                    <label for="ibu_{{ Str::slug($job, '_') }}">{{ $job }}</label>
+                                </li>
+                            @endforeach
                             <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="TNI/POLRI" id="TNI_POLRI" onchange="togglePekerjaanInput()" required> 
-                                <label for="TNI_POLRI">TNI/POLRI</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="ASN/PNS" id="ASN_PNS" onchange="togglePekerjaanInput()" required> 
-                                <label for="ASN_PNS">ASN/PNS</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Karyawan" id="Karyawan" onchange="togglePekerjaanInput()" required> 
-                                <label for="Karyawan">Karyawan</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Wiraswasta" id="Wiraswasta" onchange="togglePekerjaanInput()" required> 
-                                <label for="Wiraswasta">Wiraswasta</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Ibu Rumah Tangga" id="Pengemudi" onchange="togglePekerjaanInput()" required> 
-                                <label for="Ibu Rumah Tangga">Ibu Rumah Tangga</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Buruh" id="Buruh" onchange="togglePekerjaanInput()" required> 
-                                <label for="Buruh">Buruh</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Tani" id="Tani" onchange="togglePekerjaanInput()" required> 
-                                <label for="Tani">Tani</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Pensiunan" id="Pensiunan" onchange="togglePekerjaanInput()" required> 
-                                <label for="Pensiunan">Pensiunan</label>
-                            </li>
-                            <li class="col-md-6">
-                                <input type="radio" name="pekerjaan_ibu" value="Lainnya" id="Lainnya" onchange="togglePekerjaanInput()" required> 
-                                <label for="Lainnya">Lainnya</label>
+                                <input type="radio" name="pekerjaan_ibu" value="Lainnya" id="ibu_lainnya" onchange="togglePekerjaanInput()" {{ $isOtherIbu ? 'checked' : '' }} {{ $hasIbuJob ? '' : 'required' }}> 
+                                <label for="ibu_lainnya">Lainnya</label>
                             </li>
                         </ul>
-                        <input type="text" name="pekerjaan_ibu_lainnya" id="pekerjaan_ibu_lainnya" class="form-control mt-2" placeholder="Masukkan pekerjaan lain..." style="display: none;">
-                        <br>
-                        <div class="col-md-6">
-                            <p class="form-control bg-light">
-                                Pekerjaan Sebelumnya = {{ $biodata->pekerjaan_ibu ?? 'Belum diisi' }}
-                            </p>
-                        </div>
+                        <input type="text" name="pekerjaan_ibu_lainnya" id="pekerjaan_ibu_lainnya" class="form-control mt-2" placeholder="Masukkan pekerjaan lain..." value="{{ $isOtherIbu ? $curPekerjaanIbu : old('pekerjaan_ibu_lainnya', '') }}" style="display: {{ $isOtherIbu ? 'block' : 'none' }};">
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -718,7 +678,7 @@
                                         @endif
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Tutup</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                     </div>
                                 </div>
                             </div>
@@ -726,52 +686,45 @@
                 </div>
                 <br><br>
                 <h4 class="text-bold">Rentang Pendapatan Kedua Orangtua</h4>
+                    @php
+                        $stdPendapatan = [
+                            'Kurang dari Rp1.000.000,00',
+                            'Rp1.000.000,00 - Rp3.000.000,00',
+                            'Rp3.000.000,00 - Rp5.000.000,00',
+                            'Rp5.000.000,00 - Rp10.000.000,00',
+                            'Rp10.000.000,00 - Rp25.000.000,00',
+                            'Rp25.000.000,00 - Rp50.000.000,00',
+                            'Lebih dari Rp50.000.000,00',
+                        ];
+                        $curPendapatan = old('pendapatan_ortu', $biodata->pendapatan_ortu ?? '');
+                        $hasPendapatan = !empty($curPendapatan);
+                    @endphp
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="pendapatan_ortu" class="form-label">Pendapatan Ayah dan Ibu</label>
+                            @if($hasPendapatan)
+                                <div class="mb-2">
+                                    <span class="badge bg-success-subtle text-success border border-success p-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Sudah terisi: <strong>{{ $curPendapatan }}</strong> (Tidak perlu memilih lagi jika tidak ada perubahan)
+                                    </span>
+                                </div>
+                            @endif
                             <ul id="pendapatan_ortu" class="list-unstyled d-flex flex-wrap">
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Kurang dari Rp1.000.000,00" id="Kurang_dari_Rp1_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Kurang_dari_Rp1_000_000_00">Kurang dari Rp1.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Rp1.000.000,00 - Rp3.000.000,00" id="Rp1_000_000_00_-_Rp3_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Rp1_000_000_00_-_Rp3_000_000_00">Rp1.000.000,00 - Rp3.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Rp3.000.000,00 - Rp5.000.000,00" id="Rp3_000_000_00_-_Rp5_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Rp3_000_000_00_-_Rp5_000_000_00">Rp3.000.000,00 - Rp5.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Rp5.000.000,00 - Rp10.000.000,00" id="Rp5_000_000_00_-_Rp10_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Rp5_000_000_00_-_Rp10_000_000_00">Rp5.000.000,00 - Rp10.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Rp10.000.000,00 - Rp25.000.000,00" id="Rp10_000_000_00_-_Rp25_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Rp10_000_000_00_-_Rp25_000_000_00">Rp10.000.000,00 - Rp25.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Rp25.000.000,00 - Rp50.000.000,00" id="Rp25_000_000_00_-_Rp50_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Rp25_000_000_00_-_Rp50_000_000_00">Rp25.000.000,00 - Rp50.000.000,00</label>
-                                </li>
-                                <li class="col-md-3 col-sm-6">
-                                    <input type="radio" name="pendapatan_ortu" value="Lebih dari Rp50.000.000,00" id="Lebih_dari_Rp50_000_000_00" onchange="togglePekerjaanInput()">
-                                    <label for="Lebih_dari_Rp50_000_000_00">Lebih dari Rp50.000.000,00</label>
-                                </li>
+                                @foreach($stdPendapatan as $idx => $pendapatan)
+                                    <li class="col-md-3 col-sm-6">
+                                        <input type="radio" name="pendapatan_ortu" value="{{ $pendapatan }}" id="pendapatan_{{ $idx }}" {{ $curPendapatan === $pendapatan ? 'checked' : '' }}>
+                                        <label for="pendapatan_{{ $idx }}">{{ $pendapatan }}</label>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                            <p class="form-control bg-light">
-                                Rentang Pendapatan Orangtua Sebelumnya = {{ $biodata->pendapatan_ortu ?? 'Belum diisi' }}
-                            </p>
-                        </div>
                 
                 <h4>Data Pendidikan Sebelumnya</h4>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="namasekolah_asal" class="form-label">Nama Sekolah Asal</label>
-                        <input type="text" name="namasekolah_asal" id="namasekolah_asal" class="form-control" maxlength="50" placeholder="Contoh: SMK Negeri 1 Cibinong" value="{{ old('namasekolah_asal', $biodata->namasekolah_asal ?? '') }}" required>
+                        <input type="text" name="namasekolah_asal" id="namasekolah_asal" class="form-control" maxlength="50" placeholder="Contoh: SMP 1 Cibinong" value="{{ old('namasekolah_asal', $biodata->namasekolah_asal ?? '') }}" required>
                     </div>
                     <div class="col-md-6">
                         <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
@@ -821,6 +774,7 @@
                     </div>
                 </div>
             <div class="d-flex justify-content-end">
+                
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>
         </form>
@@ -846,61 +800,51 @@
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
-  <script src="/../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="/../../assets/vendor/php-email-form/validate.js"></script>
-  <script src="/../../assets/vendor/aos/aos.js"></script>
-  <script src="/../../assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="/../../assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="/../../assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+  <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+  <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
 
   <!-- Main JS File -->
-  <script src="/../../assets/js/main.js"></script>
+  <script src="{{ asset('assets/js/main.js') }}"></script>
 
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var radioButtons = document.querySelectorAll('input[name="pekerjaan_ayah"]');
-    var pekerjaanInput = document.getElementById("pekerjaan_ayah_lainnya");
+  function togglePekerjaanInput() {
+    var ayahChecked = document.querySelector('input[name="pekerjaan_ayah"]:checked');
+    var ayahInput = document.getElementById("pekerjaan_ayah_lainnya");
+    if (ayahInput) {
+        if (ayahChecked && ayahChecked.value === "Lainnya") {
+            ayahInput.style.display = "block";
+        } else {
+            ayahInput.style.display = "none";
+        }
+    }
 
-    radioButtons.forEach(function (radio) {
-        radio.addEventListener("change", function () {
-            if (this.value === "Lainnya") {
-                pekerjaanInput.style.display = "block";
-                pekerjaanInput.focus(); // Memberikan fokus ke input box
-            } else {
-                pekerjaanInput.style.display = "none";
-                pekerjaanInput.value = ""; // Reset value jika tidak dipilih "Lainnya"
-            }
-        });
+    var ibuChecked = document.querySelector('input[name="pekerjaan_ibu"]:checked');
+    var ibuInput = document.getElementById("pekerjaan_ibu_lainnya");
+    if (ibuInput) {
+        if (ibuChecked && ibuChecked.value === "Lainnya") {
+            ibuInput.style.display = "block";
+        } else {
+            ibuInput.style.display = "none";
+        }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    togglePekerjaanInput();
+
+    document.querySelectorAll('input[name="pekerjaan_ayah"]').forEach(function (radio) {
+        radio.addEventListener("change", togglePekerjaanInput);
+    });
+
+    document.querySelectorAll('input[name="pekerjaan_ibu"]').forEach(function (radio) {
+        radio.addEventListener("change", togglePekerjaanInput);
     });
   });
-</script>
-
-
-<script>
-  function togglePekerjaanInput() {
-    var pekerjaanAyah = document.querySelector('input[name="pekerjaan_ayah"]:checked').value;
-    var pekerjaanInput = document.getElementById("pekerjaan_ayah_lainnya");
-
-    if (pekerjaanAyah === "Lainnya") {
-        pekerjaanInput.style.display = "block";
-    } else {
-        pekerjaanInput.style.display = "none";
-    }
-}
-</script>
-
-<script>
-  function togglePekerjaanInput() {
-    var pekerjaanibu = document.querySelector('input[name="pekerjaan_ibu"]:checked').value;
-    var pekerjaanInput = document.getElementById("pekerjaan_ibu_lainnya");
-
-    if (pekerjaanibu === "Lainnya") {
-        pekerjaanInput.style.display = "block";
-    } else {
-        pekerjaanInput.style.display = "none";
-    }
-}
-</script>
+  </script>
 
 <script>
 function sendWhatsAppMessageAyah() {

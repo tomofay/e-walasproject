@@ -63,11 +63,11 @@
         @foreach ($daftarpdidik as $idx => $data)
             <tr>
                 <td>{{ $idx + 1 }}</td>
-                <td>{{ $data->siswa->nama }}</td>
-                <td>{{ $data->nis }}</td>
-                <td>{{ $data->nisn }}</td>
-                <td>{{ $data->jenis_kelamin }}</td>
-                <td>{{ $data->keterangan }}</td>
+                <td>{{ $data->siswa->nama ?? '-' }}</td>
+                <td>{{ $data->nis ?: ($data->siswa->biodata?->nis ?? '-') }}</td>
+                <td>{{ $data->nisn ?: ($data->siswa->biodata?->nisn ?? '-') }}</td>
+                <td>{{ $data->jenis_kelamin ?? ($data->siswa->jenis_kelamin ?? '-') }}</td>
+                <td>{{ ucfirst($data->keterangan ?? ($data->siswa->status ?? 'Aktif')) }}</td>
                 <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') }}</td>
             </tr>
         @endforeach

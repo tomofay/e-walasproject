@@ -357,8 +357,8 @@ class DatabaseSeeder extends Seeder
         }
 
         DB::table('catatan_kasus_siswas')->insert([
-            ['walas_id' => $walasIds[0], 'siswas_id' => $siswaIds[0], 'kasus' => 'Terlambat masuk sekolah', 'tindak_lanjut' => 'Dipanggil dan diberikan nasihat', 'keterangan' => 'Diberikan pembinaan agar lebih disiplin', 'created_at' => now(), 'updated_at' => now()],
-            ['walas_id' => $walasIds[1], 'siswas_id' => $siswaIds[5], 'kasus' => 'Absen tanpa keterangan', 'tindak_lanjut' => 'Koordinasi dengan orang tua', 'keterangan' => 'Orang tua menjelaskan karena sakit', 'created_at' => now(), 'updated_at' => now()],
+            ['walas_id' => $walasIds[0], 'siswas_id' => $siswaIds[0], 'tanggal' => '2025-02-10', 'waktu' => '07:15:00', 'kasus' => 'Terlambat masuk sekolah', 'tindak_lanjut' => 'Dipanggil dan diberikan nasihat', 'keterangan' => 'Diberikan pembinaan agar lebih disiplin', 'file_kasus' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['walas_id' => $walasIds[1], 'siswas_id' => $siswaIds[5], 'tanggal' => '2025-02-11', 'waktu' => '08:30:00', 'kasus' => 'Absen tanpa keterangan', 'tindak_lanjut' => 'Koordinasi dengan orang tua', 'keterangan' => 'Orang tua menjelaskan karena sakit', 'file_kasus' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('home_visits')->insert([
@@ -392,16 +392,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $biodataList = DB::table('biodata_siswas')->pluck('nis', 'siswas_id')->all();
+        $biodataNisnList = DB::table('biodata_siswas')->pluck('nisn', 'siswas_id')->all();
         foreach ($siswaIds as $index => $siswaId) {
+            $student = DB::table('siswas')->where('id', $siswaId)->first();
+            $rombel = $student ? DB::table('rombels')->where('id', $student->rombels_id)->first() : null;
+            $walasId = $rombel ? $rombel->walas_id : $walasIds[0];
+
             DB::table('daftar_peserta_didiks')->insert([
-                'walas_id' => $walasIds[$index % count($walasIds)],
+                'walas_id' => $walasId,
                 'nis' => $biodataList[$siswaId] ?? sprintf('2025%04d', $index + 1),
-                'nisn' => sprintf('000%08d', $index + 10000001),
+                'nisn' => $biodataNisnList[$siswaId] ?? sprintf('000%08d', $index + 10000001),
                 'nama_siswa' => $siswaId,
                 'keterangan' => 'Aktif',
                 'kurikulum_id' => $kurikulumIds[$index % count($kurikulumIds)],
                 'tanggal' => '2025-02-10',
-                'jenis_kelamin' => DB::table('siswas')->where('id', $siswaId)->value('jenis_kelamin'),
+                'jenis_kelamin' => $student->jenis_kelamin ?? 'Laki-laki',
                 'ttdkurikulum_url' => 'https://example.com/daftar-peserta-kurikulum.jpg',
                 'ttdwalas_url' => 'https://example.com/daftar-peserta-walas.jpg',
                 'created_at' => now(),

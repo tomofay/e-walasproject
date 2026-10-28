@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -217,6 +217,7 @@
 }
 
 </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -283,10 +284,15 @@
           <div class="col-lg-6">
             
              <div class="hero-content" data-aos="fade-up" data-aos-delay="200">
-              <div class="company-badge mb-4">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <div class="company-badge mb-4">
                 <i class="bi bi-gear-fill me-2"></i>
                     Input Data Diri
-              </div> 
+              </div>
+                <a href="{{ route('homepagesiswa.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda Siswa
+                </a>
+            </div> 
 
               <!-- <h1 class="mb-4">
                Kelola Data Diri Siswa <br>
@@ -350,15 +356,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="mb-3">
-                        <label for="walas" class="form-label">Wali Kelas</label>
-                        <select class="form-select" id="walas" name="walas_id" required>
-                            <option value="" selected disabled>Pilih Wali Kelas</option>
-                            @foreach ($walas as $wali)
-                                <option value="{{ $wali->id }}">{{ $wali->nama }}</option>
-                            @endforeach
-                        </select>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Wali Kelas</label>
+                        <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->walas?->nama ?? 'Belum ditentukan' }}" readonly tabindex="-1">
+                        <input type="hidden" name="walas_id" value="{{ $siswa->rombel?->walas_id }}">
                     </div>
+                </div>
                 <div class="row mb-3">
                     <div class="col-12">
                         <label for="tempat_lahir" class="form-label">Tempat Lahir</label>
@@ -396,27 +400,18 @@
 
                 <div class="row mb-3">
                     <div class="col-12">
-                        <label for="kepemilikan_rumah" class="form-label">Kepemilikan Rumah</label>
-                        <select name="kepemilikan_rumah" id="kepemilikan_rumah" class="form-control w-100" required>
-                            <option value="Lunas">Lunas</option>
-                            <option value="Sewa">Sewa</option>
-                            <option value="KPR/Kredit">KPR/Kredit</option>
-                            <option value="Kontrak">Kontrak</option>
-                            <option value="Inden">Inden</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <label for="jalur_masuk" class="form-label">Jalur Masuk</label>
-                        <select name="jalur_masuk" id="jalur_masuk" class="form-control w-100" required>
-                            <option value="Afirmasi">Afirmasi</option>
-                            <option value="Zonasi">Zonasi</option>
-                            <option value="Rapor">Rapor</option>
-                            <option value="Prestasi">Prestasi</option>
-                            <option value="Anak Guru">Anak Guru</option>
-                            <option value="Perpindahan Orang Tua">Perpindahan Orang Tua</option>
-                        </select>
+                        <label for="jalur_masuk" class="form-label">Jalur Masuk / SPMB</label>
+                        <input type="text" name="jalur_masuk" id="jalur_masuk" class="form-control w-100" placeholder="Contoh: Rapor / Zonasi / SPMB Bersama / Prestasi" list="jalur_masuk_list" value="{{ old('jalur_masuk') }}" required>
+                        <datalist id="jalur_masuk_list">
+                            <option value="Rapor">
+                            <option value="Zonasi">
+                            <option value="SPMB Bersama">
+                            <option value="Prestasi">
+                            <option value="Afirmasi">
+                            <option value="Anak Guru">
+                            <option value="Perpindahan Orang Tua">
+                        </datalist>
+                        <small class="text-muted"><i class="bi bi-pencil-square me-1"></i>Input manual sesuai jalur masuk / SPMB Anda.</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -473,39 +468,34 @@
                 </div>
             </div>
                 <div class="row mb-3">
+                    @php
+                        $resolvedNis = old('nis', $siswa->biodata?->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $siswa->id)->value('nis') ?? ''));
+                        $resolvedNisn = old('nisn', $siswa->biodata?->nisn ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $siswa->id)->value('nisn') ?? ''));
+                    @endphp
                     <div class="col-md-6">
                         <label for="nis" class="form-label">NIS</label>
-                        <input type="text" name="nis" id="nis" class="form-control" maxlength="20" required>
+                        <input type="text" name="nis" id="nis" class="form-control bg-light" maxlength="20" value="{{ $resolvedNis }}" placeholder="{{ $resolvedNis ? 'NIS' : 'Belum diisi oleh Walas / Kurikulum' }}" readonly tabindex="-1">
+                        @if($resolvedNis)
+                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> NIS sudah diisi oleh Walas / Kurikulum</small>
+                        @else
+                            <small class="text-muted"><i class="bi bi-info-circle"></i> NIS akan diisi oleh Walas atau Kurikulum</small>
+                        @endif
                     </div>
                     <div class="col-md-6">
                         <label for="nisn" class="form-label">NISN</label>
-                        <input type="text" name="nisn" id="nisn" class="form-control" maxlength="20" required>
+                        <input type="text" name="nisn" id="nisn" class="form-control" maxlength="20" placeholder="Masukkan NISN Anda" value="{{ $resolvedNisn }}" required>
                     </div>
                 </div>
                 <div class="row mb-3">
-                      <div class="col-md-6">
-                        <label for="kelas" class="form-label">Kelas</label>
-                        <select name="kelas" id="kelas" class="form-control" required>
-                            <option value="X">X</option>
-                            <option value="XI">XI</option>
-                            <option value="XII">XII</option>
-                            <option value="XIII">XIII</option>
-                        </select>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Kelas</label>
+                        <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? 'Belum ditentukan') }}" readonly tabindex="-1">
+                        <input type="hidden" name="kelas" value="{{ $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? 'X') }}">
                     </div>
                     <div class="col-md-6">
-                        <label for="kompetensi" class="form-label">Kompetensi</label>
-                        <select name="kompetensi" id="kompetensi" class="form-control" required>
-                            <option value="SIJA">SIJA</option>
-                            <option value="TKJ">TKJ</option>
-                            <option value="RPL">RPL</option>
-                            <option value="DKV">DKV</option>
-                            <option value="DPIB">DPIB</option>
-                            <option value="TKP">TKP</option>
-                            <option value="TP">TP</option>
-                            <option value="TFLM">TFLM</option>
-                            <option value="TKR">TKR</option>
-                            <option value="TOI">TOI</option>
-                        </select>
+                        <label class="form-label fw-semibold">Kompetensi</label>
+                        <input type="text" class="form-control bg-light" value="{{ $siswa->rombel?->kompetensi ?? 'Belum ditentukan' }}" readonly tabindex="-1">
+                        <input type="hidden" name="kompetensi" value="{{ $siswa->rombel?->kompetensi ?? 'SIJA' }}">
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -698,7 +688,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="namasekolah_asal" class="form-label">Nama Sekolah Asal</label>
-                        <input type="text" name="namasekolah_asal" id="namasekolah_asal" class="form-control" maxlength="50" placeholder="Contoh: SMK Negeri 1 Cibinong" required>
+                        <input type="text" name="namasekolah_asal" id="namasekolah_asal" class="form-control" maxlength="50" placeholder="Contoh: SMP 1 Cibinong" required>
                     </div>
                     <div class="col-md-6">
                         <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
@@ -751,9 +741,7 @@
                         <button type="submit" class="btn btn-primary" title="Kirim Data">
                             Kirim
                         </button>
-                        <button type="reset" class="btn btn-danger" title="Kosongkan Form">
-                            Batal
-                        </button>
+                        
                 </div>
                     </form>
                 </div>

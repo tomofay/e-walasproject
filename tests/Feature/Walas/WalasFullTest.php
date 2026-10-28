@@ -5,6 +5,9 @@ namespace Tests\Feature\Walas;
 use Tests\TestCase;
 use App\Models\Siswa;
 use App\Models\AgendaKegiatanWalas;
+use App\Models\CatatanKasusSiswa;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class WalasFullTest extends TestCase
 {
@@ -183,7 +186,14 @@ class WalasFullTest extends TestCase
     public function test_daftarpesertadidik_index(): void
     {
         $this->manualLogin();
-        $this->get('/daftarpesertadidik')->assertStatus(200);
+        $rombel = \App\Models\Rombel::where('walas_id', 1)->first();
+        $studentCount = \App\Models\Siswa::where('rombels_id', $rombel->id)->count();
+
+        $response = $this->get('/daftarpesertadidik');
+        $response->assertStatus(200);
+
+        $daftarpdidik = $response->viewData('daftarpdidik');
+        $this->assertCount($studentCount, $daftarpdidik);
     }
 
     public function test_rekapjumlahsiswa_index(): void
@@ -280,6 +290,78 @@ class WalasFullTest extends TestCase
 
         $this->delete("/hapusagendawalas/{$agenda->id}")->assertRedirect('/agendawalas');
         $this->assertDatabaseMissing('agenda_kegiatan_walas', ['id' => $agenda->id]);
+    }
+
+    public function test_catatankasus_store_with_multiple_files_and_datetime(): void
+    {
+        Storage::fake('public');
+        $this->manualLogin();
+
+        $file1 = UploadedFile::fake()->create('bukti_kasus1.pdf', 500, 'application/pdf');
+        $file2 = UploadedFile::fake()->create('bukti_foto2.jpg', 300, 'image/jpeg');
+
+        $response = $this->post('/catatankasus/store', [
+            'walas_id'      => 1,
+            'siswas_id'     => 1,
+            'tanggal'       => '2026-10-28',
+            'waktu'         => '10:30',
+            'kasus'         => 'Merokok di area sekolah',
+            'tindak_lanjut' => 'Pemanggilan orang tua dan skorsing 3 hari',
+            'keterangan'    => 'Siswa mengakui perbuatannya dan berjanji tidak mengulangi',
+            'file_kasus'    => [$file1, $file2],
+        ]);
+
+        $response->assertRedirect('/catatankasus');
+
+        $this->assertDatabaseHas('catatan_kasus_siswas', [
+            'walas_id'      => 1,
+            'siswas_id'     => 1,
+            'kasus'         => 'Merokok di area sekolah',
+            'tindak_lanjut' => 'Pemanggilan orang tua dan skorsing 3 hari',
+        ]);
+
+        $created = CatatanKasusSiswa::where('kasus', 'Merokok di area sekolah')->first();
+        $this->assertNotNull($created->file_kasus);
+        $this->assertIsArray($created->file_kasus);
+        $this->assertCount(2, $created->file_kasus);
+        Storage::disk('public')->assertExists($created->file_kasus[0]);
+        Storage::disk('public')->assertExists($created->file_kasus[1]);
+
+        $firstFile = $created->file_kasus[0];
+        $secondFile = $created->file_kasus[1];
+
+        // Test update: keep first file, remove second file, and upload a 3rd file
+        $newFile = UploadedFile::fake()->create('bukti_revisi3.jpg', 300, 'image/jpeg');
+        $updateResp = $this->put("/catatankasus/{$created->id}", [
+            'walas_id'       => 1,
+            'siswas_id'      => 1,
+            'tanggal'        => '2026-10-29',
+            'waktu'          => '11:00',
+            'kasus'          => 'Merokok di area sekolah (Revisi)',
+            'tindak_lanjut'  => 'Sanksi SP1 dan pembinaan',
+            'keterangan'     => 'Update tindak lanjut',
+            'form_has_files' => 1,
+            'keep_files'     => [$firstFile],
+            'file_kasus'     => [$newFile],
+        ]);
+        $updateResp->assertRedirect(route('catatankasus.index'));
+        $this->assertDatabaseHas('catatan_kasus_siswas', [
+            'id'    => $created->id,
+            'kasus' => 'Merokok di area sekolah (Revisi)',
+        ]);
+
+        $updated = CatatanKasusSiswa::find($created->id);
+        $this->assertCount(2, $updated->file_kasus);
+        Storage::disk('public')->assertExists($firstFile);
+        Storage::disk('public')->assertMissing($secondFile);
+        Storage::disk('public')->assertExists($updated->file_kasus[1]);
+
+        // Test delete: removes all files
+        $delResp = $this->delete("/hapuscatatankasus/{$created->id}");
+        $delResp->assertRedirect('/catatankasus');
+        $this->assertDatabaseMissing('catatan_kasus_siswas', ['id' => $created->id]);
+        Storage::disk('public')->assertMissing($firstFile);
+        Storage::disk('public')->assertMissing($updated->file_kasus[1]);
     }
 
     // ═══════ PROFILE ═══════

@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/css/main.css?v=2') }}" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -277,6 +277,7 @@
     }
 </style>
     
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -335,7 +336,12 @@
 <section id="hero" class="hero section">
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <div class="text-center mb-4">
-            <h2 class="font-weight-bold">Buat Jadwal Piket</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Buat Jadwal Piket</h2>
+                <a href="{{ route('jadwalpiket.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
             <hr class="my-3">
         </div>
 
@@ -387,7 +393,6 @@
 
             <!-- Button Simpan -->
             <div class="d-flex justify-content-center gap-2 mt-4">
-                <a href="{{ route('jadwalpiket.index') }}" class="btn btn-outline-secondary rounded-pill px-4">Batal</a>
                 <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
                     <i class="bi bi-check2-circle me-2"></i>Simpan Jadwal
                 </button>

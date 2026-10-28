@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -94,6 +94,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -150,7 +151,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Form Edit Prestasi Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Form Edit Prestasi Siswa</h2>
+                <a href="{{ route('prestasisiswa.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
 
@@ -234,8 +240,15 @@
                                 <input type="file" name="dokumentasi_url" id="dokumentasi_url" class="form-control" accept="image/*">
                                 <small>Jika tidak ingin mengubah gambar, biarkan kosong.</small>
                                 @if($prestasisiswa->dokumentasi_url)
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $prestasisiswa->dokumentasi_url) }}" alt="Dokumentasi" class="img-thumbnail" width="100">
+                                    @php
+                                        $docs = is_array($prestasisiswa->dokumentasi_url)
+                                            ? $prestasisiswa->dokumentasi_url
+                                            : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
+                                    @endphp
+                                    <div class="mt-2 d-flex gap-2 flex-wrap">
+                                        @foreach($docs as $doc)
+                                            <img src="{{ asset('storage/' . $doc) }}" alt="Dokumentasi" class="img-thumbnail" width="100">
+                                        @endforeach
                                     </div>
                                 @endif
                             </div>

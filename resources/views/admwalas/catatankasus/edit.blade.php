@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -94,6 +94,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -142,7 +143,12 @@
         <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
             <!-- Header dengan Title -->
             <div class="mb-4">
-                <h2 class="font-weight-bold">Edit Catatan Kasus Siswa</h2>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Edit Catatan Kasus Siswa</h2>
+                <a href="{{ route('catatankasus.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
                 <hr class="my-3">
             </div>
 
@@ -153,7 +159,7 @@
                         <h3>Edit Catatan Kasus</h3>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('catatankasus.update', $catatan->id) }}" method="POST">
+                        <form action="{{ route('catatankasus.update', $catatan->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT') <!-- Gunakan metode PUT untuk update -->
 
@@ -170,31 +176,88 @@
                                 <select name="siswas_id" id="siswas_id" class="form-control" required>
                                     @foreach ($siswas as $s)
                                         <option value="{{ $s->id }}" 
-                                            {{ $catatan->siswas_id == $s->id ? 'selected' : '' }}>
+                                            {{ old('siswas_id', $catatan->siswas_id) == $s->id ? 'selected' : '' }}>
                                             {{ $s->nama }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
+                            <!-- Tanggal & Waktu -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="tanggal" class="form-label">Tanggal Kejadian / Catatan:</label>
+                                    <input type="date" name="tanggal" id="tanggal" class="form-control" 
+                                        value="{{ old('tanggal', $catatan->tanggal ? \Carbon\Carbon::parse($catatan->tanggal)->format('Y-m-d') : date('Y-m-d')) }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="waktu" class="form-label">Waktu Kejadian:</label>
+                                    <input type="time" name="waktu" id="waktu" class="form-control" 
+                                        value="{{ old('waktu', $catatan->waktu ? \Carbon\Carbon::parse($catatan->waktu)->format('H:i') : date('H:i')) }}" required>
+                                </div>
+                            </div>
+
                             <!-- Kasus -->
                             <div class="mb-3">
                                 <label for="kasus" class="form-label">Kasus Siswa:</label>
                                 <input type="text" name="kasus" id="kasus" class="form-control" 
-                                    value="{{ $catatan->kasus }}" required>
+                                    value="{{ old('kasus', $catatan->kasus) }}" required>
                             </div>
 
-                            <!-- Tindak Lanjut -->
+                            <!-- Tindak Lanjut / Sanksi -->
                             <div class="mb-3">
-                                <label for="tindak_lanjut" class="form-label">Tindak Lanjut:</label>
+                                <label for="tindak_lanjut" class="form-label">Tindak Lanjut / Sanksi:</label>
                                 <input type="text" name="tindak_lanjut" id="tindak_lanjut" class="form-control" 
-                                    value="{{ $catatan->tindak_lanjut }}" required>
+                                    placeholder="Contoh: Pemanggilan orang tua / Pembinaan khusus / Surat peringatan"
+                                    value="{{ old('tindak_lanjut', $catatan->tindak_lanjut) }}" required>
                             </div>
 
                             <!-- Keterangan -->
                             <div class="mb-3">
                                 <label for="keterangan" class="form-label">Keterangan:</label>
-                                <textarea name="keterangan" id="keterangan" class="form-control" required>{{ $catatan->keterangan }}</textarea>
+                                <textarea name="keterangan" id="keterangan" class="form-control" rows="3" required>{{ old('keterangan', $catatan->keterangan) }}</textarea>
+                            </div>
+
+                            <!-- Upload File / Bukti -->
+                            <div class="mb-3">
+                                <label class="form-label">File / Foto Bukti Kasus Saat Ini:</label>
+                                @php
+                                    $existingFiles = is_array($catatan->file_kasus) ? $catatan->file_kasus : ($catatan->file_kasus ? [$catatan->file_kasus] : []);
+                                @endphp
+                                @if(!empty($existingFiles))
+                                    <input type="hidden" name="form_has_files" value="1">
+                                    <div class="mb-3">
+                                            @php
+                                                $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                                            @endphp
+                                            <div class="mb-2 p-2 bg-light border rounded d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <input type="checkbox" name="keep_files[]" value="{{ $filePath }}" id="keep_file_{{ $idxFile }}" checked class="form-check-input me-1">
+                                                    @if(in_array($ext, ['jpeg', 'png', 'jpg', 'gif', 'webp']))
+                                                        <a href="{{ asset('storage/' . $filePath) }}" target="_blank">
+                                                            <img src="{{ asset('storage/' . $filePath) }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;">
+                                                        </a>
+                                                    @else
+                                                        <i class="bi bi-file-earmark-text fs-3 text-primary"></i>
+                                                    @endif
+                                                    <label for="keep_file_{{ $idxFile }}" class="form-check-label small mb-0">
+                                                        <strong>{{ basename($filePath) }}</strong>
+                                                        <br><span class="text-muted small">Hapus centang untuk menghapus file ini</span>
+                                                    </label>
+                                                </div>
+                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank" class="btn btn-file-bukti">
+                                                    <i class="bi bi-box-arrow-up-right me-1"></i> Lihat File
+                                                </a>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-muted small fst-italic mb-2">Belum ada file/foto bukti yang diunggah.</p>
+                                @endif
+
+                                <label for="file_kasus" class="form-label">Tambah Foto / File Bukti Baru (Bisa pilih banyak):</label>
+                                <input type="file" name="file_kasus[]" id="file_kasus" class="form-control" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                <small class="text-muted">Bisa memilih lebih dari satu foto/file sekaligus. Format: JPG, JPEG, PNG, PDF, DOC, DOCX (Maks 10MB per file).</small>
                             </div>
 
                             <!-- Tombol Simpan -->

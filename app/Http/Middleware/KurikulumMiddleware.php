@@ -11,7 +11,7 @@ class KurikulumMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('kurikulums')->check()) {
+        if (!Auth::guard('kurikulums')->check() && !session('kurikulum_id')) {
             return redirect('/loginkurikulum')->with('error', 'Silakan login terlebih dahulu.');
         }
 

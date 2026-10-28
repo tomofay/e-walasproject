@@ -47,7 +47,6 @@
         <div><span class="label">Jenis Kelamin</span>: <span class="dots">{{ $biodatas->jenis_kelamin }}</span></div>
         <div><span class="label">Tempat, Tanggal Lahir</span>: <span class="dots">{{ $biodatas->tempat_lahir }}, {{ $biodatas->tanggal_lahir }}</span></div>
         <div><span class="label">Alamat</span>: <span class="dots">{{ $biodatas->alamat }}</span></div>
-        <div><span class="label">Kepemilikan Rumah</span>: <span class="dots">{{ $biodatas->kepemilikan_rumah }}</span></div>
         <div><span class="label">Jalur Masuk</span>: <span class="dots">{{ $biodatas->jalur_masuk }}</span></div>
         <div><span class="label">Jarak Rumah</span>: <span class="dots">{{ $biodatas->jarak_rumah }}</span></div>
         <div><span class="label">Transportasi Sekolah</span>: <span class="dots">{{ $biodatas->transportasi_sekolah }}</span></div>

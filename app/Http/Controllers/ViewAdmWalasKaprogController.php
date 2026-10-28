@@ -518,8 +518,10 @@ public function daftarpesertadidik(Request $request)
     // Ambil walas_id dari URL query parameter
     $walasIdSelected = $request->query('walas_id');
 
+    \App\Services\DaftarPesertaDidikService::syncAllRombels();
+
     // Ambil data peserta didik berdasarkan walas_id
-    $daftarPDidik = DaftarPesertaDidik::whereIn('walas_id', $walasIds);
+    $daftarPDidik = DaftarPesertaDidik::whereIn('walas_id', $walasIds)->with(['siswa.biodata']);
 
     // Filter jika walas_id dipilih
     if ($walasIdSelected && in_array($walasIdSelected, $walasIds)) {

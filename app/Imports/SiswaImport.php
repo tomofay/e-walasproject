@@ -113,5 +113,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 Siswa::create($row);
             }
         });
+
+        \App\Services\DaftarPesertaDidikService::syncAllRombels();
     }
 }

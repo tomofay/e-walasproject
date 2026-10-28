@@ -76,7 +76,7 @@ class PrestasiSiswaController extends Controller
             : null;
 
         $dokumentasiPath = $request->hasFile('dokumentasi_url')
-            ? $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public')
+            ? [$request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public')]
             : null;
 
         $jenisPrestasi = $request->jenis_prestasi === 'Non-Akademik'
@@ -135,10 +135,15 @@ class PrestasiSiswaController extends Controller
         }
 
         if ($request->hasFile('dokumentasi_url')) {
-            if ($prestasisiswa->dokumentasi_url && Storage::exists('public/' . $prestasisiswa->dokumentasi_url)) {
-                Storage::delete('public/' . $prestasisiswa->dokumentasi_url);
+            $oldDocs = is_array($prestasisiswa->dokumentasi_url)
+                ? $prestasisiswa->dokumentasi_url
+                : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
+            foreach ($oldDocs as $oldDoc) {
+                if (Storage::exists('public/' . $oldDoc)) {
+                    Storage::delete('public/' . $oldDoc);
+                }
             }
-            $dokumentasiPath = $request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public');
+            $dokumentasiPath = [$request->file('dokumentasi_url')->store('prestasisiswa/Photos', 'public')];
         } else {
             $dokumentasiPath = $prestasisiswa->dokumentasi_url;
         }
@@ -166,6 +171,17 @@ class PrestasiSiswaController extends Controller
         $prestasisiswa = PrestasiSiswa::find($id);
 
         if ($prestasisiswa) {
+            if ($prestasisiswa->sertifikat_url && Storage::exists('public/' . $prestasisiswa->sertifikat_url)) {
+                Storage::delete('public/' . $prestasisiswa->sertifikat_url);
+            }
+            $oldDocs = is_array($prestasisiswa->dokumentasi_url)
+                ? $prestasisiswa->dokumentasi_url
+                : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
+            foreach ($oldDocs as $oldDoc) {
+                if (Storage::exists('public/' . $oldDoc)) {
+                    Storage::delete('public/' . $oldDoc);
+                }
+            }
             $prestasisiswa->delete();
 
             return redirect('/prestasisiswa')->with('success', 'Data Prestasi Siswa Berhasil Dihapus ');

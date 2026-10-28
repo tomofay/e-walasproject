@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -259,6 +259,7 @@
 </style>
 
 
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -327,15 +328,35 @@
         <div class="row stats-row gy-100 mt-9 justify-content-start align-items-start" data-aos="fade-up" data-aos-delay="500">
         <div class="col-lg-12">
     <br>
-    <h1 class="mb-4 text-center">
-        Biodata Diri <br>
-        <span class="accent-text"></span>
-    </h1>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <h2 class="font-weight-bold mb-0">Biodata Diri</h2>
+        <a href="{{ route('homepagesiswa.index') }}" class="btn btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Beranda Siswa
+        </a>
+    </div>
     <br>
     <div class="container">
         @if($biodatas->isEmpty())
             <!-- Jika data kosong -->
-            <h5>Data Tidak Ditemukan</h5>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 text-center my-3" style="background-color: #f8fafc; border: 1px dashed #cbd5e1 !important;">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle" style="width: 64px; height: 64px;">
+                        <i class="bi bi-person-exclamation fs-2"></i>
+                    </span>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Biodata Diri Belum Tersedia</h5>
+                <p class="text-secondary fs-6 mb-3">
+                    Mohon input data diri terlebih dahulu, 
+                    <a href="{{ url('/inputdatadiri') }}" class="fw-bold text-primary text-decoration-underline">
+                        klik disini untuk isi data
+                    </a>.
+                </p>
+                <div>
+                    <a href="{{ url('/inputdatadiri') }}" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Klik disini untuk isi data
+                    </a>
+                </div>
+            </div>
         @else
             <!-- Jika data ditemukan -->
             @foreach($biodatas as $biodata)
@@ -350,24 +371,25 @@
                                   <p><strong>Jenis Kelamin:</strong> {{ $biodata->jenis_kelamin }}</p>
                                   <p><strong>Tempat, Tanggal Lahir:</strong> {{ $biodata->tempat_lahir }}, {{ $biodata->tanggal_lahir }}</p>
                                   <p><strong>Alamat:</strong> {{ $biodata->alamat }}</p>
-                                  <p><strong>Jalur Masuk:</strong> {{ $biodata->jalur_masuk }}</p>
+                                  <p><strong>Jalur Masuk / SPMB:</strong> {{ $biodata->jalur_masuk }}</p>
                                   <p><strong>Jarak Rumah:</strong> {{ $biodata->jarak_rumah }}</p>
                                   <p><strong>Transportasi Sekolah:</strong> {{ $biodata->transportasi_sekolah }}</p>
                                   <p><strong>Transportasi Rumah:</strong> {{ $biodata->transportasi_rumah }}</p>
                                   <p><strong>Agama:</strong> {{ $biodata->agama }}</p>
-                                  <p><strong>Kewarganaan:</strong> {{ $biodata->kewarganegaraan }}</p>
+                                  <p><strong>Kewarganegaraan:</strong> {{ $biodata->kewarganegaraan }}</p>
                               </div>
 
                               <!-- Kolom Kedua -->
                               <div class="col-md-6">
+                                  <p><strong>Wali Kelas:</strong> {{ $biodata->walas->nama ?? '-' }}</p>
+                                  <p><strong>Kelas:</strong> {{ $biodata->kelas }}</p>
+                                  <p><strong>Kompetensi:</strong> {{ $biodata->kompetensi }}</p>
+                                  <p><strong>NIS:</strong> {{ $biodata->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id)->value('nis') ?? '-') }}</p>
+                                  <p><strong>NISN:</strong> {{ $biodata->nisn ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id)->value('nisn') ?? '-') }}</p>
                                   <p><strong>Anak Ke:</strong> {{ $biodata->anak_ke }}</p>
                                   <p><strong>Jumlah Saudara:</strong> {{ $biodata->jumlah_saudara }}</p>
                                   <p><strong>No WA:</strong> {{ $biodata->no_wa }}</p>
                                   <p><strong>Email:</strong> {{ $biodata->email }}</p>
-                                  <p><strong>NIS:</strong> {{ $biodata->nis }}</p>
-                                  <p><strong>NISN:</strong> {{ $biodata->nisn }}</p>
-                                  <p><strong>Kelas:</strong> {{ $biodata->kelas }}</p>
-                                  <p><strong>Kompetensi:</strong> {{ $biodata->kompetensi }}</p>
                                   <p><strong>Tahun Masuk:</strong> {{ $biodata->tahun_masuk }}</p>
                               </div>
                           </div>
@@ -398,20 +420,16 @@
                                  <p class="text-muted mb-0">Lokasi tidak tersedia.</p>
                              @endif
                          </div>
-                          <td>
-                                <div class="mt-4 text-center">
-                                    <h5>Foto Tampak Depan Rumah</h5>
-                                    @if($biodata->fotorumah_url)
-                                        <img src="{{ asset('storage/'.$biodata->fotorumah_url) }}" 
-                                            class="img-fluid rounded" 
-                                            style="max-width: 100%; height: auto; object-fit: cover;">
-                                    @else
-                                        <p>No image</p>
-                                    @endif
-                                </div>
-                            </td>
-                            <br>
-                            <p><strong>Kepemilikan Rumah:</strong> {{ $biodata->kepemilikan_rumah }}</p>
+                          <div class="mt-4 text-center">
+                              <h5>Foto Tampak Depan Rumah</h5>
+                              @if($biodata->fotorumah_url)
+                                  <img src="{{ asset('storage/'.$biodata->fotorumah_url) }}" 
+                                      class="img-fluid rounded" 
+                                      style="max-width: 100%; height: auto; object-fit: cover;">
+                              @else
+                                  <p>No image</p>
+                              @endif
+                          </div>
                           <!-- Google Maps - Tampak Depan -->
                           <!-- <div class="mt-4">
                               <h5>Tampak Depan</h5>

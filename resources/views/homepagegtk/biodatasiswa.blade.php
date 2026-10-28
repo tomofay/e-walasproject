@@ -1,543 +1,492 @@
+@php
+    $isKurikulum = ($role ?? null) === 'kurikulum' 
+        || (!isset($role) && (session()->has('kurikulum_id') && !session()->has('walas_id') && !\Illuminate\Support\Facades\Auth::guard('walas')->check()));
+@endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>E Walas SMKN 1 Cibinong - Wali Kelas</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+  <title>E Walas SMKN 1 Cibinong - {{ $isKurikulum ? 'Kurikulum' : 'Wali Kelas' }}</title>
+  <meta name="description" content="Biodata Siswa SMKN 1 Cibinong">
+  <meta name="keywords" content="biodata, siswa, e-walas">
 
   <!-- Favicons -->
-  <link href="../../images/logokampak.png" rel="icon">
-  <link href="../../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="{{ asset('images/logokampak.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-  <link href="../../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="../../assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="../../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="../../assets/css/main.css" rel="stylesheet">
-
-  <!-- =======================================================
-  * Template Name: iLanding
-  * Template URL: https://bootstrapmade.com/ilanding-bootstrap-landing-page-template/
-  * Updated: Nov 12 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+  <link href="{{ asset('assets/css/main.css?v=2') }}" rel="stylesheet">
 
   <style>
-        /* Kotak pesan */
+        body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Kotak pesan toast */
         .alert {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 15px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            min-width: 320px;
+            max-width: 90%;
+            padding: 12px 24px;
             z-index: 9999;
             text-align: center;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
             color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            animation: slideDown 0.5s ease-out;
-            box-sizing: border-box;
-            max-height: 60px; /* Menentukan tinggi kotak pesan agar tidak terlalu panjang */
-            overflow: hidden;
-            
-            /* Flexbox untuk menyejajarkan teks di tengah */
-            display: flex;
-            justify-content: center; /* Mengatur teks ke tengah secara horizontal */
-            align-items: center; /* Mengatur teks ke tengah secara vertikal */
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            animation: slideDown 0.4s ease-out;
         }
 
         .alert-danger {
-            background-color: #e74c3c; /* Merah */
+            background-color: #ef4444;
         }
 
         .alert-success {
-            background-color: #2ecc71; /* Hijau */
+            background-color: #10b981;
         }
 
-        /* Animasi slide down */
         @keyframes slideDown {
             from {
-                transform: translateY(-100%);
+                opacity: 0;
+                transform: translate(-50%, -20px);
             }
             to {
-                transform: translateY(0);
+                opacity: 1;
+                transform: translate(-50%, 0);
             }
         }
 
-        /* Animasi slide up untuk saat pesan hilang */
         @keyframes slideUp {
             from {
-                transform: translateY(0);
+                opacity: 1;
+                transform: translate(-50%, 0);
             }
             to {
-                transform: translateY(-100%);
+                opacity: 0;
+                transform: translate(-50%, -20px);
             }
         }
 
-        /* Styling untuk tabel */
-.table {
-  width: 300%;
-  border-collapse: collapse;
-}
+        /* Card Biodata Styling */
+        .card-biodata {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+            margin-bottom: 24px;
+            transition: all 0.2s ease-in-out;
+        }
 
-.table th, .table td {
-  padding: 8px;
-  text-align: left;
-}
+        .card-biodata:hover {
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
 
-.table .btn {
-  margin-right: 5px;
-}
+        .card-biodata-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%);
+            color: #ffffff;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
+        .section-header-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            font-size: 0.93rem;
+            line-height: 1.5;
+        }
+
+        .info-row strong {
+            color: #475569;
+            min-width: 170px;
+            display: inline-block;
+        }
+
+        .parent-info-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            height: 100%;
+        }
+
+        .parent-info-card h6 {
+            color: #0f172a;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .badge-pill-custom {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
     </style>
 
-<style>
- table {
-    width: 310%;
-    border-collapse: collapse; /* Menghilangkan ruang antara sel */
-    border-radius: 8px; /* Sudut melengkung untuk tabel */
-    overflow: hidden; /* Untuk memastikan konten tidak melampaui sudut melengkung */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Efek bayangan di sekitar tabel */
-  }
-  th, td {
-    text-align: center; /* Menyelaraskan teks ke tengah */
-    padding: 12px; /* Memberikan ruang dalam sel tabel */
-    border: 1px solid #ddd; /* Menambahkan border di sekitar sel */
-  }
-  th {
-    background-color: #f4f4f4; /* Warna latar belakang untuk header tabel */
-    font-weight: bold; /* Membuat teks header lebih tebal */
-  }
-  td {
-    background-color: #fff; /* Warna latar belakang untuk baris data */
-  }
-  tr:nth-child(even) td {
-    background-color: #f9f9f9; /* Warna latar belakang untuk baris genap */
-  }
-  button {
-    border-radius: 5px; /* Menambahkan sudut melengkung pada tombol */
-  }
-
-  .btn {
-    border-radius: 10px; /* Membuat tombol melengkung */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Menambahkan bayangan */
-    transition: all 0.3s ease; /* Transisi halus untuk efek hover */
-}
-
-.btn-primary {
-    background-color: #007bff; /* Warna biru untuk tombol utama */
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background-color: #3399ff; /* Biru muda saat hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Bayangan lebih besar saat hover */
-}
-
-.btn-danger {
-    background-color: #dc3545; /* Warna merah untuk tombol batal */
-    color: #fff;
-}
-
-.btn-danger:hover {
-    background-color: #ff6666; /* Merah muda saat hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Bayangan lebih besar saat hover */
-}
-
-</style>
-
-<!-- Tambahkan link font Roboto dari Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-<style>
-    body {
-        font-family: 'Roboto', sans-serif; /* Menggunakan font Roboto */
-        background-color: #f8f9fa;
-        margin: 0;
-        padding: 0;
-    }
-
-    .container {
-        padding: 20px;
-    }
-
-    .card {
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-header {
-        background-color: #007bff;
-        color: #ffffff;
-        padding: 10px 15px;
-        border-radius: 10px 10px 0 0;
-        font-weight: bold;
-    }
-
-    .card-body {
-        padding: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 15px; /* Memberikan jarak antar elemen */
-    }
-
-    .form-group label {
-        font-weight: 500; /* Bold sedang */
-        margin-bottom: 5px;
-        display: block; /* Mengatur label berada di atas input */
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%; /* Input field akan memenuhi lebar container */
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Efek fokus */
-    }
-
-    .card-footer {
-        background-color: #f1f1f1;
-        border-top: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 0 0 10px 10px;
-        text-align: right;
-    }
-
-    .btn-warning {
-        background-color: #ffc107;
-        border-color: #ffc107;
-        color: #333;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: #fff;
-    }
-
-    .btn-warning:hover {
-        background-color: #e0a800;
-        border-color: #d39e00;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-    }
-</style>
-
-
+    @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
-     <!-- Tampilkan pesan error -->
+     <!-- Pesan error -->
      @if (session('error'))
         <div class="alert alert-danger" id="alertError">
-            <p>{{ session('error') }}</p>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
         </div>
     @endif
 
-    <!-- Tampilkan pesan success -->
+    <!-- Pesan success -->
     @if (session('success'))
         <div class="alert alert-success" id="alertSuccess">
-            <p>{{ session('success') }}</p>
+            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         </div>
     @endif
 
+    <!-- Header / Navbar -->
     <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
-      <a href="/walaspage" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.png" alt=""> -->
-        <h1 class="sitename">E - Walas</h1>
-      </a>
+        <a href="{{ $isKurikulum ? '/kurikulumpage' : '/walaspage' }}" class="logo d-flex align-items-center me-auto me-xl-0 text-decoration-none">
+          <h1 class="sitename">E - Walas</h1>
+        </a>
 
-      <nav id="navmenu" class="navmenu">
-        <ul>
-        
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
+        <nav id="navmenu" class="navmenu">
+          <ul>
+          @if($isKurikulum)
+            <li><a href="/kurikulumpage">Beranda</a></li>
+          @else
+            <li><a href="/walaspage">Beranda</a></li>
+            <li><a href="/siswadata">Data Siswa</a></li>
+          @endif
+          </ul>
+          <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        </nav>
 
-     <!-- Menampilkan ikon user dan informasi walas yang sedang login -->
-     <div class="user-info d-flex align-items-center">
-            @if(session()->has('walas_id'))
-                <i class="bi bi-person-circle text-primary me-2" style="font-size: 24px;"></i>  <!-- Icon User dengan warna biru -->
-                
-                <!-- Tautkan nama walas ke /userprofile -->
-                <a href="/profilewalas" class="text-decoration-none">
-                    <span>{{ $walas->nama }}</span>  <!-- Nama Walas yang sedang login -->
+        <!-- User profile & Logout -->
+        <div class="user-info d-flex align-items-center">
+            @if($isKurikulum)
+                <i class="bi bi-person-circle text-primary me-2" style="font-size: 24px;"></i>
+                <a href="/profilekurikulum" class="text-decoration-none">
+                    <span class="fw-semibold">{{ $kurikulum->nama ?? session('kurikulum_nama', 'Kurikulum') }}</span>
                 </a>
+                <form action="{{ route('logoutkurikulum') }}" method="POST" class="ms-3 mb-0">
+                    @csrf
+                    <button type="submit" class="btn-getstarted">Logout</button>
+                </form>
+            @else
+                <i class="bi bi-person-circle text-primary me-2" style="font-size: 24px;"></i>
+                <a href="/profilewalas" class="text-decoration-none">
+                    <span class="fw-semibold">{{ $walas->nama ?? 'Walas' }}</span>
+                </a>
+                <form action="{{ route('logoutwalas') }}" method="POST" class="ms-3 mb-0">
+                    @csrf
+                    <button type="submit" class="btn-getstarted">Logout</button>
+                </form>
             @endif
-            <form action="{{ route('logoutwalas') }}" method="POST" class="ms-3">
-                @csrf
-                <button type="submit" class="btn-getstarted">Logout</button>
-            </form>
         </div>
-    </div>
-  </header>
+      </div>
+    </header>
 
-  <main class="main">
+    <main class="main" style="padding-top: 90px; min-height: 80vh;">
+      <section id="hero" class="hero section py-4">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-    <!-- Hero Section -->
-    <section id="hero" class="hero section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row align-items-center">
-          <div class="col-lg-6">
-            
-             <div class="hero-content" data-aos="fade-up" data-aos-delay="200">
-              <div class="company-badge mb-4">
-                <i class="bi bi-gear-fill me-2"></i>
-                     Data Diri
-              </div>
-              <a href="{{ route('homepagegtk.biodatasiswa', ['id' => $siswa->id, 'export' => 'pdf']) }}" 
-   class="btn btn-outline-secondary me-2 mb-2" 
-   style="background-color: #0d6efd; color: white; border-color: #0d6efd;">
-    <i class="bi bi-download"></i> Unduh PDF
-</a>
-
+          <!-- Action bar: Back & Download PDF -->
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <a href="{{ $backUrl ?? ($isKurikulum ? route('kurikulum.index') : route('siswadata.index')) }}" class="btn btn-back">
+                  <i class="bi bi-arrow-left me-1"></i> Kembali
+              </a>
+              <a href="{{ $pdfUrl ?? ($isKurikulum ? route('kurikulum.biodatasiswa', ['id' => $siswa->id, 'export' => 'pdf']) : route('homepagegtk.biodatasiswa', ['id' => $siswa->id, 'export' => 'pdf'])) }}" 
+                 class="btn btn-primary" 
+                 style="background-color: #0d6efd; color: white; border-color: #0d6efd; border-radius: 8px;">
+                  <i class="bi bi-file-earmark-pdf me-1"></i> Unduh PDF
+              </a>
+            </div>
+            <div class="company-badge py-1 px-3">
+              <i class="bi bi-person-vcard me-2"></i> Biodata Siswa: <strong>{{ $siswa->nama }}</strong>
             </div>
           </div>
 
-          <div class="col-lg-6">
+          <div class="text-center mb-4">
+              <h2 class="fw-bold mb-1">Biodata Diri Siswa</h2>
+              <p class="text-muted mb-0">Rombel: {{ $rombel->nama_kelas ?? ($siswa->rombel->nama_kelas ?? '-') }} | Status: {{ ucfirst($siswa->status ?? 'Aktif') }}</p>
           </div>
-        </div>
 
-        <div class="row stats-row gy-100 mt-9 justify-content-start align-items-start" data-aos="fade-up" data-aos-delay="500">
-        <div class="col-lg-12">
-
-
-    <br>
-    <h1 class="mb-4 text-center">
-        Biodata Diri <br>
-        <span class="accent-text"></span>
-    </h1>
-    <br>
-    <div class="container">
-        @if($biodatas->isEmpty())
-            <!-- Jika data kosong -->
-            <h5>Data Tidak Ditemukan</h5>
-        @else
-            <!-- Jika data ditemukan -->
-            @foreach($biodatas as $biodata)
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>{{ $biodata->nama_lengkap }}</h5>
-                    </div>
-                    <div class="card-body">
-                          <div class="row">
-                              <!-- Kolom Pertama -->
-                              <div class="col-md-6">
-                                  <p><strong>Jenis Kelamin:</strong> {{ $biodata->jenis_kelamin }}</p>
-                                  <p><strong>Tempat, Tanggal Lahir:</strong> {{ $biodata->tempat_lahir }}, {{ $biodata->tanggal_lahir }}</p>
-                                  <p><strong>Alamat:</strong> {{ $biodata->alamat }}</p>
-                                  <p><strong>Jalur Masuk:</strong> {{ $biodata->jalur_masuk }}</p>
-                                  <p><strong>Jarak Rumah:</strong> {{ $biodata->jarak_rumah }}</p>
-                                  <p><strong>Transportasi Sekolah:</strong> {{ $biodata->transportasi_sekolah }}</p>
-                                  <p><strong>Transportasi Rumah:</strong> {{ $biodata->transportasi_rumah }}</p>
-                                  <p><strong>Agama:</strong> {{ $biodata->agama }}</p>
-                                  <p><strong>Kewarganaan:</strong> {{ $biodata->kewarganegaraan }}</p>
-                              </div>
-
-                              <!-- Kolom Kedua -->
-                              <div class="col-md-6">
-                                  <p><strong>Anak Ke:</strong> {{ $biodata->anak_ke }}</p>
-                                  <p><strong>Jumlah Saudara:</strong> {{ $biodata->jumlah_saudara }}</p>
-                                  <p><strong>No WA:</strong> {{ $biodata->no_wa }}</p>
-                                  <p><strong>Email:</strong> {{ $biodata->email }}</p>
-                                  <p><strong>NIS:</strong> {{ $biodata->nis }}</p>
-                                  <p><strong>NISN:</strong> {{ $biodata->nisn }}</p>
-                                  <p><strong>Kelas:</strong> {{ $biodata->kelas }}</p>
-                                  <p><strong>Kompetensi:</strong> {{ $biodata->kompetensi }}</p>
-                                  <p><strong>Tahun Masuk:</strong> {{ $biodata->tahun_masuk }}</p>
+          <div>
+              @if($biodatas->isEmpty())
+                  <!-- Jika data kosong -->
+                  <div class="card p-5 text-center border-0 shadow-sm" style="border-radius: 12px;">
+                      <div class="mb-3">
+                          <i class="bi bi-folder-x text-muted" style="font-size: 3rem;"></i>
+                      </div>
+                      <h5 class="text-muted mb-3">Biodata untuk siswa ini belum tersedia.</h5>
+                      <div>
+                          @if($isKurikulum)
+                              <a href="{{ Route::has('kurikulum.createbiodata') ? route('kurikulum.createbiodata', $siswa->id) : url('/kurikulum/siswa/biodata/' . $siswa->id . '/create') }}" class="btn btn-primary px-4 py-2">
+                                  <i class="bi bi-plus-circle me-1"></i> Buat Biodata Siswa
+                              </a>
+                          @else
+                              <a href="{{ Route::has('homepagegtk.createbiodata') ? route('homepagegtk.createbiodata', $siswa->id) : url('/siswabiodata/' . $siswa->id . '/create') }}" class="btn btn-primary px-4 py-2">
+                                  <i class="bi bi-plus-circle me-1"></i> Buat Biodata Siswa
+                              </a>
+                          @endif
+                      </div>
+                  </div>
+              @else
+                  <!-- Jika data ditemukan -->
+                  @foreach($biodatas as $biodata)
+                      <div class="card-biodata">
+                          <div class="card-biodata-header">
+                              <h5 class="mb-0 text-white fw-bold">
+                                  <i class="bi bi-person-fill me-2"></i>{{ $biodata->nama_lengkap }}
+                              </h5>
+                              <div class="d-flex align-items-center gap-2">
+                                  <span class="badge bg-white text-primary badge-pill-custom">
+                                      NIS: {{ $biodata->nis ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id)->value('nis') ?? '-') }}
+                                  </span>
+                                  <span class="badge bg-white text-primary badge-pill-custom">
+                                      NISN: {{ $biodata->nisn ?: (\App\Models\DaftarPesertaDidik::where('nama_siswa', $biodata->siswas_id)->value('nisn') ?? '-') }}
+                                  </span>
                               </div>
                           </div>
-                         @php
-                             $mapUrl = trim((string) ($biodata->alamat_maps ?? ''));
-                             $mapEmbedUrl = \App\Support\GoogleMapsUrl::embedUrl($mapUrl);
-                             $isGoogleMapsUrl = \App\Support\GoogleMapsUrl::isGoogleMapsUrl($mapUrl);
-                         @endphp
 
-                         <div class="mt-4">
-                             <h5>Lokasi Alamat</h5>
-                             @if($mapEmbedUrl)
-                                 <iframe
-                                     src="{{ $mapEmbedUrl }}"
-                                     width="100%"
-                                     height="300"
-                                     style="border:0;"
-                                     allowfullscreen=""
-                                     loading="lazy"
-                                     referrerpolicy="no-referrer-when-downgrade">
-                                 </iframe>
-                             @elseif($isGoogleMapsUrl)
-                                 <p class="text-muted">Link singkat Google Maps tidak bisa ditampilkan langsung di sini.</p>
-                                 <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
-                                     Buka di Google Maps
-                                 </a>
-                             @else
-                                 <p class="text-muted mb-0">Lokasi tidak tersedia.</p>
-                             @endif
-                         </div>
-                          <td>
-                          <td>
-                                <div class="mt-4 text-center">
-                                    <h5>Foto Tampak Depan Rumah</h5>
-                                    @if($biodata->fotorumah_url)
-                                        <img src="{{ asset('storage/'.$biodata->fotorumah_url) }}" 
-                                            class="img-fluid rounded" 
-                                            style="max-width: 100%; height: auto; object-fit: cover;">
-                                    @else
-                                        <p>No image</p>
-                                    @endif
-                                </div>
-                            </td>
-                            <p><strong>Kepemilikan Rmah:</strong> {{ $biodata->kepemilikan_rumah }}</p>
-                        
-                    <div class="card-header">
-                        <h5>Data Orang Tua</h5>
-                    </div>
-                    <div class="card-body">
-                      <h5>Data Ayah</h5>
-                        <p><strong>Nama Ayah:</strong> {{ $biodata->nama_ayah }}</p>
-                        <p><strong>Pekerjaan Ayah:</strong> {{ $biodata->pekerjaan_ayah }}</p>
-                        <p><strong>Tempat, Tanggal Lahir:</strong> {{ $biodata->tempat_lahir_ayah }}, {{ $biodata->tanggal_lahir_ayah }}</p>
-                        <p><strong>Alamat Ayah :</strong> {{ $biodata->alamat_ayah }}</p>
-                        <p><strong>No WA Ayah:</strong> {{ $biodata->no_wa_ayah }}</p>
-                        <br>
-                      <h5>Data Ibu</h5>
-                        <p><strong>Nama ibu:</strong> {{ $biodata->nama_ibu }}</p>
-                        <p><strong>Pekerjaan ibu:</strong> {{ $biodata->pekerjaan_ibu }}</p>
-                        <p><strong>Tempat, Tanggal Lahir:</strong> {{ $biodata->tempat_lahir_ibu }}, {{ $biodata->tanggal_lahir_ibu }}</p>
-                        <p><strong>Alamat ibu :</strong> {{ $biodata->alamat_ibu }}</p>
-                        <p><strong>No WA ibu:</strong> {{ $biodata->no_wa_ibu }}</p>
-                    </div>
+                          <div class="card-body p-4">
+                              <!-- Section 1: Data Pribadi Siswa -->
+                              <div class="section-header-title">
+                                  <i class="bi bi-person-lines-fill me-2"></i> Data Pribadi Siswa
+                              </div>
+                              <div class="row g-3 mb-4">
+                                  <div class="col-md-6">
+                                      <div class="info-row"><strong>Jenis Kelamin:</strong> {{ $biodata->jenis_kelamin }}</div>
+                                      <div class="info-row"><strong>Tempat, Tgl Lahir:</strong> {{ $biodata->tempat_lahir ?? '-' }}, {{ $biodata->tanggal_lahir ?? '-' }}</div>
+                                      <div class="info-row"><strong>Alamat Lengkap:</strong> {{ $biodata->alamat ?? '-' }}</div>
+                                      <div class="info-row"><strong>Jalur Masuk:</strong> {{ $biodata->jalur_masuk ?? '-' }}</div>
+                                      <div class="info-row"><strong>Jarak Rumah:</strong> {{ $biodata->jarak_rumah ?? '-' }}</div>
+                                      <div class="info-row"><strong>Transportasi Sekolah:</strong> {{ $biodata->transportasi_sekolah ?? '-' }}</div>
+                                      <div class="info-row"><strong>Transportasi Rumah:</strong> {{ $biodata->transportasi_rumah ?? '-' }}</div>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <div class="info-row"><strong>Kelas:</strong> {{ $biodata->kelas ?? '-' }}</div>
+                                      <div class="info-row"><strong>Kompetensi:</strong> {{ $biodata->kompetensi ?? '-' }}</div>
+                                      <div class="info-row"><strong>Agama:</strong> {{ $biodata->agama ?? '-' }}</div>
+                                      <div class="info-row"><strong>Kewarganegaraan:</strong> {{ $biodata->kewarganegaraan ?? '-' }}</div>
+                                      <div class="info-row"><strong>Anak Ke / Jumlah Saudara:</strong> Ke-{{ $biodata->anak_ke ?? '1' }} dari {{ $biodata->jumlah_saudara ?? '1' }} bersaudara</div>
+                                      <div class="info-row"><strong>No WhatsApp:</strong> {{ $biodata->no_wa ?? '-' }}</div>
+                                      <div class="info-row"><strong>Email Siswa:</strong> {{ $biodata->email ?? '-' }}</div>
+                                      <div class="info-row"><strong>Tahun Masuk:</strong> {{ $biodata->tahun_masuk ?? '-' }}</div>
+                                  </div>
+                              </div>
 
-                    <div class="card-header">
-                        <h5>Data Pendapatan Orang Tua</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Pendapatan Kedua Orangtua:</strong> {{ $biodata->pendapatan_ortu }}</p>
-                    </div>
-  
-                    <div class="card-header">
-                        <h5>Data Pelengkap</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Nama Sekolah Asal:</strong> {{ $biodata->namasekolah_asal }}</p>
-                        <p><strong>Alamat Sekolah:</strong> {{ $biodata->alamat_sekolah }}</p>
-                        <p><strong>Tahun Lulus:</strong> {{ $biodata->tahun_lulus }}</p>
-                        <p><strong>Riwayat Penyakit:</strong> {{ $biodata->riwayat_penyakit }}</p>
-                        <p><strong>Alergi:</strong> {{ $biodata->alergi }}</p>
-                        <p><strong>Prestasi Akademik:</strong> {{ $biodata->prestasi_akademik }}</p>
-                        <p><strong>Prestasi Non Akademik:</strong> {{ $biodata->prestasi_non_akademik }}</p>
-                        <p><strong>Pengalaman Eskul:</strong> {{ $biodata->pengalaman_eskul }}</p>
-                        <p><strong>Kepribadian:</strong> {{ $biodata->kepribadian }}</p>
-                       
-                    <div class="card-footer text-end">
-                        <a href="{{ route('homepagegtk.editbiodata', $biodata->id) }}" class="btn btn-danger btn-sm">Edit</a>
-                    </div>
-                </div>
-            @endforeach
-        @endif
-    </div>
-</div>
+                              <!-- Section 2: Lokasi & Foto Rumah -->
+                              <div class="row g-4 mb-4">
+                                  <div class="col-md-6">
+                                      <div class="section-header-title">
+                                          <i class="bi bi-geo-alt-fill me-2"></i> Lokasi Alamat (Google Maps)
+                                      </div>
+                                      @php
+                                          $mapUrl = trim((string) ($biodata->alamat_maps ?? ''));
+                                          $mapEmbedUrl = \App\Support\GoogleMapsUrl::embedUrl($mapUrl);
+                                          $isGoogleMapsUrl = \App\Support\GoogleMapsUrl::isGoogleMapsUrl($mapUrl);
+                                      @endphp
+                                      @if($mapEmbedUrl)
+                                          <iframe
+                                              src="{{ $mapEmbedUrl }}"
+                                              width="100%"
+                                              height="240"
+                                              style="border:0; border-radius: 8px;"
+                                              allowfullscreen=""
+                                              loading="lazy"
+                                              referrerpolicy="no-referrer-when-downgrade">
+                                          </iframe>
+                                      @elseif($isGoogleMapsUrl)
+                                          <div class="p-3 bg-light rounded text-center">
+                                              <p class="text-muted mb-2">Tautan peta Google Maps:</p>
+                                              <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm">
+                                                  <i class="bi bi-box-arrow-up-right me-1"></i> Buka di Google Maps
+                                              </a>
+                                          </div>
+                                      @else
+                                          <div class="p-3 bg-light rounded text-center text-muted">
+                                              <i class="bi bi-map fs-3 d-block mb-1"></i>
+                                              Lokasi peta belum diatur.
+                                          </div>
+                                      @endif
+                                  </div>
 
-</div>
+                                  <div class="col-md-6">
+                                      <div class="section-header-title">
+                                          <i class="bi bi-house-door-fill me-2"></i> Foto Tampak Depan Rumah
+                                      </div>
+                                      @if($biodata->fotorumah_url)
+                                          <div class="text-center">
+                                              <img src="{{ asset('storage/'.$biodata->fotorumah_url) }}" 
+                                                  class="img-fluid rounded border shadow-sm" 
+                                                  style="max-width: 100%; max-height: 240px; object-fit: cover;">
+                                          </div>
+                                      @else
+                                          <div class="p-4 bg-light rounded text-center text-muted" style="min-height: 180px; display: flex; flex-direction: column; justify-content: center;">
+                                              <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                              <span>Foto tampak depan rumah belum diunggah.</span>
+                                          </div>
+                                      @endif
+                                  </div>
+                              </div>
 
-    </section><!-- /Hero Section -->
+                              <!-- Section 3: Data Orang Tua -->
+                              <div class="section-header-title">
+                                  <i class="bi bi-people-fill me-2"></i> Data Orang Tua
+                              </div>
+                              <div class="row g-4 mb-4">
+                                  <div class="col-md-6">
+                                      <div class="parent-info-card">
+                                          <h6><i class="bi bi-person-badge-fill text-primary me-2"></i> Data Ayah</h6>
+                                          <div class="info-row"><strong>Nama Ayah:</strong> {{ $biodata->nama_ayah ?? '-' }}</div>
+                                          <div class="info-row"><strong>Pekerjaan Ayah:</strong> <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $biodata->pekerjaan_ayah ?? '-' }}</span></div>
+                                          <div class="info-row"><strong>Tempat, Tgl Lahir:</strong> {{ $biodata->tempat_lahir_ayah ?? '-' }}, {{ $biodata->tanggal_lahir_ayah ?? '-' }}</div>
+                                          <div class="info-row"><strong>Alamat Ayah:</strong> {{ $biodata->alamat_ayah ?? '-' }}</div>
+                                          <div class="info-row"><strong>No WA Ayah:</strong> {{ $biodata->no_wa_ayah ?? '-' }}</div>
+                                      </div>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <div class="parent-info-card">
+                                          <h6><i class="bi bi-person-badge-fill text-danger me-2"></i> Data Ibu</h6>
+                                          <div class="info-row"><strong>Nama Ibu:</strong> {{ $biodata->nama_ibu ?? '-' }}</div>
+                                          <div class="info-row"><strong>Pekerjaan Ibu:</strong> <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ $biodata->pekerjaan_ibu ?? '-' }}</span></div>
+                                          <div class="info-row"><strong>Tempat, Tgl Lahir:</strong> {{ $biodata->tempat_lahir_ibu ?? '-' }}, {{ $biodata->tanggal_lahir_ibu ?? '-' }}</div>
+                                          <div class="info-row"><strong>Alamat Ibu:</strong> {{ $biodata->alamat_ibu ?? '-' }}</div>
+                                          <div class="info-row"><strong>No WA Ibu:</strong> {{ $biodata->no_wa_ibu ?? '-' }}</div>
+                                      </div>
+                                  </div>
+                              </div>
 
-</main>
-  
-    <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">SIJA SMKN 1 Cibinong</strong> <span>All Rights Reserved</span></p>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+                              <!-- Section 4: Pendapatan Orang Tua -->
+                              <div class="section-header-title">
+                                  <i class="bi bi-cash-coin me-2"></i> Pendapatan Kedua Orang Tua
+                              </div>
+                              <div class="p-3 bg-light rounded border mb-4">
+                                  <div class="info-row mb-0">
+                                      <strong>Rentang Pendapatan:</strong> 
+                                      <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+                                          {{ $biodata->pendapatan_ortu ?? 'Belum diisi' }}
+                                      </span>
+                                  </div>
+                              </div>
+
+                              <!-- Section 5: Data Pelengkap -->
+                              <div class="section-header-title">
+                                  <i class="bi bi-journal-check me-2"></i> Data Pendidikan & Pelengkap
+                              </div>
+                              <div class="row g-3">
+                                  <div class="col-md-6">
+                                      <div class="info-row"><strong>Sekolah Asal:</strong> {{ $biodata->namasekolah_asal ?? '-' }}</div>
+                                      <div class="info-row"><strong>Alamat Sekolah:</strong> {{ $biodata->alamat_sekolah ?? '-' }}</div>
+                                      <div class="info-row"><strong>Tahun Kelulusan:</strong> {{ $biodata->tahun_lulus ?? '-' }}</div>
+                                      <div class="info-row"><strong>Riwayat Penyakit:</strong> {{ $biodata->riwayat_penyakit ?? 'Tidak ada' }}</div>
+                                      <div class="info-row"><strong>Alergi:</strong> {{ $biodata->alergi ?? 'Tidak ada' }}</div>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <div class="info-row"><strong>Prestasi Akademik:</strong> {{ $biodata->prestasi_akademik ?? '-' }}</div>
+                                      <div class="info-row"><strong>Prestasi Non Akademik:</strong> {{ $biodata->prestasi_non_akademik ?? '-' }}</div>
+                                      <div class="info-row"><strong>Pengalaman Ekskul:</strong> {{ $biodata->pengalaman_eskul ?? ($biodata->pengalaman_ekskul ?? '-') }}</div>
+                                      <div class="info-row"><strong>Kepribadian:</strong> {{ $biodata->kepribadian ?? '-' }}</div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="card-footer bg-light py-3 px-4 d-flex justify-content-end align-items-center">
+                              <a href="{{ $editUrl ?? ($isKurikulum ? route('kurikulum.editbiodata', $biodata->id) : route('homepagegtk.editbiodata', $biodata->id)) }}" class="btn btn-primary px-3">
+                                  <i class="bi bi-pencil-square me-1"></i> Edit Biodata
+                              </a>
+                          </div>
+                      </div>
+                  @endforeach
+              @endif
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="footer" class="footer border-top py-4 bg-white mt-5">
+      <div class="container text-center">
+        <p class="mb-0">© <span>Copyright</span> <strong class="px-1 sitename">SIJA SMKN 1 Cibinong</strong> <span>All Rights Reserved</span></p>
       </div>
-    </div>
+    </footer>
 
-  </footer>
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+    <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
 
-  <!-- Vendor JS Files -->
-  <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="../../assets/vendor/php-email-form/validate.js"></script>
-  <script src="../../assets/vendor/aos/aos.js"></script>
-  <script src="../../assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="../../assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="../../assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <!-- Main JS File -->
+    <script src="{{ asset('assets/js/main.js') }}"></script>
 
-  <!-- Main JS File -->
-  <script src="../../assets/js/main.js"></script>
-
-  <script>
+    <script>
         window.onload = function() {
-            // Cek jika ada pesan error
             var errorAlert = document.getElementById('alertError');
             var successAlert = document.getElementById('alertSuccess');
 
-            // Jika ada pesan error, sembunyikan setelah 2 detik dengan animasi
             if (errorAlert) {
                 setTimeout(function() {
-                    errorAlert.style.animation = 'slideUp 0.5s ease-out'; // Animasi naik
+                    errorAlert.style.animation = 'slideUp 0.4s ease-out forwards';
                     setTimeout(function() {
-                        errorAlert.style.display = 'none'; // Sembunyikan setelah animasi selesai
-                    }, 500); // Durasi animasi
-                }, 2000); // Tunda selama 2 detik sebelum animasi
+                        errorAlert.style.display = 'none';
+                    }, 400);
+                }, 3000);
             }
 
-            // Jika ada pesan success, sembunyikan setelah 2 detik dengan animasi
             if (successAlert) {
                 setTimeout(function() {
-                    successAlert.style.animation = 'slideUp 0.5s ease-out'; // Animasi naik
+                    successAlert.style.animation = 'slideUp 0.4s ease-out forwards';
                     setTimeout(function() {
-                        successAlert.style.display = 'none'; // Sembunyikan setelah animasi selesai
-                    }, 500); // Durasi animasi
-                }, 2000); // Tunda selama 2 detik sebelum animasi
+                        successAlert.style.display = 'none';
+                    }, 400);
+                }, 3000);
             }
         };
     </script>
-
 </body>
-
 </html>

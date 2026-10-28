@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -94,6 +94,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -142,7 +143,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Form Penyerahan Rapot</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Form Penyerahan Rapot</h2>
+                <a href="{{ route('serahterimarapor.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
 

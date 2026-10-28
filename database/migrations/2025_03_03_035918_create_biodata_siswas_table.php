@@ -24,8 +24,8 @@ return new class extends Migration
             $table->text('alamat');
             $table->text('alamat_maps');
             $table->string('fotorumah_url',255)->nullable();
-            $table->enum('kepemilikan_rumah', ['Lunas', 'Sewa', 'KPR/Kredit', 'Kontrak', 'Inden'])->default('Lunas');
-            $table->enum('jalur_masuk', ['Afirmasi', 'Zonasi', 'Rapor', 'Prestasi', 'Anak Guru','Perpindahan Orang Tua',])->default('Rapor');
+            $table->string('kepemilikan_rumah', 50)->nullable();
+            $table->string('jalur_masuk', 100)->nullable();
             $table->string('jarak_rumah',255);
             $table->string('transportasi_sekolah',255);
             $table->string('transportasi_rumah',255);
@@ -35,10 +35,10 @@ return new class extends Migration
             $table->string('jumlah_saudara', 5);
             $table->string('no_wa',14);
             $table->string('email', 50);
-            $table->string('nis', 20)->unique();
+            $table->string('nis', 20)->nullable()->unique();
             $table->string('nisn', 20)->unique();
-            $table->string('kelas', 255);
-            $table->enum('kompetensi', ['SIJA', 'TKJ', 'RPL', 'DKV', 'DPIB', 'TKP', 'TP','TFLM', 'TKR', 'TOI'])->default('SIJA');
+            $table->string('kelas', 255)->nullable();
+            $table->string('kompetensi', 100)->nullable();
             $table->string('tahun_masuk', 4);
             $table->string('nama_ayah', 80);
             $table->string('pekerjaan_ayah', 80);

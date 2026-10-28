@@ -27,7 +27,7 @@
 
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -155,6 +155,7 @@
     background-color: #6c757d;
 }
 </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -213,7 +214,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Daftar Rombel</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h2 class="font-weight-bold mb-0">Daftar Rombel</h2>
+                <a href="{{ route('homepagekaprog.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
         </div>
         <div class="d-flex-container">

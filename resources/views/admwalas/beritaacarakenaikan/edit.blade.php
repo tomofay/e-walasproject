@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -95,6 +95,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -143,7 +144,12 @@
     <div class="starter-section container">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <H2 class="font-weight-bold">Edit Berita Acara Kenaikan</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Edit Berita Acara Kenaikan</h2>
+                <a href="{{ route('beritaacarakenaikan.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
 
@@ -224,7 +230,6 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Update</button>
-        <a href="{{ route('beritaacarakenaikan.index') }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
     </section>

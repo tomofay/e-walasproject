@@ -25,7 +25,7 @@
   <link href="../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="../../assets/css/main.css" rel="stylesheet">
+  <link href="../../assets/css/main.css?v=2" rel="stylesheet">
 
   <style>
     /* Alert box */
@@ -175,6 +175,7 @@
       }
     }
   </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body>
@@ -237,7 +238,12 @@
 
   <div class="container mt-5">
     <div class="form-container">
-    <h3>Form Edit Siswa </h3>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Form Edit Siswa</h3>
+        <a href="{{ route('profilesiswa.index') }}" class="btn btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Profil
+        </a>
+    </div>
     <br>
         <!-- Form Edit Data Wali Kelas -->
 <form action="{{ route('profilesiswa.update', $siswa->id) }}" method="POST" enctype="multipart/form-data">
@@ -264,8 +270,9 @@
         <label for="teacherPassword" class="form-label">Password</label>
         <input type="password" class="form-control" id="teacherPassword" placeholder="Masukkan Password (Kosongkan jika tidak ingin diubah)" name="password">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 d-flex align-items-center">
         <button type="submit" class="btn btn-success">Update Data</button>
+        
     </div>
 </form>
 

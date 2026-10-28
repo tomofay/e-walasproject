@@ -17,9 +17,12 @@ return new class extends Migration
             $table->foreign('walas_id')->references('id')->on('walas')->onDelete('cascade')->onUpdate ('cascade');
             $table->unsignedBigInteger('siswas_id');
             $table->foreign('siswas_id')->references('id')->on('siswas')->onDelete('cascade')->onUpdate ('cascade');
+            $table->date('tanggal')->nullable();
+            $table->time('waktu')->nullable();
             $table->string('kasus',255);
             $table->string('tindak_lanjut',255);
             $table->text('keterangan');
+            $table->text('file_kasus')->nullable();
             $table->timestamps();
         });
     }

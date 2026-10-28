@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -119,6 +119,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -177,7 +178,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Catatan Kasus Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Catatan Kasus Siswa</h2>
+                <a href="{{ route('adminwalas.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
                 <a href="/catatankasuscreate" class="btn btn-primary me-2 mb-2">
@@ -206,9 +212,11 @@
             <tr>
                 <th>No</th>
                 <th>Nama Siswa</th>
+                <th>Tanggal & Waktu</th>
                 <th>Kasus</th>
-                <th>Tindak Lanjut</th>
+                <th>Tindak Lanjut / Sanksi</th>
                 <th>Keterangan</th>
+                <th>Foto Dokumentasi</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -217,10 +225,45 @@
                 <tr>
                     <td>{{ $idx + 1 }}</td>
                     <td>{{ $data->siswa->nama ?? 'Siswa Tidak Ditemukan' }}</td>
+                    <td>
+                        @if($data->tanggal)
+                            <strong>{{ \Carbon\Carbon::parse($data->tanggal)->translatedFormat('d M Y') }}</strong>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                        @if($data->waktu)
+                            <br><small class="text-muted"><i class="bi bi-clock"></i> {{ \Carbon\Carbon::parse($data->waktu)->format('H:i') }} WIB</small>
+                        @endif
+                    </td>
                     <td>{{ $data->kasus }}</td>
-                    <td>{{ $data->tindak_lanjut }}</td>
+                    <td><span class="badge bg-warning text-dark">{{ $data->tindak_lanjut }}</span></td>
                     <td>{{ $data->keterangan }}</td>
-                    <td class="text-center" colspan="2">
+                    <td class="text-center">
+                        @php
+                            $files = is_array($data->file_kasus) ? $data->file_kasus : ($data->file_kasus ? [$data->file_kasus] : []);
+                        @endphp
+                        @if(!empty($files))
+                            <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                @foreach($files as $file)
+                                    @php
+                                        $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                    @endphp
+                                    @if(in_array($fileExtension, ['jpeg', 'png', 'jpg', 'gif', 'webp']))
+                                        <a href="{{ asset('storage/' . $file) }}" target="_blank">
+                                            <img src="{{ asset('storage/' . $file) }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;" title="Buka foto">
+                                        </a>
+                                    @else
+                                        <a href="{{ asset('storage/' . $file) }}" target="_blank" class="btn btn-file-bukti" title="{{ basename($file) }}">
+                                            <i class="bi bi-file-earmark-text"></i> File
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
+                    <td class="text-center">
                         <div class="d-flex justify-content-center">
                             <!-- Tombol Edit -->
                             <a href="{{ route('catatankasus.edit', $data->id) }}" class="btn btn-primary btn-sm me-2">Edit</a>
@@ -235,7 +278,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center">Tidak ada data wali kelas.</td>
+                    <td colspan="8" class="text-center">Tidak ada data catatan kasus siswa.</td>
                 </tr>
             @endforelse
         </tbody>

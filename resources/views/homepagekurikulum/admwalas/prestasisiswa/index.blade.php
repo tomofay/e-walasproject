@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -119,6 +119,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -177,7 +178,18 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Prestasi Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Prestasi Siswa</h2>
+                @if(request('walas_id') || !empty($walasIdSelected))
+                    <a href="{{ url('/admwalasviewkurikulum/' . (request('walas_id') ?? $walasIdSelected)) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                    </a>
+                @else
+                    <a href="{{ route('homepagekurikulum.index') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                    </a>
+                @endif
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
             <form id="exportForm" method="POST" action="{{ route('prestasisiswa.generatepdfkurikulumprestasi') }}">
@@ -229,9 +241,21 @@
                         @endif
                     </td>
                     <td>
-                        @if($data->dokumentasi_url)
-                            <img src="{{ asset('storage/'.$data->dokumentasi_url) }}" 
-                                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 0;">
+                        @php
+                            $docs = is_array($data->dokumentasi_url)
+                                ? $data->dokumentasi_url
+                                : ($data->dokumentasi_url ? [$data->dokumentasi_url] : []);
+                        @endphp
+                        @if(!empty($docs))
+                            <div class="d-flex flex-wrap gap-1" style="max-width: 160px;">
+                                @foreach($docs as $doc)
+                                    <a href="{{ asset('storage/'.$doc) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$doc) }}" 
+                                             style="width: 70px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;"
+                                             alt="Dokumentasi">
+                                    </a>
+                                @endforeach
+                            </div>
                         @else
                             <p>No image</p>
                         @endif

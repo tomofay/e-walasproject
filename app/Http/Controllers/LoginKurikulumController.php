@@ -41,6 +41,13 @@ class LoginKurikulumController extends Controller
 
         // Periksa apakah kurikulum ditemukan dan password cocok
         if ($kurikulum && Hash::check($request->password, $kurikulum->password)) {
+            $request->session()->forget(['walas_id', 'admin_id', 'kakom_id', 'kepsek_id', 'siswa_id']);
+            Auth::guard('walas')->logout();
+            Auth::guard('admins')->logout();
+            Auth::guard('kakoms')->logout();
+            Auth::guard('kepseks')->logout();
+            Auth::guard('siswas')->logout();
+
             $request->session()->put('kurikulum_id', $kurikulum->id);
             Auth::guard('kurikulums')->login($kurikulum);
 

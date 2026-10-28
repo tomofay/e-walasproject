@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -119,6 +119,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -177,7 +178,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Prestasi Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Prestasi Siswa</h2>
+                <a href="{{ route('adminwalas.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
                 <!-- Form Cari Administrasi -->
@@ -226,22 +232,59 @@
                     <td>{{ $idx + 1 }}</td>
                     <td>{{ $data->siswa->nama ?? 'Siswa Tidak Ditemukan' }}</td>
                     <td>{{ $data->jenis_prestasi }}</td>
-                    <td>{{ $data->nama_prestasi }}</td>
-                    <td>{{ \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') }}</td>
                     <td>
-                        @if($data->sertifikat_url)
-                            <img src="{{ asset('storage/'.$data->sertifikat_url) }}" 
-                                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 0;">
-                        @else
-                            <p>No image</p>
+                        <span class="badge {{ $data->jenis_prestasi == 'Akademik' ? 'bg-primary' : 'bg-success' }} mb-1">{{ $data->jenis_prestasi }}</span>
+                        <div class="fw-bold">{{ $data->nama_prestasi }}</div>
+                        @if($data->mata_lomba)
+                            <small class="text-muted d-block"><i class="bi bi-tag"></i> {{ $data->mata_lomba }}</small>
+                        @endif
+                        @if($data->tingkat)
+                            <span class="badge bg-info text-dark mt-1">{{ $data->tingkat }}</span>
                         @endif
                     </td>
                     <td>
-                        @if($data->dokumentasi_url)
-                            <img src="{{ asset('storage/'.$data->dokumentasi_url) }}" 
-                                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 0;">
+                        {{ $data->tanggal ? \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') : '-' }}
+                        @if($data->lokasi)
+                            <br><small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $data->lokasi }}</small>
+                        @endif
+                        @if($data->nama_pembimbing)
+                            <br><small class="text-muted"><i class="bi bi-person"></i> Pembimbing: {{ $data->nama_pembimbing }}</small>
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        @if($data->sertifikat_url)
+                            @php
+                                $fileExtension = strtolower(pathinfo($data->sertifikat_url, PATHINFO_EXTENSION));
+                            @endphp
+                            @if(in_array($fileExtension, ['jpeg', 'png', 'jpg', 'gif', 'webp']))
+                                <a href="{{ asset('storage/'.$data->sertifikat_url) }}" target="_blank">
+                                    <img src="{{ asset('storage/'.$data->sertifikat_url) }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;" title="Lihat Sertifikat">
+                                </a>
+                            @else
+                                <a href="{{ asset('storage/'.$data->sertifikat_url) }}" target="_blank" class="btn btn-file-bukti">
+                                    <i class="bi bi-file-earmark-text"></i> Sertifikat
+                                </a>
+                            @endif
                         @else
-                            <p>No image</p>
+                            <span class="text-muted small">-</span>
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        @php
+                            $docs = is_array($data->dokumentasi_url) 
+                                ? $data->dokumentasi_url 
+                                : ($data->dokumentasi_url ? [$data->dokumentasi_url] : []);
+                        @endphp
+                        @if(!empty($docs))
+                            <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                @foreach($docs as $doc)
+                                    <a href="{{ asset('storage/'.$doc) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$doc) }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;" title="Buka foto">
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="text-muted small">-</span>
                         @endif
                     </td>
                     

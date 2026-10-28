@@ -25,7 +25,7 @@
   <link href="../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="../../assets/css/main.css" rel="stylesheet">
+  <link href="../../assets/css/main.css?v=2" rel="stylesheet">
 
   <style>
     /* Alert box */
@@ -175,6 +175,7 @@
       }
     }
   </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body>
@@ -227,7 +228,12 @@
 
   <div class="container mt-5">
     <div class="form-container">
-    <h3>Form Edit Rombels </h3>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <h3 class="mb-0">Form Edit Rombels</h3>
+        <a href="{{ route('rombel.index') }}" class="btn btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Rombel Data
+        </a>
+    </div>
     <br>
       <form method="POST" action="{{ route('rombels.update', $rombel->id) }}">
         @csrf

@@ -21,6 +21,7 @@ use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\RombelPageController;
 use App\Http\Controllers\MapelPageController;
 use App\Http\Controllers\DataSiswaWalasController;
+use App\Http\Controllers\DataSiswaKurikulumBiodataController;
 use App\Http\Controllers\HomePageWalasController;
 use App\Http\Controllers\AdministrasiWalasController;
 use App\Http\Controllers\IdentitasKelasController;
@@ -120,36 +121,42 @@ Route::post('/loginsiswa', [LoginSiswaController::class, 'store'])->middleware('
 
 Route::post('/homepageadmin/logout', function () {
     Auth::guard('admins')->logout();
+    session()->forget(['admin_id']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutadmin');
 
 Route::post('/homepagegtk/logout', function () {
     Auth::guard('walas')->logout();
+    session()->forget(['walas_id', 'rombel_id']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutwalas');
 
 Route::post('/homepagekaprog/logout', function () {
     Auth::guard('kakoms')->logout();
+    session()->forget(['kakom_id']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutkakom');
 
 Route::post('/homepagekepsek/logout', function () {
     Auth::guard('kepseks')->logout();
+    session()->forget(['kepsek_id']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutkepsek');
 
 Route::post('/homepagekurikulum/logout', function () {
     Auth::guard('kurikulums')->logout();
+    session()->forget(['kurikulum_id', 'kurikulum_nama']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutkurikulum');
 
 Route::post('/homepagesiswa/logout', function () {
     Auth::guard('siswas')->logout();
+    session()->forget(['siswa_id']);
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutsiswa');
@@ -265,6 +272,8 @@ Route::middleware('walas')->group(function () {
 
     Route::resource('siswadata', DataSiswaWalasController::class)->except(['edit', 'update', 'store']);
     Route::get('/siswa/biodata/{id}', [DataSiswaWalasController::class, 'biodata'])->name('homepagegtk.biodatasiswa');
+    Route::get('/siswabiodata/{id}/create', [DataSiswaWalasController::class, 'createbiodata'])->name('homepagegtk.createbiodata');
+    Route::post('/siswabiodata/{id}/store', [DataSiswaWalasController::class, 'storebiodata'])->name('homepagegtk.storebiodata');
     Route::get('/siswabiodata/{id}/edit', [DataSiswaWalasController::class, 'editbiodata'])->name('homepagegtk.editbiodata');
     Route::put('/siswabiodata/{id}', [DataSiswaWalasController::class, 'updatebiodata'])->name('homepagegtk.updatebiodata');
     Route::post('/siswa-import', [DataSiswaWalasController::class, 'import']);
@@ -532,6 +541,12 @@ Route::middleware('kurikulum')->group(function () {
     Route::resource('kurikulumwalas', KurikulumWalasController::class);
     Route::resource('admwalasviewkurikulum', AdmWalasKurikulumViewController::class);
     Route::get('/detailkelasviewkurikulum/{walas_id}', [RombelDataController::class, 'showDetailKurikulum'])->name('rombel.showDetailKurikulum');
+    Route::get('/kurikulum/siswa/biodata/{id}', [DataSiswaKurikulumBiodataController::class, 'show'])->name('kurikulum.biodatasiswa');
+    Route::get('/kurikulum/siswa/biodata/{id}/create', [DataSiswaKurikulumBiodataController::class, 'create'])->name('kurikulum.createbiodata');
+    Route::post('/kurikulum/siswa/biodata/{id}/store', [DataSiswaKurikulumBiodataController::class, 'store'])->name('kurikulum.storebiodata');
+    Route::get('/kurikulum/siswabiodata/{id}/edit', [DataSiswaKurikulumBiodataController::class, 'edit'])->name('kurikulum.editbiodata');
+    Route::put('/kurikulum/siswabiodata/{id}', [DataSiswaKurikulumBiodataController::class, 'update'])->name('kurikulum.updatebiodata');
+    Route::put('/kurikulum/daftarpesertadidik/{id}/update-nis', [DataSiswaKurikulumBiodataController::class, 'updateNisNisn'])->name('kurikulum.daftarpesertadidik.updateNis');
 
     Route::get('beritaacarakenaikanviewkurikulum', [ViewAdmWalasKurikulumController::class, 'beritaacarakenaikankurikulum'])->name('admwalas.beritaacarakenaikankurikulum');
     Route::get('beritaacarakelulusanviewkurikulum', [ViewAdmWalasKurikulumController::class, 'beritaacarakelulusankurikulum'])->name('admwalas.beritaacarakelulusankurikulum');

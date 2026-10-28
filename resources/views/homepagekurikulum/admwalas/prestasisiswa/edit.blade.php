@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -234,8 +234,15 @@
                                 <input type="file" name="dokumentasi_url" id="dokumentasi_url" class="form-control" accept="image/*">
                                 <small>Jika tidak ingin mengubah gambar, biarkan kosong.</small>
                                 @if($prestasisiswa->dokumentasi_url)
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $prestasisiswa->dokumentasi_url) }}" alt="Dokumentasi" class="img-thumbnail" width="100">
+                                    @php
+                                        $docs = is_array($prestasisiswa->dokumentasi_url)
+                                            ? $prestasisiswa->dokumentasi_url
+                                            : ($prestasisiswa->dokumentasi_url ? [$prestasisiswa->dokumentasi_url] : []);
+                                    @endphp
+                                    <div class="mt-2 d-flex gap-2 flex-wrap">
+                                        @foreach($docs as $doc)
+                                            <img src="{{ asset('storage/' . $doc) }}" alt="Dokumentasi" class="img-thumbnail" width="100">
+                                        @endforeach
                                     </div>
                                 @endif
                             </div>

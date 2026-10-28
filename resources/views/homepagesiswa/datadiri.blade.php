@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -147,6 +147,7 @@
 }
 
 </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -241,7 +242,12 @@
         <div class="table-responsive">
         <div class="row stats-row gy-7 mt-9 justify-content-center align-items-center" data-aos="fade-up" data-aos-delay="500">
         <div class="col-lg-4 col-md-8 biodata-container">
-            <h1 class="mb-4 text-center">Biodata Diri</h1>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <h2 class="font-weight-bold mb-0">Biodata Diri</h2>
+                <a href="{{ route('homepagesiswa.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda Siswa
+                </a>
+            </div>
 
             <table class="table table-striped">
                 <thead>
@@ -256,9 +262,19 @@
                     <tr>
                         <td>1</td>
                         <td>{{ $siswa ? $siswa->nama : 'Nama Tidak Ada' }}</td>
-                        <td>{{ $status ?? 'Tidak Ada Keterangan' }}</td>
                         <td>
-                            <a href="{{ url('/datadiripage') }}" class="btn btn-info btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Data">Lihat Data</a>
+                            @if(($status ?? '') === 'Sudah Diisi')
+                                <span class="badge bg-success">Sudah Diisi</span>
+                            @else
+                                <span class="badge bg-warning text-dark">Belum Diisi</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if(($status ?? '') === 'Sudah Diisi')
+                                <a href="{{ url('/datadiripage') }}" class="btn btn-info btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Data">Lihat Data</a>
+                            @else
+                                <a href="{{ url('/inputdatadiri') }}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Isi Data">Isi Data</a>
+                            @endif
                         </td>
                     </tr>
                 </tbody>

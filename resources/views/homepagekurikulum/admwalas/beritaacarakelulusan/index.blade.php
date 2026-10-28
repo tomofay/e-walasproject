@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -116,6 +116,7 @@
             }
         }    
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -174,7 +175,18 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Berita Acara Kelulusan</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Berita Acara Kelulusan</h2>
+                @if(request('walas_id') || !empty($walasIdSelected))
+                    <a href="{{ url('/admwalasviewkurikulum/' . (request('walas_id') ?? $walasIdSelected)) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                    </a>
+                @else
+                    <a href="{{ route('homepagekurikulum.index') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                    </a>
+                @endif
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
                     <a href="{{ route('admwalas.beritaacarakelulusankurikulum', ['export' => 'pdf', 'walas_id' => $walasIdSelected]) }}" class="btn btn-outline-secondary me-2 mb-2">

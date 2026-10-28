@@ -63,16 +63,21 @@
 
     <table>
         <tr>
-            <th>No</th>
-            <th>Nama Siswa</th>
-            <th>Kasus</th>
-            <th>Tindak Lanjut</th>
-            <th>Keterangan</th>
+            <th style="width: 5%;">No</th>
+            <th style="width: 20%;">Nama Siswa</th>
+            <th style="width: 15%;">Tanggal & Waktu</th>
+            <th style="width: 20%;">Kasus</th>
+            <th style="width: 20%;">Tindak Lanjut / Sanksi</th>
+            <th style="width: 20%;">Keterangan</th>
         </tr>
         @foreach ($catatankasus as $idx => $data)
             <tr>
-                <td>{{ $idx + 1 }}</td>
+                <td style="text-align: center;">{{ $idx + 1 }}</td>
                 <td>{{ $data->siswa->nama ?? 'Siswa Tidak Ditemukan' }}</td>
+                <td>
+                    {{ $data->tanggal ? \Carbon\Carbon::parse($data->tanggal)->format('d/m/Y') : '-' }}
+                    {{ $data->waktu ? \Carbon\Carbon::parse($data->waktu)->format('H:i') : '' }}
+                </td>
                 <td>{{ $data->kasus }}</td>
                 <td>{{ $data->tindak_lanjut }}</td>
                 <td>{{ $data->keterangan }}</td>

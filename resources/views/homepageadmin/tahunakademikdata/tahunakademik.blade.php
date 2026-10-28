@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -87,6 +87,7 @@
             }
         }
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -174,7 +175,10 @@
                Sudah Siap Beroperasi Hari Ini?
               </p>
 
-              <div class="hero-buttons">
+              <div class="hero-buttons d-flex align-items-center gap-3">
+                <a href="{{ route('homepageadmin.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                </a>
                 <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="btn btn-link tutorial-btn mt-2 mt-sm-0 glightbox">
                     <i class="bi bi-play-circle me-1"></i>
                     Tutorial Penggunaan Website

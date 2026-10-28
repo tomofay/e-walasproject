@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -151,6 +151,7 @@
 </style>
 
 
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -233,28 +234,70 @@
             <table class="table table-striped w-100">
             <div class="row justify-content-center mt-5" data-aos="fade-up" data-aos-delay="500">
                 <div class="col-lg-8 col-md-10">
-                    <h1 class="mb-4 text-center">Catatan Kasus</h1>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                        <h2 class="font-weight-bold mb-0">Catatan Kasus</h2>
+                        <a href="{{ route('homepagesiswa.index') }}" class="btn btn-back">
+                            <i class="bi bi-arrow-left"></i> Kembali ke Beranda Siswa
+                        </a>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>No</th>
+                                    <th>Tanggal & Waktu</th>
                                     <th>Kasus</th>
-                                    <th>Tindak Lanjut</th>
+                                    <th>Tindak Lanjut / Sanksi</th>
                                     <th>Keterangan</th>
+                                    <th>Foto Dokumentasi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($catatankasus ?? [] as $idx => $data)
                                     <tr>
                                         <td>{{ $idx + 1 }}</td>
+                                        <td>
+                                            @if($data->tanggal)
+                                                <strong>{{ \Carbon\Carbon::parse($data->tanggal)->translatedFormat('d M Y') }}</strong>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                            @if($data->waktu)
+                                                <br><small class="text-muted"><i class="bi bi-clock"></i> {{ \Carbon\Carbon::parse($data->waktu)->format('H:i') }} WIB</small>
+                                            @endif
+                                        </td>
                                         <td>{{ $data->kasus }}</td>
-                                        <td>{{ $data->tindak_lanjut }}</td>
+                                        <td><span class="badge bg-warning text-dark">{{ $data->tindak_lanjut }}</span></td>
                                         <td>{{ $data->keterangan }}</td>
+                                        <td class="text-center">
+                                            @php
+                                                $files = is_array($data->file_kasus) ? $data->file_kasus : ($data->file_kasus ? [$data->file_kasus] : []);
+                                            @endphp
+                                            @if(!empty($files))
+                                                <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                                    @foreach($files as $file)
+                                                        @php
+                                                            $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                        @endphp
+                                                        @if(in_array($fileExtension, ['jpeg', 'png', 'jpg', 'gif', 'webp']))
+                                                            <a href="{{ asset('storage/' . $file) }}" target="_blank">
+                                                                <img src="{{ asset('storage/' . $file) }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ced4da;" title="Buka foto">
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ asset('storage/' . $file) }}" target="_blank" class="btn btn-file-bukti" title="{{ basename($file) }}">
+                                                                <i class="bi bi-file-earmark-text"></i> File
+                                                            </a>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">Tidak ada Catatan Kasus.</td>
+                                        <td colspan="6" class="text-center">Tidak ada Catatan Kasus.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -23,9 +23,13 @@ class DaftarPesertaDidikController extends Controller
         $walas = $this->getAuthenticatedWalas();
         $rombel = $this->getWalasRombel();
 
+        \App\Services\DaftarPesertaDidikService::syncRombel($rombel);
+
         $siswas = Siswa::where('rombels_id', $rombel->id)->get();
         $daftarpdidik = DaftarPesertaDidik::where('walas_id', $walas->id)
-            ->with('siswa')
+            ->whereIn('nama_siswa', $siswas->pluck('id'))
+            ->with(['siswa.biodata'])
+            ->orderBy('id', 'asc')
             ->get();
 
         $jenisKelaminCount = $daftarpdidik->groupBy('jenis_kelamin')->map(function ($items) {
@@ -99,8 +103,16 @@ class DaftarPesertaDidikController extends Controller
     // Set 'keterangan' otomatis menjadi 'aktif'
     $validatedData['keterangan'] = 'aktif';
 
-    // Simpan data ke database
-    DaftarPesertaDidik::create($validatedData);
+    // Simpan data ke database dan sinkronkan ke biodata jika ada
+    DB::transaction(function () use ($validatedData) {
+        DaftarPesertaDidik::create($validatedData);
+
+        BiodataSiswa::where('siswas_id', $validatedData['nama_siswa'])
+            ->update([
+                'nis' => $validatedData['nis'],
+                'nisn' => $validatedData['nisn'],
+            ]);
+    });
 
     return redirect('/daftarpesertadidik')->with('success', 'Data berhasil disimpan.');
 }
@@ -165,13 +177,13 @@ class DaftarPesertaDidikController extends Controller
     $validatedData['keterangan'] = 'aktif';
 
     DB::transaction(function () use ($daftarPesertaDidik, $validatedData) {
-        $daftarPesertaDidik->update($validatedData);
-
         BiodataSiswa::where('siswas_id', $validatedData['nama_siswa'])
             ->update([
                 'nis' => $validatedData['nis'],
                 'nisn' => $validatedData['nisn'],
             ]);
+
+        $daftarPesertaDidik->update($validatedData);
     });
 
     return redirect('/daftarpesertadidik')->with('success', 'Data berhasil diperbarui.');

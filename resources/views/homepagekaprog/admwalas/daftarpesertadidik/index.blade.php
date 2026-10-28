@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -119,6 +119,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -177,7 +178,18 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Daftar Peserta Didik</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Daftar Peserta Didik</h2>
+                @if(request('walas_id') || !empty($walasIdSelected))
+                    <a href="{{ url('/admwalasview/' . (request('walas_id') ?? $walasIdSelected)) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                    </a>
+                @else
+                    <a href="{{ route('homepagekaprog.index') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                    </a>
+                @endif
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex flex-wrap align-items-center justify-content-start">
                 <!-- Tombol Unduh PDF -->
@@ -213,11 +225,11 @@
             @forelse ($daftarPDidik ?? [] as $idx => $data)
                 <tr>
                     <td>{{ $idx + 1 }}</td>
-                    <td>{{ $data->siswa->nama }}</td>
-                    <td>{{ $data->nis }}</td>
-                    <td>{{ $data->nisn }}</td>
-                    <td>{{ $data->jenis_kelamin }}</td>
-                    <td>{{ $data->keterangan }}</td>
+                    <td>{{ $data->siswa->nama ?? '-' }}</td>
+                    <td>{{ $data->nis ?: ($data->siswa->biodata?->nis ?? '-') }}</td>
+                    <td>{{ $data->nisn ?: ($data->siswa->biodata?->nisn ?? '-') }}</td>
+                    <td>{{ $data->jenis_kelamin ?? ($data->siswa->jenis_kelamin ?? '-') }}</td>
+                    <td>{{ ucfirst($data->keterangan ?? ($data->siswa->status ?? 'Aktif')) }}</td>
                     <td>{{ $data->tanggal }}</td>
                 </tr>
             @empty

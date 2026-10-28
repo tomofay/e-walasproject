@@ -25,7 +25,7 @@
   <link href="../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="../../assets/css/main.css" rel="stylesheet">
+  <link href="../../assets/css/main.css?v=2" rel="stylesheet">
 
   <style>
     /* Alert box */
@@ -175,6 +175,7 @@
       }
     }
   </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body>
@@ -196,30 +197,21 @@
     <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
       <a href="/walaspage" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.png" alt=""> -->
         <h1 class="sitename">E - Walas</h1>
-</a>
+      </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
-        <li><a href="/tahunajaran" >Beranda</a></li>
-          <li><a href="/rombel" class="active">Rombel</a></li>
-          <li><a href="/datamapel">Mata Pelajaran</a></li>
-          <li class="dropdown"><a href="#"><span>Tahun Akademik</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="#">Tahun Ajaran {{ $activeAcademicYear }} - Aktif</a></li>
-            </ul>
-          </li>
+          <li><a href="/walaspage">Beranda</a></li>
+          <li><a href="/siswadata" class="active">Data Siswa</a></li>
+          <li><a href="/adminwalas">Administrasi Walas</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
-      <form action="{{ route('logoutadmin') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-getstarted">Logout</button>
-                                </form>
-      
-
+      <form action="{{ route('logoutwalas') }}" method="POST">
+          @csrf
+          <button type="submit" class="btn-getstarted">Logout</button>
+      </form>
     </div>
   </header>
 
@@ -227,8 +219,12 @@
 
   <div class="container mt-5">
     <div class="form-container">
-        <h3>Form Edit Siswa</h3>
-        <br>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0">Form Edit Siswa</h3>
+            <a href="{{ route('siswadata.index') }}" class="btn btn-back">
+                <i class="bi bi-arrow-left"></i> Kembali ke Data Siswa
+            </a>
+        </div>
         <form action="{{ route('siswa.update', $siswa->siswa_id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT') <!-- Menyatakan bahwa ini adalah request PUT untuk update -->
@@ -287,9 +283,10 @@
                 <input type="hidden" id="Status" name="status" value="aktif">
             </div>
 
-            <!-- Tombol Submit -->
-            <div class="mb-3">
+            <!-- Tombol Submit & Batal -->
+            <div class="mb-3 d-flex gap-2">
                 <button type="submit" class="btn btn-success">Update Data</button>
+                
             </div>
         </form>
     </div>

@@ -4,8 +4,12 @@ namespace App\Http\Concerns;
 
 trait ConvertsImagesToBase64
 {
-    protected function convertToBase64(?string $path): ?string
+    protected function convertToBase64(string|array|null $path): ?string
     {
+        if (is_array($path)) {
+            $path = $path[0] ?? null;
+        }
+
         if (! $path) {
             return null;
         }

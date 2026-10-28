@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -119,6 +119,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -177,7 +178,18 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Daftar Peserta Didik</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Daftar Peserta Didik</h2>
+                @if(request('walas_id') || !empty($walasIdSelected))
+                    <a href="{{ url('/admwalasviewkurikulum/' . (request('walas_id') ?? $walasIdSelected)) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                    </a>
+                @else
+                    <a href="{{ route('homepagekurikulum.index') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                    </a>
+                @endif
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex flex-wrap align-items-center justify-content-start">
                 <!-- Tombol Unduh PDF -->
@@ -199,35 +211,115 @@
 
     @if($daftarPDidik->isNotEmpty())
     <div class="table-responsive">
-    <table class="table table-bordered table-striped">
-            <tr>
-                <th>No</th>
-                <th>Nama Siswa</th>
-                <th>NIS</th>
-                <th>NISN</th>
-                <th>Jenis Kelamin</th>
-                <th>Keterangan</th>
-                <th>Tanggal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($daftarPDidik ?? [] as $idx => $data)
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
                 <tr>
-                    <td>{{ $idx + 1 }}</td>
-                    <td>{{ $data->siswa->nama }}</td>
-                    <td>{{ $data->nis }}</td>
-                    <td>{{ $data->nisn }}</td>
-                    <td>{{ $data->jenis_kelamin }}</td>
-                    <td>{{ $data->keterangan }}</td>
-                    <td>{{ $data->tanggal }}</td>
+                    <th>No</th>
+                    <th>Nama Siswa</th>
+                    <th>NIS</th>
+                    <th>NISN</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Keterangan</th>
+                    <th>Tanggal</th>
+                    <th class="text-center" style="min-width: 170px;">Aksi</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="10" class="text-center">Tidak ada data Peserta Didik.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($daftarPDidik ?? [] as $idx => $data)
+                    <tr>
+                        <td>{{ $idx + 1 }}</td>
+                        <td>{{ $data->siswa->nama ?? '-' }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ $data->nis ?: ($data->siswa->biodata?->nis ?? '-') }}</span></td>
+                        <td><span class="badge bg-light text-dark border">{{ $data->nisn ?: ($data->siswa->biodata?->nisn ?? '-') }}</span></td>
+                        <td>{{ $data->jenis_kelamin ?? ($data->siswa->jenis_kelamin ?? '-') }}</td>
+                        <td>{{ ucfirst($data->keterangan ?? ($data->siswa->status ?? 'Aktif')) }}</td>
+                        <td>{{ $data->tanggal }}</td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center gap-1 justify-content-center flex-wrap">
+                                <button type="button" class="btn btn-warning btn-sm text-dark" data-bs-toggle="modal" data-bs-target="#editModal_{{ $data->id }}" title="Edit NIS & NISN">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                                @if(!empty($data->nama_siswa) || !empty($data->siswa?->id))
+                                    <a href="{{ route('kurikulum.biodatasiswa', $data->nama_siswa ?? $data->siswa->id) }}" class="btn btn-info btn-sm text-white" title="Lihat/Edit Biodata Lengkap">
+                                        <i class="bi bi-person-lines-fill"></i> Biodata
+                                    </a>
+                                @endif
+                            </div>
+
+                            <!-- Modal Edit NIS / NISN -->
+                            <div class="modal fade text-start" id="editModal_{{ $data->id }}" tabindex="-1" aria-labelledby="editModalLabel_{{ $data->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content shadow">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title text-white" id="editModalLabel_{{ $data->id }}">
+                                                <i class="bi bi-pencil-square me-1"></i> Edit Data: {{ $data->siswa->nama ?? 'Siswa' }}
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ route('kurikulum.daftarpesertadidik.updateNis', $data->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">Nama Siswa</label>
+                                                    <input type="text" class="form-control bg-light" value="{{ $data->siswa->nama ?? '-' }}" readonly>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="nis_{{ $data->id }}" class="form-label fw-semibold">NIS <span class="text-danger">*</span></label>
+                                                        <input type="text" name="nis" id="nis_{{ $data->id }}" class="form-control" value="{{ old('nis', $data->nis ?: ($data->siswa->biodata?->nis ?? '')) }}" required placeholder="Contoh: 20250001">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="nisn_{{ $data->id }}" class="form-label fw-semibold">NISN <span class="text-danger">*</span></label>
+                                                        <input type="text" name="nisn" id="nisn_{{ $data->id }}" class="form-control" value="{{ old('nisn', $data->nisn ?: ($data->siswa->biodata?->nisn ?? '')) }}" required placeholder="Contoh: 00010000001">
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="jk_{{ $data->id }}" class="form-label fw-semibold">Jenis Kelamin</label>
+                                                        <select name="jenis_kelamin" id="jk_{{ $data->id }}" class="form-select">
+                                                            <option value="Laki-laki" {{ ($data->jenis_kelamin ?? ($data->siswa->jenis_kelamin ?? '')) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                                            <option value="Perempuan" {{ ($data->jenis_kelamin ?? ($data->siswa->jenis_kelamin ?? '')) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="ket_{{ $data->id }}" class="form-label fw-semibold">Keterangan / Status</label>
+                                                        <select name="keterangan" id="ket_{{ $data->id }}" class="form-select">
+                                                            <option value="aktif" {{ strtolower($data->keterangan ?? '') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                                            <option value="nonaktif" {{ strtolower($data->keterangan ?? '') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <hr class="my-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="text-muted small">Ingin ubah data biodata lengkap?</span>
+                                                    @if(!empty($data->nama_siswa) || !empty($data->siswa?->id))
+                                                        <a href="{{ route('kurikulum.biodatasiswa', $data->nama_siswa ?? $data->siswa->id) }}" class="btn btn-outline-info btn-sm">
+                                                            <i class="bi bi-person-lines-fill"></i> Buka Biodata &raquo;
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-save me-1"></i> Simpan Perubahan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center">Tidak ada data Peserta Didik.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
     <br>
     <!-- Menampilkan Jumlah Jenis Kelamin -->
     <div class="row mb-3">

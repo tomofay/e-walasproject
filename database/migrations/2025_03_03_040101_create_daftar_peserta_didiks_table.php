@@ -14,11 +14,9 @@ return new class extends Migration
         Schema::create('daftar_peserta_didiks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('walas_id');
-            $table->foreign('walas_id')->references('id')->on('walas')->onDelete('cascade')->onUpdate ('cascade');
-            $table->string('nis', 20); 
-            $table->foreign('nis')->references('nis')->on('biodata_siswas')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('nisn', 20);
-            $table->foreign('nisn')->references('nisn')->on('biodata_siswas')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('walas_id')->references('id')->on('walas')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('nis', 20)->nullable(); 
+            $table->string('nisn', 20)->nullable();
             $table->unsignedBigInteger('nama_siswa');
             $table->foreign('nama_siswa')->references('id')->on('siswas')->onDelete('cascade')->onUpdate ('cascade');
             $table->string('keterangan', 50);

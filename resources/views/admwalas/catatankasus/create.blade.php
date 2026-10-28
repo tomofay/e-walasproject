@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -94,6 +94,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -142,7 +143,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Form Catatan Kasus Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Form Catatan Kasus Siswa</h2>
+                <a href="{{ route('catatankasus.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
 
@@ -170,27 +176,46 @@
                             <select name="siswas_id" id="siswas_id" class="form-control" required>
                                 <option value="" disabled selected>Pilih Siswa</option>
                                 @foreach ($siswas as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nama }}</option>
+                                    <option value="{{ $s->id }}" {{ old('siswas_id') == $s->id ? 'selected' : '' }}>{{ $s->nama }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <!-- Tanggal & Waktu -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="tanggal" class="form-label">Tanggal Kejadian / Catatan:</label>
+                                <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ old('tanggal', date('Y-m-d')) }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="waktu" class="form-label">Waktu Kejadian:</label>
+                                <input type="time" name="waktu" id="waktu" class="form-control" value="{{ old('waktu', date('H:i')) }}" required>
+                            </div>
                         </div>
 
                         <!-- Kasus -->
                         <div class="mb-3">
                             <label for="kasus" class="form-label">Kasus Siswa:</label>
-                            <input type="text" name="kasus" id="kasus" class="form-control" required>
+                            <input type="text" name="kasus" id="kasus" class="form-control" placeholder="Masukkan perihal kasus siswa" value="{{ old('kasus') }}" required>
                         </div>
 
-                        <!-- Tindak Lanjut -->
+                        <!-- Tindak Lanjut / Sanksi -->
                         <div class="mb-3">
-                            <label for="tindak_lanjut" class="form-label">Tindak Lanjut:</label>
-                            <input type="text" name="tindak_lanjut" id="tindak_lanjut" class="form-control" required>
+                            <label for="tindak_lanjut" class="form-label">Tindak Lanjut / Sanksi:</label>
+                            <input type="text" name="tindak_lanjut" id="tindak_lanjut" class="form-control" placeholder="Contoh: Pemanggilan orang tua / Pembinaan khusus / Surat peringatan" value="{{ old('tindak_lanjut') }}" required>
                         </div>
 
                         <!-- Keterangan -->
                         <div class="mb-3">
                             <label for="keterangan" class="form-label">Keterangan:</label>
-                            <textarea name="keterangan" id="keterangan" class="form-control" required></textarea>
+                            <textarea name="keterangan" id="keterangan" class="form-control" rows="3" placeholder="Keterangan tambahan mengenai kasus..." required>{{ old('keterangan') }}</textarea>
+                        </div>
+
+                        <!-- Upload File / Bukti -->
+                        <div class="mb-3">
+                            <label for="file_kasus" class="form-label">Upload File / Foto Bukti Kasus (Bisa pilih banyak foto):</label>
+                            <input type="file" name="file_kasus[]" id="file_kasus" class="form-control" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            <small class="text-muted">Bisa memilih lebih dari satu foto/dokumen sekaligus. Format: JPG, JPEG, PNG, PDF, DOC, DOCX (Maks 10MB per file).</small>
                         </div>
 
                         <!-- Tombol Simpan -->

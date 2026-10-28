@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -217,6 +217,7 @@
     }
 </style>
     
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -275,9 +276,13 @@
 <!-- Hero Section -->
 <section id="hero" class="hero section">
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
-        <div class="text-center mb-4">
-            <br><br><br><br>
-            <h2 class="font-weight-bold">Kelompok Siswa</h2>
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Kelompok Siswa</h2>
+                <a href="{{ route('denahkerjakelompok.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Denah Kelompok
+                </a>
+            </div>
             <hr class="my-3">
         </div>
 
@@ -331,6 +336,7 @@
             <!-- Button Simpan -->
             <div class="d-flex justify-content-center mt-4">
                 <button type="submit" class="btn btn-primary">Simpan</button>
+                        
             </div>
         </form>
 

@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -87,6 +87,7 @@
             }
         }
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -163,6 +164,12 @@
                Kelola Data Warga sekolah <br>
                 <span class="accent-text">SMK Negeri 1 Cibinong</span>
               </h1>
+
+              <div class="mb-4">
+                <a href="{{ route('homepageadmin.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda Admin
+                </a>
+              </div>
 
               <!-- <div class="hero-buttons">
                 <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="btn btn-link tutorial-btn mt-2 mt-sm-0 glightbox">

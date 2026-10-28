@@ -37,7 +37,7 @@
 
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -220,6 +220,7 @@
 
 
 
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -278,7 +279,18 @@
 <section id="hero" class="hero section">
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <div class="mb-4">
-            <h2 class="font-weight-bold">Denah Kerja Kelompok Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Denah Kerja Kelompok Siswa</h2>
+                @if(request('walas_id') || !empty($walasIdSelected))
+                    <a href="{{ url('/admwalasviewkepsek/' . (request('walas_id') ?? $walasIdSelected)) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Administrasi Walas
+                    </a>
+                @else
+                    <a href="{{ route('homepagekepsek.index') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                    </a>
+                @endif
+            </div>
             <hr class="my-3">
         </div>
 

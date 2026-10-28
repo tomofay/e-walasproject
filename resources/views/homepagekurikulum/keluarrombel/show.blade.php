@@ -30,7 +30,7 @@
 
 
   <!-- Main CSS File -->
-  <link href="/../../assets/css/main.css" rel="stylesheet">
+  <link href="/../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -333,6 +333,7 @@
 
 
 </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -383,15 +384,23 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            @forelse ($kelasGroup as $namaKelas => $keluarSiswa)
-                <h2 class="font-weight-bold">Daftar Siswa Keluar Rombel Kelas: {{ $namaKelas }} </h2>
-                @if ($selectedPeriod)
-                    <p>Periode: {{ $selectedPeriod['year'] }} - {{ $selectedPeriod['semester'] }}</p>
-                @endif
-                <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
-            @empty
-                <p class="text-muted">Tidak ada siswa yang keluar dari rombel.</p>
-            @endforelse
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <div>
+                    @forelse ($kelasGroup as $namaKelas => $keluarSiswa)
+                        <h2 class="font-weight-bold mb-1">Daftar Siswa Keluar Rombel Kelas: {{ $namaKelas }} </h2>
+                        @if ($selectedPeriod)
+                            <p class="text-muted mb-0">Periode: {{ $selectedPeriod['year'] }} - {{ $selectedPeriod['semester'] }}</p>
+                        @endif
+                    @empty
+                        <h2 class="font-weight-bold mb-1">Daftar Siswa Keluar Rombel</h2>
+                        <p class="text-muted mb-0">Tidak ada siswa yang keluar dari rombel.</p>
+                    @endforelse
+                </div>
+                <a href="{{ route('keluarrombeldatakurikulum.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Keluar Rombel
+                </a>
+            </div>
+            <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
 
             <div class="d-flex align-items-center justify-content-start">
                 <!-- Tombol Tambah Data -->

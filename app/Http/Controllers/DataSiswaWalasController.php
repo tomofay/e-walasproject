@@ -80,7 +80,11 @@ class DataSiswaWalasController extends Controller
 
         $biodatas = BiodataSiswa::where('siswas_id', $siswa->id)->get();
         if ($biodatas->isEmpty()) {
-            return back()->with('error', 'Data Biodata Siswa Tidak Ditemukan');
+            $targetUrl = \Illuminate\Support\Facades\Route::has('homepagegtk.createbiodata')
+                ? route('homepagegtk.createbiodata', $siswa->id)
+                : url('/siswabiodata/' . $siswa->id . '/create');
+            return redirect($targetUrl)
+                ->with('info', 'Biodata untuk ' . $siswa->nama . ' belum ada. Silakan buat atau lengkapi biodata berikut.');
         }
 
         foreach ($biodatas as $item) {
@@ -94,7 +98,12 @@ class DataSiswaWalasController extends Controller
             return $pdf->stream('Biodata_Siswa.pdf');
         }
 
-        return view('homepagegtk.biodatasiswa', compact('siswa', 'biodatas', 'walas', 'rombel'));
+        $role = 'walas';
+        $backUrl = route('siswadata.index');
+        $editUrl = route('homepagegtk.editbiodata', $biodatas->first()->id);
+        $pdfUrl = route('homepagegtk.biodatasiswa', ['id' => $siswa->id, 'export' => 'pdf']);
+
+        return view('homepagegtk.biodatasiswa', compact('siswa', 'biodatas', 'walas', 'rombel', 'role', 'backUrl', 'editUrl', 'pdfUrl'));
     }
 
     private function convertToBase64($path)
@@ -135,6 +144,78 @@ class DataSiswaWalasController extends Controller
         }
     }
 
+    public function createbiodata($id)
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $this->siswaDiRombel($id);
+
+        $siswa = Siswa::with('rombel.walas')->findOrFail($id);
+        $biodata = BiodataSiswa::where('siswas_id', $siswa->id)->first();
+        if ($biodata) {
+            return redirect()->route('homepagegtk.editbiodata', $biodata->id);
+        }
+
+        $nowalas = $siswa->rombel ? $siswa->rombel->walas : $walas;
+        $walasList = Walas::select('id', 'nama')->get();
+        $no_wa_walas = $nowalas?->no_wa ?? 'Nomor tidak tersedia';
+
+        $biodata = new BiodataSiswa([
+            'siswas_id' => $siswa->id,
+            'walas_id' => $siswa->rombel?->walas_id ?? $walas->id,
+            'nama_lengkap' => $siswa->nama,
+            'jenis_kelamin' => $siswa->jenis_kelamin ?? 'Laki-laki',
+            'no_wa' => $siswa->no_wa ?? '',
+            'kelas' => $siswa->rombel?->tingkat ?? ($siswa->rombel?->nama_kelas ?? 'X'),
+            'kompetensi' => $siswa->rombel?->kompetensi ?? 'SIJA',
+            'tahun_masuk' => '2025',
+            'nis' => sprintf('2025%04d', $siswa->id),
+            'nisn' => sprintf('000%08d', 10000000 + $siswa->id),
+        ]);
+
+        $role = 'walas';
+        $isCreate = true;
+        $formAction = route('homepagegtk.storebiodata', $siswa->id);
+        $backUrl = route('siswadata.index');
+
+        return view('homepagegtk.editbiodata', compact('biodata', 'siswa', 'nowalas', 'walasList', 'no_wa_walas', 'walas', 'isCreate', 'formAction', 'backUrl', 'role'));
+    }
+
+    public function storebiodata(Request $request, $id)
+    {
+        $walas = $this->getAuthenticatedWalas();
+        $this->siswaDiRombel($id);
+
+        $siswa = Siswa::with('rombel')->findOrFail($id);
+
+        $validatedData = $this->validateBiodataInput($request);
+
+        $fotoRumahPath = $request->hasFile('fotorumah_url')
+            ? $request->file('fotorumah_url')->store('images/photos', 'public')
+            : null;
+
+        $defaults = $this->getDefaultBiodataAttributes($siswa, $walas);
+        $biodataData = array_merge($defaults, array_filter($validatedData, fn($v) => !is_null($v)));
+        $biodataData['fotorumah_url'] = $fotoRumahPath;
+
+        $biodata = BiodataSiswa::updateOrCreate(['siswas_id' => $siswa->id], $biodataData);
+
+        $walasId = $siswa->rombel?->walas_id ?? ($biodata->walas_id ?? $walas->id);
+        \App\Models\DaftarPesertaDidik::updateOrCreate(
+            ['nama_siswa' => $siswa->id],
+            [
+                'walas_id' => $walasId,
+                'nis' => $biodata->nis,
+                'nisn' => $biodata->nisn,
+                'jenis_kelamin' => $biodata->jenis_kelamin ?? 'Laki-laki',
+                'keterangan' => 'Aktif',
+                'tanggal' => now()->toDateString(),
+            ]
+        );
+
+        return redirect()->route('homepagegtk.biodatasiswa', $siswa->id)
+            ->with('success', 'Biodata siswa berhasil dibuat!');
+    }
+
     public function editbiodata($id)
     {
         $walas = $this->getAuthenticatedWalas();
@@ -144,17 +225,24 @@ class DataSiswaWalasController extends Controller
             return redirect('/siswadata')->with('error', 'Biodata siswa tidak ditemukan.');
         }
 
-        $siswa = Siswa::find($biodata->siswas_id);
+        $this->siswaDiRombel($biodata->siswas_id);
+
+        $siswa = Siswa::with('rombel.walas')->find($biodata->siswas_id);
         if (! $siswa) {
             return redirect('/siswadata')->with('error', 'Data siswa tidak ditemukan.');
         }
 
         $nowalas = $siswa->rombel ? $siswa->rombel->walas : null;
         $walasList = Walas::select('id', 'nama')->get();
-        $walasData = Walas::find($biodata->walas_id);
+        $walasData = Walas::find($biodata->walas_id) ?? $nowalas;
         $no_wa_walas = $walasData?->no_wa ?? 'Nomor tidak tersedia';
 
-        return view('homepagegtk.editbiodata', compact('biodata', 'siswa', 'nowalas', 'walasList', 'no_wa_walas', 'walas'));
+        $role = 'walas';
+        $isCreate = false;
+        $formAction = route('homepagegtk.updatebiodata', $biodata->id);
+        $backUrl = route('homepagegtk.biodatasiswa', $biodata->siswas_id);
+
+        return view('homepagegtk.editbiodata', compact('biodata', 'siswa', 'nowalas', 'walasList', 'no_wa_walas', 'walas', 'isCreate', 'formAction', 'backUrl', 'role'));
     }
 
     public function updatebiodata(Request $request, $id)
@@ -164,7 +252,56 @@ class DataSiswaWalasController extends Controller
 
         $this->siswaDiRombel($biodata->siswas_id);
 
-        $request->validate([
+        $validatedData = $this->validateBiodataInput($request);
+
+        // Jika sudah pernah terisi dan input kosong, pertahankan data lama (tidak usah masukkan lagi)
+        if (empty($validatedData['pekerjaan_ayah']) && !empty($biodata->pekerjaan_ayah)) {
+            unset($validatedData['pekerjaan_ayah']);
+        }
+        if (empty($validatedData['pekerjaan_ibu']) && !empty($biodata->pekerjaan_ibu)) {
+            unset($validatedData['pekerjaan_ibu']);
+        }
+        if (empty($validatedData['pendapatan_ortu']) && !empty($biodata->pendapatan_ortu)) {
+            unset($validatedData['pendapatan_ortu']);
+        }
+
+        if ($request->hasFile('fotorumah_url')) {
+            if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
+                Storage::delete('public/' . $biodata->fotorumah_url);
+            }
+            $biodata->fotorumah_url = $request->file('fotorumah_url')->store('images/photos', 'public');
+        }
+
+        $biodata->fill(array_filter($validatedData, fn($v) => !is_null($v)));
+        $biodata->save();
+
+        $walasId = $biodata->walas_id ?? $walas->id;
+        \App\Models\DaftarPesertaDidik::updateOrCreate(
+            ['nama_siswa' => $biodata->siswas_id],
+            [
+                'walas_id' => $walasId,
+                'nis' => $biodata->nis,
+                'nisn' => $biodata->nisn,
+                'jenis_kelamin' => $biodata->jenis_kelamin ?? 'Laki-laki',
+                'keterangan' => 'Aktif',
+                'tanggal' => now()->toDateString(),
+            ]
+        );
+
+        return redirect()->route('homepagegtk.biodatasiswa', $biodata->siswas_id)
+            ->with('success', 'Data Diri Siswa berhasil diperbarui!');
+    }
+
+    protected function validateBiodataInput(Request $request): array
+    {
+        if ($request->pekerjaan_ayah === 'Lainnya' && $request->has('pekerjaan_ayah_lainnya')) {
+            $request->merge(['pekerjaan_ayah' => $request->pekerjaan_ayah_lainnya]);
+        }
+        if ($request->pekerjaan_ibu === 'Lainnya' && $request->has('pekerjaan_ibu_lainnya')) {
+            $request->merge(['pekerjaan_ibu' => $request->pekerjaan_ibu_lainnya]);
+        }
+
+        return $request->validate([
             'walas_id' => 'nullable|integer',
             'siswas_id' => 'nullable|integer',
             'nama_lengkap' => 'nullable|string|max:255',
@@ -174,7 +311,7 @@ class DataSiswaWalasController extends Controller
             'alamat' => 'nullable|string|max:255',
             'alamat_maps' => 'nullable|string|max:5000',
             'fotorumah_url' => 'nullable',
-            'jalur_masuk' => 'nullable|string|max:50',
+            'jalur_masuk' => 'nullable|string|max:100',
             'jarak_rumah' => 'nullable|string|max:50',
             'transportasi_sekolah' => 'nullable|string|max:50',
             'transportasi_rumah' => 'nullable|string|max:50',
@@ -201,6 +338,7 @@ class DataSiswaWalasController extends Controller
             'tanggal_lahir_ibu' => 'nullable|date',
             'alamat_ibu' => 'nullable|string|max:255',
             'no_wa_ibu' => 'nullable|string|max:15',
+            'pendapatan_ortu' => 'nullable|string|max:80',
             'namasekolah_asal' => 'nullable|string|max:255',
             'alamat_sekolah' => 'nullable|string|max:255',
             'tahun_lulus' => 'nullable|string|max:4',
@@ -211,28 +349,56 @@ class DataSiswaWalasController extends Controller
             'pengalaman_ekskul' => 'nullable|string|max:255',
             'kepribadian' => 'nullable|string|max:255',
         ]);
+    }
 
-        if ($request->pekerjaan_ayah === 'Lainnya' && $request->has('pekerjaan_ayah_lainnya')) {
-            $request->merge(['pekerjaan_ayah' => $request->pekerjaan_ayah_lainnya]);
-        }
-        if ($request->pekerjaan_ibu === 'Lainnya' && $request->has('pekerjaan_ibu_lainnya')) {
-            $request->merge(['pekerjaan_ibu' => $request->pekerjaan_ibu_lainnya]);
-        }
-
-        if ($request->hasFile('fotorumah_url')) {
-            if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
-                Storage::delete('public/' . $biodata->fotorumah_url);
-            }
-            $fotoRumahPath = $request->file('fotorumah_url')->store('images/photos', 'public');
-        } else {
-            $fotoRumahPath = $biodata->fotorumah_url;
-        }
-
-        $biodata->fill($request->except(['fotorumah_url']));
-        $biodata->fotorumah_url = $fotoRumahPath;
-        $biodata->save();
-
-        return redirect('/siswadata')->with('success', 'Data Diri Siswa berhasil diperbarui!');
+    protected function getDefaultBiodataAttributes(Siswa $siswa, Walas $walas): array
+    {
+        return [
+            'siswas_id' => $siswa->id,
+            'walas_id' => $siswa->rombel?->walas_id ?? $walas->id,
+            'nama_lengkap' => $siswa->nama,
+            'jenis_kelamin' => $siswa->jenis_kelamin ?? 'Laki-laki',
+            'tempat_lahir' => '-',
+            'tanggal_lahir' => '2008-01-01',
+            'alamat' => '-',
+            'alamat_maps' => '-',
+            'jarak_rumah' => '-',
+            'transportasi_sekolah' => '-',
+            'transportasi_rumah' => '-',
+            'agama' => 'Islam',
+            'kewarganegaraan' => 'Indonesia',
+            'anak_ke' => '1',
+            'jumlah_saudara' => '1',
+            'no_wa' => $siswa->no_wa ?? '081234567890',
+            'email' => strtolower(str_replace(' ', '.', $siswa->nama)) . '@student.sch.id',
+            'nis' => sprintf('2025%04d', $siswa->id),
+            'nisn' => sprintf('000%08d', 10000000 + $siswa->id),
+            'kelas' => $siswa->rombel?->tingkat ?? 'X',
+            'kompetensi' => $siswa->rombel?->kompetensi ?? 'SIJA',
+            'tahun_masuk' => '2025',
+            'nama_ayah' => '-',
+            'pekerjaan_ayah' => '-',
+            'tempat_lahir_ayah' => '-',
+            'tanggal_lahir_ayah' => '1980-01-01',
+            'alamat_ayah' => '-',
+            'no_wa_ayah' => '081234567890',
+            'nama_ibu' => '-',
+            'pekerjaan_ibu' => '-',
+            'tempat_lahir_ibu' => '-',
+            'tanggal_lahir_ibu' => '1982-01-01',
+            'alamat_ibu' => '-',
+            'no_wa_ibu' => '081234567890',
+            'pendapatan_ortu' => 'Rp1.000.000,00 - Rp3.000.000,00',
+            'namasekolah_asal' => '-',
+            'alamat_sekolah' => '-',
+            'tahun_lulus' => '2024',
+            'riwayat_penyakit' => 'Tidak ada',
+            'alergi' => 'Tidak ada',
+            'prestasi_akademik' => 'Tidak ada',
+            'prestasi_non_akademik' => 'Tidak ada',
+            'pengalaman_ekskul' => 'Tidak ada',
+            'kepribadian' => 'Baik',
+        ];
     }
 
     public function create()
@@ -256,7 +422,7 @@ class DataSiswaWalasController extends Controller
             ? $request->file('image_url')->store('siswafoto/Photos', 'public')
             : null;
 
-        Siswa::create([
+        $siswa = Siswa::create([
             'nama' => $request->nama,
             'rombels_id' => $request->rombels_id,
             'jenis_kelamin' => $request->jenis_kelamin,
@@ -265,6 +431,11 @@ class DataSiswaWalasController extends Controller
             'status' => $request->status,
             'image_url' => $imagePath,
         ]);
+
+        $rombel = Rombel::find($request->rombels_id);
+        if ($rombel) {
+            \App\Services\DaftarPesertaDidikService::syncRombel($rombel);
+        }
 
         return redirect()->back()->with(['success' => 'Data Siswa berhasil ditambahkan!']);
     }
@@ -311,6 +482,11 @@ class DataSiswaWalasController extends Controller
             $siswa->password = Hash::make($request->password);
         }
         $siswa->save();
+
+        $rombel = Rombel::find($siswa->rombels_id);
+        if ($rombel) {
+            \App\Services\DaftarPesertaDidikService::syncRombel($rombel);
+        }
 
         return redirect('/siswadata')->with('success', 'Data siswa Berhasil di Edit');
     }

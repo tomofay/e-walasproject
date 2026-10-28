@@ -25,7 +25,7 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -182,22 +182,6 @@ h1 .accent-text {
     background-color: #95E8F0; /* Warna biru lebih gelap saat hover */
 }
 
-.kembali-button {
-    background-color: #8E8989; /* Biru muda */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 20px; /* Memberikan jarak di atas tombol */
-}
-
-.kembali-button:hover {
-    background-color: #E7DDFF; /* Warna biru lebih gelap saat hover */
-}
-
 /* Container utama */
 .walas-info-container {
     display: flex;
@@ -239,22 +223,8 @@ h1 .accent-text {
 }
 
 /* Tombol */
-.edit-button, .kembali-button {
-    display: inline-block;
-    padding: 10px 15px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    text-align: center;
-}
-
-.edit-button {
+.edit-button, .edit-button {
     background-color: #007bff;
-    color: white;
-}
-
-.kembali-button {
-    background-color: #6c757d;
     color: white;
 }
 
@@ -269,14 +239,11 @@ h1 .accent-text {
         max-width: 100%;
     }
 
-    .edit-button, .kembali-button {
-        width: 100%;
-        margin-top: 10px;
-    }
-}
+    .edit-button, }
 
 
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -352,7 +319,7 @@ h1 .accent-text {
         <!-- Tombol Edit -->
          <br>
          <a href="{{ route('profilekurikulum.edit', $kurikulum->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>
-         <a href="/kurikulumpage" class="kembali-button">Kembali</a>
+         <a href="/kurikulumpage" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
 
     </div>
 

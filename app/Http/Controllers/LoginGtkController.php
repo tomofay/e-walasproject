@@ -32,6 +32,13 @@ class LoginGtkController extends Controller
 
         // Periksa apakah walas ditemukan dan password cocok
         if ($walas && Hash::check($request->password, $walas->password)) {
+            $request->session()->forget(['kurikulum_id', 'admin_id', 'kakom_id', 'kepsek_id', 'siswa_id', 'kurikulum_nama']);
+            Auth::guard('kurikulums')->logout();
+            Auth::guard('admins')->logout();
+            Auth::guard('kakoms')->logout();
+            Auth::guard('kepseks')->logout();
+            Auth::guard('siswas')->logout();
+
             $request->session()->put('walas_id', $walas->id);
             Auth::guard('walas')->login($walas);
 

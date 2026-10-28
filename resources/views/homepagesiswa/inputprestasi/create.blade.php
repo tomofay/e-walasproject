@@ -29,7 +29,7 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"rel="stylesheet"/>
 
   <!-- Main CSS File -->
-  <link href="../../../assets/css/main.css" rel="stylesheet">
+  <link href="../../../assets/css/main.css?v=2" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: iLanding
@@ -94,6 +94,7 @@
 
         
     </style>
+  @include('partials.btn_back_style')
 </head>
 
 <body class="index-page">
@@ -150,7 +151,12 @@
     <div class="starter-section container" data-aos="fade-up" data-aos-delay="100">
         <!-- Header dengan Title, Pencarian, dan Tombol -->
         <div class="mb-4">
-            <h2 class="font-weight-bold">Form Input Prestasi Siswa</h2>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h2 class="font-weight-bold mb-0">Form Input Prestasi Siswa</h2>
+                <a href="{{ route('prestasisiswainput.index') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Prestasi
+                </a>
+            </div>
             <hr class="my-3"> <!-- Garis horizontal di bawah judul -->
             <div class="d-flex align-items-center justify-content-start">
 
@@ -163,75 +169,99 @@
                             <form action="{{ route('prestasisiswainput.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 
-                                <!-- Siswa -->
-                                <div class="mb-3">
-                                    <label for="walas_id" class="form-label">Pilih Wali Kelas:</label>
-                                    <select name="walas_id" id="walas_id" class="form-select" required>
-                                        <option value="" disabled selected>Pilih Wali Kelas</option>
-                                        @foreach ($walas as $w)
-                                            <option value="{{ $w->id }}">{{ $w->nama }}</>
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                 <!-- Wali Kelas -->
-                                 <div class="mb-3">
-                                    <label for="siswas_id" class="form-label">Nama Siswa:</label>
-                                    <select name="siswas_id" id="siswas_id" class="form-select" required disabled>
-                                        <option value="{{ $siswa->id }}" selected>{{ $siswa->nama }}</option>
-                                    </select>
-                                    <input type="hidden" name="siswas_id" value="{{ $siswa->id }}">
-                                </div>
-
-                                <!-- Rombel -->
-                                <div class="mb-3">
-                                    <label for="rombels_id" class="form-label">Rombel:</label>
-                                    <select name="rombels_id" id="rombels_id" class="form-select" required>
-                                        @foreach ($rombel as $rombel)
-                                            <option value="{{ $rombel->id }}">{{ $rombel->nama_kelas }}</option>
-                                        @endforeach
-                                    </select>
+                                <!-- Informasi Siswa & Kelas (Otomatis) -->
+                                <div class="row mb-3 p-3 bg-light border rounded">
+                                    <div class="col-md-4 mb-2 mb-md-0">
+                                        <label class="form-label text-muted small mb-1"><i class="bi bi-person-fill text-primary"></i> Nama Siswa:</label>
+                                        <div class="fw-bold fs-6">{{ $siswa->nama }}</div>
+                                        <input type="hidden" name="siswas_id" value="{{ $siswa->id }}">
+                                    </div>
+                                    <div class="col-md-4 mb-2 mb-md-0">
+                                        <label class="form-label text-muted small mb-1"><i class="bi bi-mortarboard-fill text-success"></i> Kelas / Rombel:</label>
+                                        <div class="fw-bold fs-6">{{ $siswa->rombel->nama_kelas ?? 'Belum ditentukan' }}</div>
+                                        <input type="hidden" name="rombels_id" value="{{ $siswa->rombels_id }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small mb-1"><i class="bi bi-person-badge-fill text-info"></i> Wali Kelas:</label>
+                                        <div class="fw-bold fs-6">{{ $siswa->rombel->walas->nama ?? 'Belum ditentukan' }}</div>
+                                        <input type="hidden" name="walas_id" value="{{ $siswa->rombel->walas_id ?? '' }}">
+                                    </div>
                                 </div>
 
                                 <!-- Jenis Prestasi -->
                                 <div class="mb-3">
-                                    <label for="jenis_prestasi" class="form-label">Jenis Prestasi:</label>
+                                    <label for="jenis_prestasi" class="form-label">Jenis Prestasi <span class="text-danger">*</span>:</label>
                                     <select name="jenis_prestasi" id="jenis_prestasi" class="form-select" required>
                                         <option value="" disabled selected>Pilih Jenis Prestasi</option>
-                                        <option value="Akademik">Akademik</option>
-                                        <option value="Non-akademik">Non Akademik</option>
+                                        <option value="Akademik" {{ old('jenis_prestasi') == 'Akademik' ? 'selected' : '' }}>Akademik</option>
+                                        <option value="Non-akademik" {{ old('jenis_prestasi') == 'Non-akademik' ? 'selected' : '' }}>Non-akademik</option>
                                     </select>
                                 </div>
 
-                                <!-- Nama Prestasi -->
-                                <div class="mb-3">
-                                    <label for="nama_prestasi" class="form-label">Nama Prestasi:</label>
-                                    <input type="text" name="nama_prestasi" id="nama_prestasi" class="form-control" required>
+                                <div class="row mb-3">
+                                    <!-- Nama Prestasi (Capaian) -->
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="nama_prestasi" class="form-label">Capaian / Nama Prestasi <span class="text-danger">*</span>:</label>
+                                        <input type="text" name="nama_prestasi" id="nama_prestasi" class="form-control" placeholder="Contoh: Juara 1 / Medali Emas / Harapan 2" value="{{ old('nama_prestasi') }}" required>
+                                    </div>
+                                    <!-- Mata Lomba -->
+                                    <div class="col-md-6">
+                                        <label for="mata_lomba" class="form-label">Nama Mata Lomba / Bidang:</label>
+                                        <input type="text" name="mata_lomba" id="mata_lomba" class="form-control" placeholder="Contoh: LKS Web Technologies / FLS2N Vokal Solo" value="{{ old('mata_lomba') }}">
+                                    </div>
                                 </div>
 
-                                <!-- Tanggal Prestasi -->
-                                <div class="mb-3">
-                                    <label for="tanggal" class="form-label">Tanggal Prestasi:</label>
-                                    <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+                                <div class="row mb-3">
+                                    <!-- Jenjang Tingkat -->
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="tingkat" class="form-label">Jenjang / Tingkat Perlombaan:</label>
+                                        <input type="text" name="tingkat" id="tingkat" list="tingkatList" class="form-control" placeholder="Pilih dari opsi atau ketik sendiri (Sekolah, Kabupaten, dll)" value="{{ old('tingkat') }}">
+                                        <datalist id="tingkatList">
+                                            <option value="Tingkat Sekolah">
+                                            <option value="Tingkat Kecamatan">
+                                            <option value="Tingkat Kabupaten/Kota">
+                                            <option value="Tingkat Provinsi">
+                                            <option value="Tingkat Nasional">
+                                            <option value="Tingkat Internasional">
+                                        </datalist>
+                                        <small class="text-muted">Bisa memilih rekomendasi jenjang atau langsung mengetik sendiri.</small>
+                                    </div>
+                                    <!-- Nama Pembimbing -->
+                                    <div class="col-md-6">
+                                        <label for="nama_pembimbing" class="form-label">Nama Guru Pembimbing / Pendamping:</label>
+                                        <input type="text" name="nama_pembimbing" id="nama_pembimbing" class="form-control" placeholder="Contoh: Bpk. Ahmad, S.Pd." value="{{ old('nama_pembimbing') }}">
+                                    </div>
                                 </div>
 
-                                <!-- Sertifikat (Gambar) -->
-                                <div class="mb-3">
-                                    <label for="sertifikat_url" class="form-label">Unggah Sertifikat (Gambar):</label>
-                                    <input type="file" name="sertifikat_url" id="sertifikat_url" class="form-control" required>
-                                    <small id="fileWarning1" class="text-danger d-none">Ukuran file tidak boleh lebih dari 2 MB!</small>
+                                <div class="row mb-3">
+                                    <!-- Tanggal Prestasi -->
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="tanggal" class="form-label">Tanggal Pelaksanaan / Prestasi <span class="text-danger">*</span>:</label>
+                                        <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ old('tanggal', date('Y-m-d')) }}" required>
+                                    </div>
+                                    <!-- Lokasi -->
+                                    <div class="col-md-6">
+                                        <label for="lokasi" class="form-label">Lokasi / Tempat Pelaksanaan:</label>
+                                        <input type="text" name="lokasi" id="lokasi" class="form-control" placeholder="Contoh: SMKN 1 Cibinong / Jakarta Convention Center" value="{{ old('lokasi') }}">
+                                    </div>
                                 </div>
 
-                                <!-- Dokumentasi (Gambar) -->
+                                <!-- Sertifikat (Gambar / Dokumen) -->
                                 <div class="mb-3">
-                                    <label for="dokumentasi_url" class="form-label">Unggah Dokumentasi (Gambar):</label>
-                                    <input type="file" name="dokumentasi_url" id="dokumentasi_url" class="form-control" accept="image/*" required>
-                                    <small id="fileWarning2" class="text-danger d-none">Ukuran file tidak boleh lebih dari 1 MB!</small>
+                                    <label for="sertifikat_url" class="form-label">Unggah Sertifikat / Piagam (Opsional):</label>
+                                    <input type="file" name="sertifikat_url" id="sertifikat_url" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.docx">
+                                    <small class="text-muted">Format: JPG, PNG, PDF, DOCX (Maks 10MB)</small>
+                                </div>
+
+                                <!-- Dokumentasi (Bisa lebih dari 1 foto) -->
+                                <div class="mb-3">
+                                    <label for="dokumentasi_url" class="form-label">Unggah Foto Dokumentasi (Bisa lebih dari 1 foto):</label>
+                                    <input type="file" name="dokumentasi_url[]" id="dokumentasi_url" class="form-control" accept="image/*" multiple>
+                                    <small class="text-muted">Bisa memilih lebih dari 1 foto sekaligus. Format: JPG, JPEG, PNG, GIF (Maks 10MB per foto)</small>
                                 </div>
 
                                 <!-- Tombol Simpan -->
-                                <button type="submit" class="btn btn-primary">Simpan</button>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Simpan Prestasi</button>
                             </form>
                         </div>
                     </div>
