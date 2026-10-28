@@ -8,6 +8,8 @@ use App\Http\Controllers\LoginKaprogController;
 use App\Http\Controllers\LoginKepsekController;
 use App\Http\Controllers\LoginKurikulumController;
 use App\Http\Controllers\LoginSiswaController;
+use App\Http\Controllers\LoginPembinaSiswaController;
+use App\Http\Controllers\PembinaSiswaController;
 use App\Http\Controllers\PageAdminController;
 use App\Http\Controllers\WargaSekolahController;
 use App\Http\Controllers\SiswaDataPageAdminController;
@@ -113,6 +115,9 @@ Route::post('/loginkurikulum', [LoginKurikulumController::class, 'store'])->midd
 Route::get('/loginsiswa', [LoginSiswaController::class, 'index'])->name('loginsiswa.index');
 Route::post('/loginsiswa', [LoginSiswaController::class, 'store'])->middleware('throttle:login')->name('loginsiswa.store');
 
+Route::get('/loginpembinasiswa', [LoginPembinaSiswaController::class, 'index'])->name('loginpembinasiswa.index');
+Route::post('/loginpembinasiswa', [LoginPembinaSiswaController::class, 'store'])->middleware('throttle:login')->name('loginpembinasiswa.store');
+
 /*
 |--------------------------------------------------------------------------
 | Logout Routes (POST)
@@ -160,6 +165,8 @@ Route::post('/homepagesiswa/logout', function () {
     session()->flash('status', 'Logout Berhasil');
     return redirect('/');
 })->name('logoutsiswa');
+
+Route::post('/homepagepembina/logout', [LoginPembinaSiswaController::class, 'logout'])->name('pembina.logout');
 
 /*
 |--------------------------------------------------------------------------
@@ -613,3 +620,34 @@ Route::middleware('siswa')->group(function () {
     Route::get('/profilesiswa/{id}/edit', [ProfilePageController::class, 'edit'])->name('profilesiswa.edit');
     Route::put('/profilesiswa/{id}', [ProfilePageController::class, 'update'])->name('profilesiswa.update');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Pembina Siswa Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('pembina')->prefix('pembinapage')->name('pembina.')->group(function () {
+    Route::get('/', [PembinaSiswaController::class, 'index'])->name('dashboard');
+    Route::get('/catatankasus', [PembinaSiswaController::class, 'catatankasusIndex'])->name('catatankasus.index');
+    Route::get('/catatankasus/create', [PembinaSiswaController::class, 'catatankasusCreate'])->name('catatankasus.create');
+    Route::post('/catatankasus', [PembinaSiswaController::class, 'catatankasusStore'])->name('catatankasus.store');
+    Route::get('/catatankasus/{id}/edit', [PembinaSiswaController::class, 'catatankasusEdit'])->name('catatankasus.edit');
+    Route::put('/catatankasus/{id}', [PembinaSiswaController::class, 'catatankasusUpdate'])->name('catatankasus.update');
+    Route::delete('/catatankasus/{id}', [PembinaSiswaController::class, 'catatankasusDestroy'])->name('catatankasus.destroy');
+
+    Route::get('/presensi', [PembinaSiswaController::class, 'presensiIndex'])->name('presensi.index');
+    Route::get('/presensi/{id}', [PembinaSiswaController::class, 'presensiDetail'])->name('presensi.detail');
+
+    Route::get('/profile', [PembinaSiswaController::class, 'profile'])->name('profile');
+    Route::get('/profile/edit', [PembinaSiswaController::class, 'profileEdit'])->name('profile.edit');
+    Route::get('/profile/{id}/edit', [PembinaSiswaController::class, 'profileEdit'])->name('profile.edit.param');
+    Route::put('/profile/{id?}', [PembinaSiswaController::class, 'profileUpdate'])->name('profile.update');
+});
+
+Route::middleware('pembina')->group(function () {
+    Route::get('/profilepembina', [PembinaSiswaController::class, 'profile'])->name('profilepembina.index');
+    Route::get('/profilepembina/{id}/edit', [PembinaSiswaController::class, 'profileEdit'])->name('profilepembina.edit');
+    Route::put('/profilepembina/{id?}', [PembinaSiswaController::class, 'profileUpdate'])->name('profilepembina.update');
+});
+

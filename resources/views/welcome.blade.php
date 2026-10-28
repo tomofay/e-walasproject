@@ -159,6 +159,18 @@ FACEBOOK: https://www.facebook.com/themefisher
           </a>
         </div>
         <div class="col-lg-4 col-md-12 mt-5 mt-lg-0 text-center">
+          <a href="/loginpembinasiswa" class="button-link" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="Masuk sebagai Pembina Siswa">
+            <i class="ti-id-badge text-primary"></i>
+            <h5 class="mb-0 text-muted">Saya Seorang</h5>
+            <h3 class="text-capitalize">Pembina Siswa</h3>
+          </a>
+        </div>
+      </div>
+
+      <br><br>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 text-center">
           <a href="/loginsiswa" class="button-link" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="Masuk sebagai Siswa">
             <i class="ti-user text-primary"></i>
             <h5 class="mb-0 text-muted">Saya Seorang</h5>

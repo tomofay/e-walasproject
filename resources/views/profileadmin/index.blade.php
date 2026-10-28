@@ -296,41 +296,34 @@ h1 .accent-text {
     <section id="hero" class="hero section">
         <h1 class="mb-4 text-center">
             Profile Admin <br>
-            <span class="accent-text">Berikut adalah Profile dari Kepala Program</span>
+            <span class="accent-text">Berikut adalah Profile dari Admin</span>
         </h1>
 
         <div class="walas-info-container">
-    <!-- Foto Besar dan Icon Edit -->
-    <div class="walas-photo-container position-relative">
-    <div class="walas-photo-container">
-    @if ($admin->image_url)
-        <img src="{{ asset('storage/'.$admin->image_url) }}" alt="Image" class="walas-photo">
-    @else
-        <div class="initials-logo">
-            {{ strtoupper(substr($admin->nama, 0, 1)) }}{{ strtoupper(substr($admin->nama, 1, 1)) }}
+            <!-- Foto Besar dan Icon Edit -->
+            <div class="walas-photo-container position-relative">
+                @if ($admin->image_url && file_exists(storage_path('app/public/' . $admin->image_url)))
+                    <img src="{{ asset('storage/' . $admin->image_url) }}" alt="Foto {{ $admin->nama }}" class="walas-photo">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($admin->nama) }}&size=200&background=0d6efd&color=fff" alt="Foto {{ $admin->nama }}" class="walas-photo" onerror="this.onerror=null;this.src='{{ asset('assets/img/avatar-1.webp') }}';">
+                @endif
+                <a href="{{ route('profileadmin.edit', $admin->id) }}" class="edit-icon" title="Edit Data">
+                    <i class="bi bi-pencil"></i>
+                </a>
+            </div>
+
+            <!-- Informasi Profile -->
+            <div class="profile-info-container">
+                <p><strong>Name:</strong> {{ $admin->nama }}</p>
+                <p><strong>Phone:</strong> {{ $admin->no_wa }}</p>
+                <p><strong>Password:</strong> ••••••••</p>
+
+                <!-- Tombol Edit -->
+                <br>
+                <a href="{{ route('profileadmin.edit', $admin->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>
+                <a href="/adminpage" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+            </div>
         </div>
-    @endif
-</div>
-
-        <div class="edit-icon">
-            <i class="bi bi-pencil"></i>
-        </div>
-    </div>
-
-   <!-- Informasi Profile -->
-    <div class="profile-info-container">
-        <p><strong>Name:</strong> {{ $admin->nama }}</p>
-        <p><strong>Phone:</strong> {{ $admin->no_wa }}</p>
-        <p><strong>Password:</strong> {{ $admin->password }}</p>
-
-        <!-- Tombol Edit -->
-         <br>
-         <a href="{{ route('profileadmin.edit', $admin->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>
-         <a href="/adminpage" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-
-    </div>
-
-</div>
 
         </div>
 

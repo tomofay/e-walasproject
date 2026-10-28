@@ -298,28 +298,30 @@ h1 .accent-text {
         </h1>
 
         <div class="walas-info-container">
-    <!-- Foto Besar dan Icon Edit -->
-    <div class="walas-photo-container position-relative">
-        <img src="{{ asset('storage/'.$kepsek->image_url) }}" alt="Image" class="walas-photo">
-        <div class="edit-icon">
-            <i class="bi bi-pencil"></i>
+            <!-- Foto Besar dan Icon Edit -->
+            <div class="walas-photo-container position-relative">
+                @if ($kepsek->image_url && file_exists(storage_path('app/public/' . $kepsek->image_url)))
+                    <img src="{{ asset('storage/' . $kepsek->image_url) }}" alt="Foto {{ $kepsek->nama }}" class="walas-photo">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($kepsek->nama) }}&size=200&background=0d6efd&color=fff" alt="Foto {{ $kepsek->nama }}" class="walas-photo" onerror="this.onerror=null;this.src='{{ asset('assets/img/avatar-1.webp') }}';">
+                @endif
+                <a href="{{ route('profilekepsek.edit', $kepsek->id) }}" class="edit-icon" title="Edit Data">
+                    <i class="bi bi-pencil"></i>
+                </a>
+            </div>
+
+            <!-- Informasi Profile -->
+            <div class="profile-info-container">
+                <p><strong>Name:</strong> {{ $kepsek->nama }}</p>
+                <p><strong>Phone:</strong> {{ $kepsek->no_wa }}</p>
+                <p><strong>Password:</strong> ••••••••</p>
+
+                <!-- Tombol Edit -->
+                <br>
+                <a href="{{ route('profilekepsek.edit', $kepsek->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>
+                <a href="/kepsekpage" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+            </div>
         </div>
-    </div>
-
-   <!-- Informasi Profile -->
-    <div class="profile-info-container">
-        <p><strong>Name:</strong> {{ $kepsek->nama }}</p>
-        <p><strong>Phone:</strong> {{ $kepsek->no_wa }}</p>
-        <p><strong>Password:</strong> {{ $kepsek->password }}</p>
-
-        <!-- Tombol Edit -->
-         <br>
-         <a href="{{ route('profilekepsek.edit', $kepsek->id) }}" class="edit-button" style="margin-right: 10px;">Edit Data</a>
-         <a href="/kepsekpage" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-
-    </div>
-
-</div>
 
         </div>
 

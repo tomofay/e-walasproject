@@ -221,6 +221,8 @@ class InputDataDiriSiswaController extends Controller
             $fileName = uniqid() . '.' . $request->file('fotorumah_url')->getClientOriginalExtension();
             $fotoRumahPath = $request->file('fotorumah_url')->storeAs('images/photos', $fileName, 'public');
             $validatedData['fotorumah_url'] = $fotoRumahPath;
+        } else {
+            $validatedData['fotorumah_url'] = null;
         }
     
         // Simpan data ke database
@@ -388,8 +390,8 @@ class InputDataDiriSiswaController extends Controller
         // Periksa apakah ada file baru yang diunggah
         if ($request->hasFile('fotorumah_url')) {
             // Hapus file lama jika ada
-            if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
-                Storage::delete('public/' . $biodata->fotorumah_url);
+            if ($biodata->fotorumah_url && Storage::disk('public')->exists($biodata->fotorumah_url)) {
+                Storage::disk('public')->delete($biodata->fotorumah_url);
             }
             // Simpan file baru
             $fotoRumahPath = $request->file('fotorumah_url')->store('images/photos', 'public');

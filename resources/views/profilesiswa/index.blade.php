@@ -290,20 +290,24 @@ h1 .accent-text {
     <div class="walas-info-container">
         <!-- Foto Besar dan Icon Edit -->
         <div class="walas-photo-container position-relative">
-            <img src="{{ asset('storage/'.$siswa->image_url) }}" alt="Image" class="walas-photo">
-            <div class="edit-icon">
+            @if ($siswa->image_url && file_exists(storage_path('app/public/' . $siswa->image_url)))
+                <img src="{{ asset('storage/' . $siswa->image_url) }}" alt="Foto {{ $siswa->nama }}" class="walas-photo">
+            @else
+                <img src="https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&size=200&background=0d6efd&color=fff" alt="Foto {{ $siswa->nama }}" class="walas-photo" onerror="this.onerror=null;this.src='{{ asset('assets/img/avatar-1.webp') }}';">
+            @endif
+            <a href="{{ route('profilesiswa.edit', $siswa->id) }}" class="edit-icon" title="Edit Data">
                 <i class="bi bi-pencil"></i>
-            </div>
+            </a>
         </div>
 
         <!-- Informasi Profile -->
         <div class="profile-info-container">
             <p><strong>Name:</strong> {{ $siswa->nama }}</p>
-            <p><strong>Kelas:</strong> {{ $siswa->rombel->nama_kelas }}</p>
-            <p><strong>Jenis Kelamin:</strong> {{ $siswa->jenis_kelamin }}</p>
-            <p><strong>Phone:</strong> {{ $siswa->no_wa }}</p>
-            <p><strong>Status:</strong> {{ $siswa->status }}</p>
-            <p><strong>Password:</strong> {{ $siswa->password }}</p>
+            <p><strong>Kelas:</strong> {{ $siswa->rombel->nama_kelas ?? '-' }}</p>
+            <p><strong>Jenis Kelamin:</strong> {{ $siswa->jenis_kelamin ?? '-' }}</p>
+            <p><strong>Phone:</strong> {{ $siswa->no_wa ?? '-' }}</p>
+            <p><strong>Status:</strong> {{ $siswa->status ?? 'aktif' }}</p>
+            <p><strong>Password:</strong> ••••••••</p>
 
             <!-- Tombol Edit -->
             <br>

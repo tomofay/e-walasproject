@@ -56,6 +56,10 @@ return [
             'driver' => 'session',
             'provider' => 'kurikulums',
         ],
+        'pembinas' => [
+            'driver' => 'session',
+            'provider' => 'pembinas',
+        ],
         'siswas' => [
             'driver' => 'session',
             'provider' => 'siswas',
@@ -103,6 +107,10 @@ return [
         'kurikulums' => [
             'driver' => 'eloquent',
             'model' => App\Models\Kurikulum::class,
+        ],
+        'pembinas' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PembinaSiswa::class,
         ],
         'siswas' => [
             'driver' => 'eloquent',

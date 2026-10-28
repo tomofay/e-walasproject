@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'kepsek' => \App\Http\Middleware\KepsekMiddleware::class,
             'kurikulum' => \App\Http\Middleware\KurikulumMiddleware::class,
             'siswa' => \App\Http\Middleware\SiswaMiddleware::class,
+            'pembina' => \App\Http\Middleware\PembinaMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

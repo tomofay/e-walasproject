@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder
             'kakoms',
             'kurikulums',
             'kepseks',
+            'pembina_siswas',
             'gurus',
             'admins',
         ];
@@ -76,6 +77,10 @@ class DatabaseSeeder extends Seeder
     {
         DB::table('admins')->insert([
             ['nama' => 'admin', 'no_wa' => '081234567890', 'password' => $password, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        DB::table('pembina_siswas')->insert([
+            ['nama' => 'Pembina Siswa', 'jenis_kelamin' => 'Laki-laki', 'nip' => '198501012010011001', 'no_wa' => '081234567899', 'password' => $password, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         $walas = [

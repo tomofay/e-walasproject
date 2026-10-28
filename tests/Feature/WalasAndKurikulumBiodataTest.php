@@ -9,6 +9,8 @@ use App\Models\Rombel;
 use App\Models\Siswa;
 use App\Models\Walas;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class WalasAndKurikulumBiodataTest extends TestCase
@@ -621,5 +623,72 @@ class WalasAndKurikulumBiodataTest extends TestCase
         $this->assertEquals('TNI/POLRI', $biodata->pekerjaan_ayah);
         $this->assertEquals('ASN/PNS', $biodata->pekerjaan_ibu);
         $this->assertEquals('Rp3.000.000,00 - Rp5.000.000,00', $biodata->pendapatan_ortu);
+    }
+
+    public function test_walas_can_upload_and_save_fotorumah_properly(): void
+    {
+        Storage::fake('public');
+        $biodata = $this->createTestBiodata(['nis' => '11223344', 'nisn' => '99887766']);
+
+        $fakePhoto = UploadedFile::fake()->create('rumah_walas.jpg', 200, 'image/jpeg');
+
+        $response = $this->withSession([
+            'walas_id' => $this->walas->id,
+            'rombel_id' => $this->rombel->id,
+        ])->put(route('homepagegtk.updatebiodata', $biodata->id), [
+            'nama_lengkap' => $biodata->nama_lengkap,
+            'jenis_kelamin' => $biodata->jenis_kelamin,
+            'nisn' => $biodata->nisn,
+            'fotorumah_url' => $fakePhoto,
+        ]);
+
+        $response->assertRedirect(route('homepagegtk.biodatasiswa', $this->siswa->id));
+
+        $biodata->refresh();
+        $this->assertNotNull($biodata->fotorumah_url);
+        $this->assertStringStartsWith('images/photos/', $biodata->fotorumah_url);
+        $this->assertStringNotContainsString('Temp', $biodata->fotorumah_url);
+        Storage::disk('public')->assertExists($biodata->fotorumah_url);
+
+        // Update tanpa upload foto baru tetap mempertahankan foto yang sudah ada
+        $secondUpdate = $this->withSession([
+            'walas_id' => $this->walas->id,
+            'rombel_id' => $this->rombel->id,
+        ])->put(route('homepagegtk.updatebiodata', $biodata->id), [
+            'nama_lengkap' => 'Nama Baru Lagi',
+            'jenis_kelamin' => $biodata->jenis_kelamin,
+            'nisn' => $biodata->nisn,
+        ]);
+
+        $secondUpdate->assertRedirect(route('homepagegtk.biodatasiswa', $this->siswa->id));
+        $biodata->refresh();
+        $this->assertStringStartsWith('images/photos/', $biodata->fotorumah_url);
+        Storage::disk('public')->assertExists($biodata->fotorumah_url);
+    }
+
+    public function test_kurikulum_can_upload_and_save_fotorumah_properly(): void
+    {
+        Storage::fake('public');
+        $biodata = $this->createTestBiodata(['nis' => '55667788', 'nisn' => '44332211']);
+
+        $fakePhoto = UploadedFile::fake()->create('rumah_kurikulum.png', 200, 'image/png');
+
+        $response = $this->withSession([
+            'kurikulum_id' => $this->kurikulum->id,
+            'kurikulum_nama' => $this->kurikulum->nama,
+        ])->put(route('kurikulum.updatebiodata', $biodata->id), [
+            'nama_lengkap' => $biodata->nama_lengkap,
+            'jenis_kelamin' => $biodata->jenis_kelamin,
+            'nisn' => $biodata->nisn,
+            'fotorumah_url' => $fakePhoto,
+        ]);
+
+        $response->assertRedirect(route('kurikulum.biodatasiswa', $this->siswa->id));
+
+        $biodata->refresh();
+        $this->assertNotNull($biodata->fotorumah_url);
+        $this->assertStringStartsWith('images/photos/', $biodata->fotorumah_url);
+        $this->assertStringNotContainsString('Temp', $biodata->fotorumah_url);
+        Storage::disk('public')->assertExists($biodata->fotorumah_url);
     }
 }

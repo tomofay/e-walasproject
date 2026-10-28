@@ -359,7 +359,8 @@
                                           <div class="text-center">
                                               <img src="{{ asset('storage/'.$biodata->fotorumah_url) }}" 
                                                   class="img-fluid rounded border shadow-sm" 
-                                                  style="max-width: 100%; max-height: 240px; object-fit: cover;">
+                                                  style="max-width: 100%; max-height: 240px; object-fit: cover;"
+                                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'p-4 bg-light rounded text-center text-muted\' style=\'min-height: 180px; display: flex; flex-direction: column; justify-content: center;\'><i class=\'bi bi-image fs-1 d-block mb-2\'></i><span>Foto tampak depan rumah belum diunggah atau tidak ditemukan.</span></div>';">
                                           </div>
                                       @else
                                           <div class="p-4 bg-light rounded text-center text-muted" style="min-height: 180px; display: flex; flex-direction: column; justify-content: center;">

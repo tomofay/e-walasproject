@@ -122,6 +122,8 @@ class DataSiswaKurikulumBiodataController extends Controller
             ? $request->file('fotorumah_url')->store('images/photos', 'public')
             : null;
 
+        unset($validatedData['fotorumah_url']);
+
         $defaults = $this->getDefaultBiodataAttributes($siswa);
         $biodataData = array_merge($defaults, array_filter($validatedData, fn($v) => !is_null($v)));
         $biodataData['fotorumah_url'] = $fotoRumahPath;
@@ -185,11 +187,13 @@ class DataSiswaKurikulumBiodataController extends Controller
         }
 
         if ($request->hasFile('fotorumah_url')) {
-            if ($biodata->fotorumah_url && Storage::exists('public/' . $biodata->fotorumah_url)) {
-                Storage::delete('public/' . $biodata->fotorumah_url);
+            if ($biodata->fotorumah_url && Storage::disk('public')->exists($biodata->fotorumah_url)) {
+                Storage::disk('public')->delete($biodata->fotorumah_url);
             }
             $biodata->fotorumah_url = $request->file('fotorumah_url')->store('images/photos', 'public');
         }
+
+        unset($validatedData['fotorumah_url']);
 
         $biodata->fill(array_filter($validatedData, fn($v) => !is_null($v)));
         $biodata->save();
