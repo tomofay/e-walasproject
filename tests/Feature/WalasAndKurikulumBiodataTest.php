@@ -2,22 +2,25 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\Walas;
-use App\Models\Kurikulum;
-use App\Models\Siswa;
-use App\Models\Rombel;
 use App\Models\BiodataSiswa;
 use App\Models\DaftarPesertaDidik;
+use App\Models\Kurikulum;
+use App\Models\Rombel;
+use App\Models\Siswa;
+use App\Models\Walas;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class WalasAndKurikulumBiodataTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $walas;
+
     protected $kurikulum;
+
     protected $rombel;
+
     protected $siswa;
 
     protected function setUp(): void
@@ -126,6 +129,53 @@ class WalasAndKurikulumBiodataTest extends TestCase
             'nis' => '20250016',
             'nisn' => '0012345678',
             'jenis_kelamin' => 'Laki-laki',
+        ]);
+    }
+
+    public function test_walas_nis_edits_are_preserved_when_student_has_no_biodata(): void
+    {
+        $daftar = DaftarPesertaDidik::create([
+            'walas_id' => $this->walas->id,
+            'nama_siswa' => $this->siswa->id,
+            'nis' => '20250016',
+            'nisn' => '0012345678',
+            'jenis_kelamin' => 'Laki-laki',
+            'keterangan' => 'aktif',
+            'tanggal' => now()->toDateString(),
+        ]);
+
+        $session = [
+            'walas_id' => $this->walas->id,
+            'rombel_id' => $this->rombel->id,
+        ];
+
+        $this->withSession($session)
+            ->put(route('daftarpesertadidik.update', $daftar->id), [
+                'walas_id' => $this->walas->id,
+                'kurikulum_id' => $this->kurikulum->id,
+                'nama_siswa' => (string) $this->siswa->id,
+                'nis' => '20259999',
+                'nisn' => '0099999999',
+                'jenis_kelamin' => 'Laki-laki',
+                'keterangan' => 'aktif',
+                'tanggal' => now()->toDateString(),
+            ])
+            ->assertRedirect('/daftarpesertadidik')
+            ->assertSessionHas('success', 'Data berhasil diperbarui.');
+
+        $this->withSession($session)
+            ->get('/daftarpesertadidik')
+            ->assertOk()
+            ->assertSee('20259999')
+            ->assertSee('0099999999');
+
+        $this->assertDatabaseHas('daftar_peserta_didiks', [
+            'id' => $daftar->id,
+            'nis' => '20259999',
+            'nisn' => '0099999999',
+        ]);
+        $this->assertDatabaseMissing('biodata_siswas', [
+            'siswas_id' => $this->siswa->id,
         ]);
     }
 

@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Siswa;
-use App\Models\Rombel;
 use App\Models\DaftarPesertaDidik;
 use App\Models\Kurikulum;
+use App\Models\Rombel;
+use App\Models\Siswa;
 
 class DaftarPesertaDidikService
 {
@@ -32,12 +32,11 @@ class DaftarPesertaDidikService
 
         foreach ($siswas as $siswa) {
             $biodata = $siswa->biodata;
-            $currentNis = $biodata?->nis ?? sprintf('2025%04d', $siswa->id);
-            $currentNisn = $biodata?->nisn ?? sprintf('000%08d', 10000000 + $siswa->id);
+            $existing = DaftarPesertaDidik::where('nama_siswa', $siswa->id)->first();
+            $currentNis = $biodata?->nis ?: ($existing?->nis ?: sprintf('2025%04d', $siswa->id));
+            $currentNisn = $biodata?->nisn ?: ($existing?->nisn ?: sprintf('000%08d', 10000000 + $siswa->id));
             $jk = $siswa->jenis_kelamin ?? ($biodata?->jenis_kelamin ?? 'Laki-laki');
             $keterangan = $siswa->status ?? ($siswa->keterangan ?? 'Aktif');
-
-            $existing = DaftarPesertaDidik::where('nama_siswa', $siswa->id)->first();
 
             if (! $existing) {
                 DaftarPesertaDidik::create([
